@@ -1,0 +1,9 @@
+﻿<Application x:Class="DBScriptSaver.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DBScriptSaver"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <BitmapImage x:Key="MainIco" CreateOptions="IgnoreImageCache" CacheOption="OnLoad" UriSource="C:\Users\Artur\Documents\Visual Studio 2017\Projects\DBScriptSaver\DBScriptSaver\ico\main.ico"/>
+    </Application.Resources>
+</Application>
