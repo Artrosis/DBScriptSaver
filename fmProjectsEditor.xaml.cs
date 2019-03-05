@@ -28,22 +28,13 @@ namespace DBScriptSaver
 
             Vm = viewModel;
 
-            this.DataContext = Vm;            
+            this.DataContext = Vm;
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
+            Vm.SaveProjects();
             DialogResult = true;
-        }
-
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnOK_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            Vm.AddProject();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -53,6 +44,20 @@ namespace DBScriptSaver
             {
                 Vm.Projects.Remove(gcProjects.SelectedItem as Project);
             }
+        }
+
+        private void EditDataBase_Click(object sender, RoutedEventArgs e)
+        {
+            var proj = gcProjects.SelectedItem as Project;
+
+            if (proj == null)
+            {
+                return;
+            }
+
+            var fmEditor = new fmDataBasesEditor(proj) { Owner = this };
+            fmEditor.ShowDialog();
+
         }
     }
 }

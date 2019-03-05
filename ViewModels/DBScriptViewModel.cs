@@ -3,16 +3,27 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace DBScriptSaver.ViewModels
 {
     public class DBScriptViewModel
     {
-        public ObservableCollection<Project> Projects { get; set; }
+        public ObservableCollection<Project> Projects { get; }
+
+        public ListCollectionView EditProjects
+        {
+            get
+            {
+                return new ListCollectionView(Projects);
+            }
+        }
 
         const string SettingsFileName = @"Settings.cfg";
 
@@ -37,22 +48,53 @@ namespace DBScriptSaver.ViewModels
             if (ProjectsData != string.Empty)
             {
                 Projects = new ObservableCollection<Project>(JsonConvert.DeserializeObject<List<Project>>(ProjectsData));
+                Projects.ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
+                Projects.ToList().SelectMany(i => i.DataBases).ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
             }
             else
             {
                 Projects = new ObservableCollection<Project>(new List<Project>());
             }
-            Projects.CollectionChanged += SaveProjects;
+            
+            Projects.CollectionChanged += ContentCollectionChanged;
+            Projects.CollectionChanged += SaveProjectsWrapper;
         }
 
-        private void SaveProjects(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ContentCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (INotifyPropertyChanged item in e.OldItems)
+                {
+                    item.PropertyChanged -= Item_PropertyChanged;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (INotifyPropertyChanged item in e.NewItems)
+                {
+                    item.PropertyChanged += Item_PropertyChanged;
+                }
+            }
+        }
+
+        private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            SaveProjects();
+        }
+        public void SaveProjects()
         {
             File.WriteAllText(Settings, JsonConvert.SerializeObject(Projects));
         }
 
+        private void SaveProjectsWrapper(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            SaveProjects();
+        }
+
         public void AddProject()
         {
-            Projects.Add(new Project() { Name = Resources.НовыйПроект });            
+            Projects.Add(new Project() { Name = Resources.НовыйПроект });
         }
     }
 }

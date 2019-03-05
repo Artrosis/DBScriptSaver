@@ -36,35 +36,6 @@
             VerticalAlignment="Top"
             HorizontalContentAlignment="Center"
             Content="Проект" />
-        <Label
-            Width="150"
-            Margin="187,0,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            HorizontalContentAlignment="Center"
-            Content="Сервер" />
-        <Label
-            Width="150"
-            Margin="187,59,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            HorizontalContentAlignment="Center"
-            Content="База данных" RenderTransformOrigin="0.987,4.269" />
-        <ComboBox
-            x:Name="comboBox"
-            Width="150"
-            Margin="187,90,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top" />
-        <TextBox
-            x:Name="tbServer"
-            Width="150"
-            Height="23"
-            Margin="187,31,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Text="{x:Null}"
-            TextWrapping="Wrap" />
         <Button
             x:Name="button"
             Width="22"

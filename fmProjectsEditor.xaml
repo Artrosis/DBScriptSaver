@@ -5,24 +5,31 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DBScriptSaver"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="800"
-    Height="482.341"
     mc:Ignorable="d"
     Icon="ico/main.ico"
     Title="Проекты"
     WindowStartupLocation="CenterOwner">
 
-    <Grid Margin="0,0,0,0">
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">        
         <DataGrid
             x:Name="gcProjects"
-            Width="792"
-            Height="399"
+            Width="auto"
+            Height="auto"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            ItemsSource="{Binding Projects}" AutoGenerateColumns="False">
+            ItemsSource="{Binding EditProjects}" 
+            AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Проект" Binding="{Binding Path=Name}" Width="200"></DataGridTextColumn>
-                <DataGridTextColumn Header="Путь" Binding="{Binding Path=Path}" Width="400"></DataGridTextColumn>
+                <DataGridTextColumn Header="Путь" Binding="{Binding Path=Path}" Width="300"></DataGridTextColumn>
+                <DataGridTextColumn Header="Сервер" Binding="{Binding Path=Server}" Width="300"></DataGridTextColumn>
+                <DataGridTemplateColumn Header="Базы данных" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Настроить базы" Click="EditDataBase_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -33,33 +40,11 @@
             </DataGrid.Columns>
         </DataGrid>
         <Button
-            x:Name="btnOK"
             Width="75"
             Height="23"
-            Margin="627,404,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
             Click="btnOK_Click"
-            Content="OK" />
-        <Button
-            x:Name="btnCancel"
-            Width="75"
-            Height="23"
-            Margin="707,404,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Click="BtnCancel_Click"
-            Content="Отмена"
-            IsCancel="True" />
-        <Button
-            x:Name="btnOK_Copy"
-            Width="75"
-            Height="23"
-            Margin="10,399,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Click="btnOK_Copy_Click"
-            Content="Добавить" />
+            Content="OK"/>
     </Grid>
-
 </Window>
