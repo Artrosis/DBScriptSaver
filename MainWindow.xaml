@@ -37,13 +37,33 @@
             HorizontalContentAlignment="Center"
             Content="Проект" />
         <Button
-            x:Name="button"
+            x:Name="btEditProjects"
             Width="22"
             Margin="160,31,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="EditProjects">
             <Image Source="img\edit.png"/>            
+        </Button>
+        <Button
+            x:Name="btDBObjectFilter"
+            Width="195"
+            Margin="5,58,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="EditDBObjectFilter"
+            Content="Фильтр объектов базы данных" 
+            Height="48">
+        </Button>
+        <Button
+            x:Name="btRefreshObjects"
+            Width="195"
+            Margin="5,111,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="RefreshObjects"
+            Content="Обновить объекты" 
+            Height="48">
         </Button>
     </Grid>
 

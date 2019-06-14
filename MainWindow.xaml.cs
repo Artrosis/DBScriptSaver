@@ -122,5 +122,16 @@ namespace DBScriptSaver
             //    cbServer.Properties.ContextImage = imgs.Images[0];
             //};
         }
+
+        private void EditDBObjectFilter(object sender, RoutedEventArgs e)
+        {
+            var fmEditor = new fmEditDBObjectFilter(Vm) { Owner = this };
+            fmEditor.ShowDialog();
+        }
+
+        private void RefreshObjects(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

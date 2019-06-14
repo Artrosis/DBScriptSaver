@@ -13,6 +13,18 @@ namespace DBScriptSaver.ViewModels
     {
         public Project() : base()
         {
+            DataBases.CollectionChanged += DataBases_CollectionChanged;
+        }
+
+        private void DataBases_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                foreach (ProjectDataBase db in e.NewItems)
+                {
+                    db.Project = this;
+                }
+            }
         }
 
         public string Name { get; set; }

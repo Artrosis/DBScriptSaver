@@ -1,0 +1,22 @@
+﻿<Window x:Class="DBScriptSaver.DBObjectsFiltering"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DBScriptSaver"
+        mc:Ignorable="d"
+        Title="Настройка объектов базы данных" Height="450" Width="800">
+    <ScrollViewer
+        HorizontalContentAlignment="Stretch"
+        VerticalContentAlignment="Stretch"
+        HorizontalAlignment="Stretch" 
+        Background="Green" 
+        VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch">
+        <StackPanel 
+            x:Name="listProcedures"
+            Grid.Column="0" 
+            Background="White" 
+            Orientation="Vertical">
+        </StackPanel>
+    </ScrollViewer>
+</Window>

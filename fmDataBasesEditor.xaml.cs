@@ -26,5 +26,18 @@ namespace DBScriptSaver
 
             DataContext = proj;
         }
+
+        private void EditDBObjects_Click(object sender, RoutedEventArgs e)
+        {
+            var DB = gcDataBases.SelectedItem as ProjectDataBase;
+
+            if (DB == null)
+            {
+                return;
+            }
+
+            var fmEditor = new DBObjectsFiltering(DB) { Owner = this };
+            fmEditor.ShowDialog();
+        }
     }
 }

@@ -57,7 +57,6 @@ namespace DBScriptSaver
 
             var fmEditor = new fmDataBasesEditor(proj) { Owner = this };
             fmEditor.ShowDialog();
-
         }
     }
 }

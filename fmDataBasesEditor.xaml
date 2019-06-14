@@ -13,6 +13,7 @@
         VerticalAlignment="Stretch">
         <Label Content="Базы данных"></Label>
         <DataGrid
+            x:Name="gcDataBases"
             Width="auto"
             Height="auto"
             HorizontalAlignment="Left"
@@ -23,11 +24,18 @@
                 <DataGridTextColumn
                     Width="200"
                     Binding="{Binding Path=Name}"
-                    Header="Наимменование базы данных" />
+                    Header="Наименование базы данных" />
                 <DataGridTextColumn
                     Width="300"
                     Binding="{Binding Path=Path}"
                     Header="Расположение" />
+                <DataGridTemplateColumn Header="Базы данных" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Фильтр объектов" Click="EditDBObjects_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </StackPanel>

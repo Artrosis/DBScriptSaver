@@ -41,6 +41,8 @@
     <ApplicationIcon>ico\main.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.SqlServer.Smo, Version=14.100.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -71,8 +73,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DBObjectsFiltering.xaml.cs">
+      <DependentUpon>DBObjectsFiltering.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fmDataBasesEditor.xaml.cs">
       <DependentUpon>fmDataBasesEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="fmEditDBObjectFilter.xaml.cs">
+      <DependentUpon>fmEditDBObjectFilter.xaml</DependentUpon>
     </Compile>
     <Compile Include="fmProjectsEditor.xaml.cs">
       <DependentUpon>fmProjectsEditor.xaml</DependentUpon>
@@ -80,7 +88,15 @@
     <Compile Include="ViewModels\DBScriptViewModel.cs" />
     <Compile Include="ViewModels\Project.cs" />
     <Compile Include="ViewModels\ProjectDataBase.cs" />
+    <Page Include="DBObjectsFiltering.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="fmDataBasesEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="fmEditDBObjectFilter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
