@@ -10,7 +10,7 @@
     Title="Проекты"
     WindowStartupLocation="CenterOwner">
 
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">        
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <DataGrid
             x:Name="gcProjects"
             Width="auto"
