@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:DBScriptSaver"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <BitmapImage x:Key="MainIco" CreateOptions="IgnoreImageCache" CacheOption="OnLoad" UriSource="C:\Users\Artur\Documents\Visual Studio 2017\Projects\DBScriptSaver\DBScriptSaver\ico\main.ico"/>
+        <BitmapImage x:Key="MainIco" CreateOptions="IgnoreImageCache" CacheOption="OnLoad" UriSource="ico\main.ico"/>
     </Application.Resources>
 </Application>
