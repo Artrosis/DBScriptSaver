@@ -23,6 +23,7 @@ namespace DBScriptSaver
     /// </summary>
     public partial class fmDataBasesEditor : Window
     {
+        private Project project => DataContext as Project;
         public fmDataBasesEditor(Project proj)
         {
             InitializeComponent();
@@ -30,9 +31,11 @@ namespace DBScriptSaver
             DataContext = proj;
         }
 
+        private ProjectDataBase SelectedBase => gcDataBases.SelectedItem as ProjectDataBase;
+
         private void EditDBObjects_Click(object sender, RoutedEventArgs e)
         {
-            var DB = gcDataBases.SelectedItem as ProjectDataBase;
+            var DB = SelectedBase;
 
             if (DB == null)
             {
@@ -45,7 +48,7 @@ namespace DBScriptSaver
 
         private void Compare_Click(object sender, RoutedEventArgs e)
         {
-            var DB = gcDataBases.SelectedItem as ProjectDataBase;
+            var DB = SelectedBase;
             DirectoryInfo d = new DirectoryInfo(DB.SourceFolder);
             Dictionary<string, Tuple<string, DateTime>> SourcesData = d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
                                     .OrderBy(f => f.LastWriteTime)
@@ -104,6 +107,11 @@ namespace DBScriptSaver
             }
             Encoding enc = Encoding.GetEncoding(encoding);
             return enc;
+        }
+
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            project.DataBases.Add(new ProjectDataBase(project));
         }
     }
 }

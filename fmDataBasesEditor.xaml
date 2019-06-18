@@ -12,6 +12,13 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
         <Label Content="Базы данных"></Label>
+        <Button
+            Width="75"
+            Height="23"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Click="btnAdd_Click"
+            Content="Добавить"/>
         <DataGrid
             x:Name="gcDataBases"
             Width="auto"
