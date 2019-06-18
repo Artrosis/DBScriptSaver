@@ -1,4 +1,5 @@
-﻿using PropertyChanged;
+﻿using Newtonsoft.Json;
+using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,7 @@ namespace DBScriptSaver.ViewModels
         public string Name { get; set; }
         public string Path { get; set; }
 
+        [JsonIgnoreAttribute]
         public Project Project { get; set; }
 
         public List<string> traceProcedures = new List<string>();

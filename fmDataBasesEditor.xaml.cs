@@ -88,7 +88,7 @@ namespace DBScriptSaver
 
                         if ((TextFromFile == null) ||(TextFromFile != TextFromDB))
                         {
-                            File.WriteAllText(DB.SourceFolder + FileName, TextFromDB);
+                            File.WriteAllText(DB.SourceFolder + FileName, TextFromDB, new UTF8Encoding(true));
                         }
                     }
                 }
