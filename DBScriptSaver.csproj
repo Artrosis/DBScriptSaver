@@ -85,13 +85,11 @@
     <Compile Include="fmDataBasesEditor.xaml.cs">
       <DependentUpon>fmDataBasesEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="fmEditDBObjectFilter.xaml.cs">
-      <DependentUpon>fmEditDBObjectFilter.xaml</DependentUpon>
-    </Compile>
     <Compile Include="fmProjectsEditor.xaml.cs">
       <DependentUpon>fmProjectsEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="GetObjectNameHelper.cs" />
+    <Compile Include="TaskbarIconHelper.cs" />
     <Compile Include="ViewModels\DBScriptViewModel.cs" />
     <Compile Include="ViewModels\Project.cs" />
     <Compile Include="ViewModels\ProjectDataBase.cs" />
@@ -100,10 +98,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="fmDataBasesEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="fmEditDBObjectFilter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -152,6 +146,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="img\Settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\Refresh.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
