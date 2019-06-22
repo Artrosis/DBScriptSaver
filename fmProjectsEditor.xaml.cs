@@ -31,16 +31,6 @@ namespace DBScriptSaver
             Vm = viewModel;
 
             this.DataContext = Vm;
-
-            Loaded += FmProjectsEditor_Loaded;
-        }
-
-        private void FmProjectsEditor_Loaded(object sender, RoutedEventArgs e)
-        {
-            TaskbarIcon tbi = new TaskbarIcon();
-            Stream iconStream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/DBScriptSaver;component/ico/main.ico")).Stream;
-            tbi.Icon = new System.Drawing.Icon(iconStream);
-            tbi.ToolTipText = "Помошник сохранения скриптов";
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
