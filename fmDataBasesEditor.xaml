@@ -8,18 +8,32 @@
     mc:Ignorable="d"
     Title="{Binding Path=Name}">
 
-    <StackPanel
+    <Grid
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
-        <Label Content="Базы данных"></Label>
-        <Button
-            Width="75"
-            Height="23"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Bottom"
-            Click="btnAdd_Click"
-            Content="Добавить"/>
-        <DataGrid
+        <StackPanel
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <Label Content="Базы данных"></Label>
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Width="75"
+                    Height="23"
+                    Margin="3"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Click="btnAdd_Click"
+                    Content="Добавить"/>
+                <Button
+                    Width="75"
+                    Height="23"
+                    Margin="3"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Click="btnDel_Click"
+                    Content="Удалить"/>
+            </StackPanel>
+            <DataGrid
             x:Name="gcDataBases"
             Width="auto"
             Height="auto"
@@ -27,30 +41,38 @@
             VerticalAlignment="Top"
             AutoGenerateColumns="False"
             ItemsSource="{Binding DataBases}">
-            <DataGrid.Columns>
-                <DataGridTextColumn
+                <DataGrid.Columns>
+                    <DataGridTextColumn
                     Width="200"
                     Binding="{Binding Path=Name}"
                     Header="Наименование базы данных" />
-                <DataGridTextColumn
+                    <DataGridTextColumn
                     Width="300"
                     Binding="{Binding Path=Path}"
                     Header="Расположение" />
-                <DataGridTemplateColumn Header="Базы данных" Width="150">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Фильтр объектов" Click="EditDBObjects_Click"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Сравнить" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Сравнить" Click="Compare_Click"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-    </StackPanel>
+                    <DataGridTemplateColumn Header="Базы данных" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Фильтр объектов" Click="EditDBObjects_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Сравнить" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Сравнить" Click="Compare_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+        <Button
+            Width="75"
+            Height="23"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Click="btnOK_Click"
+            Content="OK"/>
+    </Grid>
 </Window>

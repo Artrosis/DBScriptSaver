@@ -49,6 +49,7 @@ namespace DBScriptSaver.ViewModels
             {
                 Projects = new ObservableCollection<Project>(JsonConvert.DeserializeObject<List<Project>>(ProjectsData));
                 Projects.ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
+                Projects.ToList().ForEach(p => p.vm = this);
                 Projects.ToList().SelectMany(i => i.DataBases).ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
             }
             else
@@ -57,10 +58,9 @@ namespace DBScriptSaver.ViewModels
             }
             
             Projects.CollectionChanged += ContentCollectionChanged;
-            Projects.CollectionChanged += SaveProjectsWrapper;
         }
 
-        private void ContentCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ContentCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Remove)
             {
@@ -76,6 +76,14 @@ namespace DBScriptSaver.ViewModels
                     item.PropertyChanged += Item_PropertyChanged;
                 }
             }
+
+            if (e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                foreach (Project proj in e.NewItems)
+                {
+                    proj.vm = this;
+                }
+            }
         }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -85,16 +93,12 @@ namespace DBScriptSaver.ViewModels
         public void SaveProjects()
         {
             File.WriteAllText(Settings, JsonConvert.SerializeObject(Projects));
-        }
-
-        private void SaveProjectsWrapper(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            SaveProjects();
+            TaskbarIconHelper.UpdateContextMenu();
         }
 
         public void AddProject()
         {
-            Projects.Add(new Project() { Name = Resources.НовыйПроект });
+            Projects.Add(new Project(this) { Name = Resources.НовыйПроект });
         }
     }
 }

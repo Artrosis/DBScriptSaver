@@ -11,8 +11,11 @@ namespace DBScriptSaver.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class Project
     {
-        public Project() : base()
+        [JsonIgnoreAttribute]
+        public DBScriptViewModel vm;
+        public Project(DBScriptViewModel vm) : base()
         {
+            this.vm = vm;
             DataBases.CollectionChanged += DataBases_CollectionChanged;
         }
 

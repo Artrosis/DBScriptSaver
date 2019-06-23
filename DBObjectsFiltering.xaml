@@ -9,40 +9,41 @@
     Height="450"
     mc:Ignorable="d"
     Title="Настройка объектов базы данных">
-
-    <ScrollViewer
+    <Grid>
+        <ScrollViewer
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         HorizontalContentAlignment="Stretch"
         VerticalContentAlignment="Stretch"
         Background="Green"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel
+            <StackPanel
             x:Name="listProcedures"
             Background="White"
             Orientation="Vertical">
-            <StackPanel x:Name="ProceduresHeader" Orientation="Horizontal">
-                <Label HorizontalContentAlignment="Center"  Width="300">Объекты Базы данных</Label>
-                <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Отслеживать</CheckBox>
+                <StackPanel x:Name="ProceduresHeader" Orientation="Horizontal">
+                    <Label HorizontalContentAlignment="Center"  Width="300">Объекты Базы данных</Label>
+                    <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Отслеживать</CheckBox>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button
-                    Width="150"
-                    Height="23"
-                    Margin="0, 0, 10, 0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Click="CheckFromSaved_Click"
-                    Content="Выбрать из сохранённого"/>
-                <Button
-                    Width="75"
-                    Height="23"
-                    Margin="0, 0, 10, 0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Click="Save_Click"
-                    Content="Сохранить"/>
-            </StackPanel>
+        </ScrollViewer>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button
+                Width="150"
+                Height="23"
+                Margin="0, 0, 10, 0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="CheckFromSaved_Click"
+                Content="Выбрать из сохранённого"/>
+            <Button
+                Width="75"
+                Height="23"
+                Margin="0, 0, 10, 0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="Save_Click"
+                Content="Сохранить"/>
         </StackPanel>
-    </ScrollViewer>
+    </Grid>
 </Window>

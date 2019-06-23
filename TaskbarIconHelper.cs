@@ -123,7 +123,7 @@ namespace DBScriptSaver
                 return;
             }
 
-            new fmDataBasesEditor(proj).Show();
+            new fmDataBasesEditor(proj).ShowDialog();
         }
 
         private static void SettingsItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

@@ -56,5 +56,22 @@ namespace DBScriptSaver
         {
             project.DataBases.Add(new ProjectDataBase(project));
         }
+
+        private void btnOK_Click(object sender, RoutedEventArgs e)
+        {
+            project.vm.SaveProjects();
+            DialogResult = true;
+        }
+
+        private void btnDel_Click(object sender, RoutedEventArgs e)
+        {
+            var DB = SelectedBase;
+            if (DB == null)
+            {
+                MessageBox.Show("Не выбрана база данных");
+                return;
+            }
+            project.DataBases.Remove(SelectedBase);
+        }
     }
 }

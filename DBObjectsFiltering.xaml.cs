@@ -140,6 +140,8 @@ namespace DBScriptSaver
             XElement spNames = new XElement("StoredProcedures", UsedObjects.Select(s => new XElement("StoredProcedure", s)));
 
             File.AppendAllText(db.FilterFile, spNames.ToString());
+
+            DialogResult = true;
         }
 
         private void CheckFromSaved_Click(object sender, RoutedEventArgs e)
