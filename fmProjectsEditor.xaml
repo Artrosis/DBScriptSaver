@@ -11,34 +11,48 @@
     WindowStartupLocation="CenterOwner">
 
     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <DataGrid
-            x:Name="gcProjects"
-            Width="auto"
-            Height="auto"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            ItemsSource="{Binding EditProjects}" 
-            AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Проект" Binding="{Binding Path=Name}" Width="200"></DataGridTextColumn>
-                <DataGridTextColumn Header="Путь" Binding="{Binding Path=Path}" Width="300"></DataGridTextColumn>
-                <DataGridTextColumn Header="Сервер" Binding="{Binding Path=Server}" Width="300"></DataGridTextColumn>
-                <DataGridTemplateColumn Header="Базы данных" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Настроить базы" Click="EditDataBase_Click"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Удалить" Click="Button_Click"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <StackPanel
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
+                <Button
+                    Width="75"
+                    Height="23"
+                    Margin="3"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Click="btnAdd_Click"
+                    Content="Добавить"/>
+            </StackPanel>
+            <DataGrid
+                x:Name="gcProjects"
+                Width="auto"
+                Height="auto"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                ItemsSource="{Binding EditProjects}" 
+                AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Проект" Binding="{Binding Path=Name}" Width="200"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Путь" Binding="{Binding Path=Path}" Width="300"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Сервер" Binding="{Binding Path=Server}" Width="300"></DataGridTextColumn>
+                    <DataGridTemplateColumn Header="Базы данных" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Настроить базы" Click="EditDataBase_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Удалить" Click="Button_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
         <Button
             Width="75"
             Height="23"

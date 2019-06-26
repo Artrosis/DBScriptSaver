@@ -60,5 +60,10 @@ namespace DBScriptSaver
             var fmEditor = new fmDataBasesEditor(proj) { Owner = this };
             fmEditor.ShowDialog();
         }
+
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            Vm.Projects.Add(new Project(Vm));
+        }
     }
 }

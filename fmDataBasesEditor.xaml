@@ -34,13 +34,13 @@
                     Content="Удалить"/>
             </StackPanel>
             <DataGrid
-            x:Name="gcDataBases"
-            Width="auto"
-            Height="auto"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            AutoGenerateColumns="False"
-            ItemsSource="{Binding DataBases}">
+                x:Name="gcDataBases"
+                Width="auto"
+                Height="auto"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                AutoGenerateColumns="False"
+                ItemsSource="{Binding DataBases}">
                 <DataGrid.Columns>
                     <DataGridTextColumn
                     Width="200"
