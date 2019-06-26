@@ -91,7 +91,7 @@ namespace DBScriptSaver
                 return;
             }
 
-            new DBObjectsFiltering(DB).Show();
+            new DBObjectsFiltering(DB).ShowDialog();
         }
 
         private static void UpdateDBItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

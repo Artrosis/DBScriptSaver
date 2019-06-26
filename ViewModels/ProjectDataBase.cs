@@ -25,18 +25,30 @@ namespace DBScriptSaver.ViewModels
         public Project Project { get; set; }
 
         public List<string> traceProcedures = new List<string>();
+        public List<string> IgnoreProcedures = new List<string>();
+        public List<string> traceFunctions = new List<string>();
+        public List<string> IgnoreFunctions = new List<string>();
 
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + "source" + System.IO.Path.DirectorySeparatorChar;
         public string FilterFile => BaseFolder + "ObjectsFilter.cfg";
 
-        internal void UpdateTraceProcedures()
+        internal void UpdateFilterDataFromConfig()
         {
             if (File.Exists(FilterFile))
             {
-                XElement storedProcedures = XElement.Parse(File.ReadAllText(FilterFile));
-
+                XElement DBObjects = XElement.Parse(File.ReadAllText(FilterFile));
+                XElement storedProcedures = DBObjects.Element(XName.Get("StoredProcedures"));
                 storedProcedures.Elements().ToList().ForEach(sp => traceProcedures.Add(sp.Value));
+
+                XElement IgnoredProcedures = DBObjects.Element(XName.Get("IgnoredProcedures"));
+                IgnoredProcedures.Elements().ToList().ForEach(sp => IgnoreProcedures.Add(sp.Value));
+
+                XElement Functions = DBObjects.Element(XName.Get("Functions"));
+                Functions.Elements().ToList().ForEach(f => traceFunctions.Add(f.Value));
+
+                XElement IgnoredFunctions = DBObjects.Element(XName.Get("IgnoredFunctions"));
+                IgnoredFunctions.Elements().ToList().ForEach(f => IgnoreFunctions.Add(f.Value));
             }
         }
 
