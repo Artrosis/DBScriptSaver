@@ -25,7 +25,7 @@
                     Orientation="Vertical">
                         <CheckBox x:Name="ShowIgnored" Width="180" IsChecked="False" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Margin="5" VerticalAlignment="Center">Показывать игнорируемые</CheckBox>
                         <Label>Схемы</Label>
-                        <StackPanel x:Name="SchemasHeader" Orientation="Horizontal">
+                        <StackPanel x:Name="SchemasHeader" Orientation="Horizontal" Background="AntiqueWhite">
                             <Label HorizontalContentAlignment="Center"  Width="300">Название</Label>
                             <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Отслеживать</CheckBox>
                             <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Игнорировать</CheckBox>
@@ -33,28 +33,36 @@
                     </StackPanel>
                 </Expander>
                 <Expander Header="Хранимые процедуры" IsExpanded="True">
-                    <StackPanel
-                    x:Name="listProcedures"
-                    Background="White"
-                    Orientation="Vertical">
-                        <StackPanel x:Name="ProceduresHeader" Orientation="Horizontal">
-                            <Label HorizontalContentAlignment="Center"  Width="300">Название</Label>
-                            <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Отслеживать</CheckBox>
-                            <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Игнорировать</CheckBox>
-                        </StackPanel>
-                    </StackPanel>
+                    <DataGrid
+                        x:Name="gcProcedures"
+                        Width="auto"
+                        Height="auto"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding EditProcedures}" 
+                        AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Path=FullName, Mode=OneWay}" Width="300"></DataGridTextColumn>
+                            <DataGridCheckBoxColumn Header="Отслеживать" Binding="{Binding Path=IsTrace}" Width="150"></DataGridCheckBoxColumn>
+                            <DataGridCheckBoxColumn Header="Игнорировать" Binding="{Binding Path=IsIgnore}" Width="150"></DataGridCheckBoxColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Expander>
                 <Expander Header="Функции" IsExpanded="True">
-                    <StackPanel
-                    x:Name="listFunctions"
-                    Background="White"
-                    Orientation="Vertical">
-                        <StackPanel x:Name="FunctionsHeader" Orientation="Horizontal">
-                            <Label HorizontalContentAlignment="Center"  Width="300">Название</Label>
-                            <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Отслеживать</CheckBox>
-                            <CheckBox Width="150" HorizontalContentAlignment="Center" VerticalAlignment="Center">Игнорировать</CheckBox>
-                        </StackPanel>
-                    </StackPanel>
+                    <DataGrid
+                        x:Name="gcFunctions"
+                        Width="auto"
+                        Height="auto"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding EditFunctions}" 
+                        AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Path=FullName, Mode=OneWay}" Width="300"></DataGridTextColumn>
+                            <DataGridCheckBoxColumn Header="Отслеживать" Binding="{Binding Path=IsTrace}" Width="150"></DataGridCheckBoxColumn>
+                            <DataGridCheckBoxColumn Header="Игнорировать" Binding="{Binding Path=IsIgnore}" Width="150"></DataGridCheckBoxColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Expander>
             </StackPanel>
         </ScrollViewer>

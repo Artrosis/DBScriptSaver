@@ -8,16 +8,10 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Xml.Linq;
 
 namespace DBScriptSaver
@@ -31,14 +25,14 @@ namespace DBScriptSaver
         private ProjectDataBase db => ((ProjectDataBase)DataContext);
         public DBObjectsFiltering(ProjectDataBase dB)
         {
-            InitializeComponent();
-
             DataContext = dB;
             
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
                 dB.UpdateFilterDataFromConfig();
+
+                InitializeComponent();
 
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
                 {
@@ -75,6 +69,8 @@ namespace DBScriptSaver
 
                         string sName = $@"{s.Name}";
 
+                        Sch sh = dB.Schemas.SingleOrDefault(sch => sch.ToString() == sName);
+
                         ElementPanel.Children.Add(new Label()
                         {
                             Width = 300,
@@ -84,10 +80,12 @@ namespace DBScriptSaver
                         ElementPanel.Children.Add(new CheckBox()
                         {
                             Width = 150,
+                            IsChecked = (sh?.State == ObjectState.Отслеживаемый)
                         });
                         ElementPanel.Children.Add(new CheckBox()
                         {
                             Width = 150,
+                            IsChecked = (sh?.State == ObjectState.Игнорируемый)
                         });
                     }
                     );
@@ -96,61 +94,29 @@ namespace DBScriptSaver
                     .Where(sp => sp.Schema != "sys").ToList()
                     .ForEach(sp =>
                     {
-                        StackPanel ElementPanel = new StackPanel() { Orientation = Orientation.Horizontal, Tag = "Element" };
-                        listProcedures.Children.Add(ElementPanel);
-
                         string spName = $@"{sp.Schema}.{sp.Name}";
+                        Procedure proc = dB.Procedures.SingleOrDefault(s => s.ToString() == spName);
 
-                        ElementPanel.Children.Add(new Label()
-                                                    {
-                                                        Width = 300,
-                                                        HorizontalContentAlignment = HorizontalAlignment.Left,
-                                                        Content = spName
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
-                                                    {
-                                                        Width = 150,
-                                                        IsChecked = dB.traceProcedures.Contains(spName),
-                                                        Tag = "Trace"
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
+                        if (proc == null)
                         {
-                            Width = 150,
-                            IsChecked = dB.IgnoreProcedures.Contains(spName),
-                            Tag = "Ignore"
-                        });
-
-                        ElementPanel.Visibility = !(ShowIgnored.IsChecked ?? false) && dB.IgnoreProcedures.Contains(spName) ? Visibility.Collapsed : Visibility.Visible;
+                            var NewProc = new Procedure(spName);
+                            dB.Procedures.Add(NewProc);
+                        }
                     }
                     );
+
                 dataBase.UserDefinedFunctions.Cast<UserDefinedFunction>().ToList()
                     .Where(f => f.Schema != "sys").ToList()
                     .ForEach(f =>
                     {
-                        StackPanel ElementPanel = new StackPanel() { Orientation = Orientation.Horizontal, Tag = "Element" };
-                        listFunctions.Children.Add(ElementPanel);
-
                         string fnName = $@"{f.Schema}.{f.Name}";
+                        Function fn = dB.Functions.SingleOrDefault(fun => fun.ToString() == fnName);
 
-                        ElementPanel.Children.Add(new Label()
+                        if (fn == null)
                         {
-                            Width = 300,
-                            HorizontalContentAlignment = HorizontalAlignment.Left,
-                            Content = fnName
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
-                        {
-                            Width = 150,
-                            IsChecked = dB.traceFunctions.Contains(fnName)
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
-                        {
-                            Width = 150,
-                            IsChecked = dB.IgnoreFunctions.Contains(fnName),
-                            Tag = "Ignore"
-                        });
-
-                        ElementPanel.Visibility = !(ShowIgnored.IsChecked ?? false) && dB.IgnoreFunctions.Contains(fnName) ? Visibility.Collapsed : Visibility.Visible;
+                            var NewFn = new Function(fnName);
+                            dB.Functions.Add(NewFn);
+                        }
                     }
                     );
             }
@@ -190,53 +156,27 @@ namespace DBScriptSaver
                 File.Delete(db.FilterFile);
             }
 
-            var lstProcedures = listProcedures.Children.Cast<UIElement>().Where(el => el is StackPanel && (string)((StackPanel)el).Tag == "Element").ToList();
-            List<string> UsedProcedures = new List<string>();
-            List<string> IgnoreProcedures = new List<string>();
-            foreach (StackPanel panel in lstProcedures)
-            {
-                bool IsUse = ((CheckBox)panel.Children[1]).IsChecked ?? false;
-                if (IsUse)
-                {
-                    string spName = (string)((Label)panel.Children[0]).Content;
-                    UsedProcedures.Add(spName);
-                }
-                bool IsIgnore = ((CheckBox)panel.Children[2]).IsChecked ?? false;
-                if (IsIgnore)
-                {
-                    string spName = (string)((Label)panel.Children[0]).Content;
-                    IgnoreProcedures.Add(spName);
-                }
-            }
-
             XElement DBObjects = new XElement("DBObjects");
-            XElement spNames = new XElement("StoredProcedures", UsedProcedures.Select(s => new XElement("StoredProcedure", s)));
-            DBObjects.Add(spNames);
-            XElement ispNames = new XElement("IgnoredProcedures", IgnoreProcedures.Select(s => new XElement("IgnoreStoredProcedure", s)));
-            DBObjects.Add(ispNames);
 
-            var lstFunctions = listFunctions.Children.Cast<UIElement>().Where(el => el is StackPanel && (string)((StackPanel)el).Tag == "Element").ToList();
-            List<string> UsedFunctions = new List<string>();
-            List<string> IgnoredFunctions = new List<string>();
-            foreach (StackPanel panel in lstFunctions)
+            var XProcedures = db.Procedures.Where(s => s.State != ObjectState.Не_указан).Select(s =>
             {
-                string fnName = (string)((Label)panel.Children[0]).Content;
-                bool IsUse = ((CheckBox)panel.Children[1]).IsChecked ?? false;
-                if (IsUse)
-                {
-                    UsedFunctions.Add(fnName);
-                }
-                bool IsIgnore = ((CheckBox)panel.Children[2]).IsChecked ?? false;
-                if (IsIgnore)
-                {
-                    IgnoredFunctions.Add(fnName);
-                }
-            }
+                var sp = new XElement("Procedure", s);
+                sp.Add(new XAttribute(XName.Get("State"), s.State.ToString()));
+                return sp;
+            });
 
-            XElement fnNames = new XElement("Functions", UsedFunctions.Select(f => new XElement("Function", f)));
+            XElement spNames = new XElement("Procedures", XProcedures);
+            DBObjects.Add(spNames);
+
+            var XFunctions = db.Functions.Where(s => s.State != ObjectState.Не_указан).Select(s =>
+            {
+                var fn = new XElement("Function", s);
+                fn.Add(new XAttribute(XName.Get("State"), s.State.ToString()));
+                return fn;
+            });
+
+            XElement fnNames = new XElement("Functions", XFunctions);
             DBObjects.Add(fnNames);
-            XElement ifnNames = new XElement("IgnoredFunctions", IgnoredFunctions.Select(f => new XElement("IgnoreFunction", f)));
-            DBObjects.Add(ifnNames);
 
             File.AppendAllText(db.FilterFile, DBObjects.ToString());
 
@@ -253,26 +193,22 @@ namespace DBScriptSaver
 
             foreach (var proc in dir.GetFiles("*.sql", SearchOption.TopDirectoryOnly))
             {
-                SavedObjects.Add(System.IO.Path.GetFileNameWithoutExtension(proc.Name));
+                SavedObjects.Add(Path.GetFileNameWithoutExtension(proc.Name));
             }
 
-            var lst = listProcedures.Children.Cast<UIElement>().Where(el => el is StackPanel && (string)((StackPanel)el).Tag == "Element").ToList();
-            foreach (StackPanel panel in lst)
+            foreach (var sp in db.Procedures)
             {
-                string spName = (string)((Label)panel.Children[0]).Content;
-                if (SavedObjects.Contains(spName))
+                if (SavedObjects.Contains(sp.FullName))
                 {
-                    ((CheckBox)panel.Children[1]).IsChecked = true;
+                    sp.IsTrace = true;
                 }
             }
 
-            lst = listFunctions.Children.Cast<UIElement>().Where(el => el is StackPanel && (string)((StackPanel)el).Tag == "Element").ToList();
-            foreach (StackPanel panel in lst)
+            foreach (var fn in db.Functions)
             {
-                string fnName = (string)((Label)panel.Children[0]).Content;
-                if (SavedObjects.Contains(fnName))
+                if (SavedObjects.Contains(fn.FullName))
                 {
-                    ((CheckBox)panel.Children[1]).IsChecked = true;
+                    fn.IsTrace = true;
                 }
             }
         }

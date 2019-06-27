@@ -90,8 +90,13 @@
       <DependentUpon>fmProjectsEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="GetObjectNameHelper.cs" />
+    <Compile Include="Sch.cs" />
     <Compile Include="TaskbarIconHelper.cs" />
+    <Compile Include="ViewModels\DBObject.cs" />
     <Compile Include="ViewModels\DBScriptViewModel.cs" />
+    <Compile Include="ViewModels\Function.cs" />
+    <Compile Include="ViewModels\ObjectState.cs" />
+    <Compile Include="ViewModels\Procedure.cs" />
     <Compile Include="ViewModels\Project.cs" />
     <Compile Include="ViewModels\ProjectDataBase.cs" />
     <Page Include="DBObjectsFiltering.xaml">

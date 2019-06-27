@@ -2,10 +2,12 @@
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Data;
 using System.Xml.Linq;
 using Ude;
 
@@ -24,10 +26,26 @@ namespace DBScriptSaver.ViewModels
         [JsonIgnoreAttribute]
         public Project Project { get; set; }
 
-        public List<string> traceProcedures = new List<string>();
-        public List<string> IgnoreProcedures = new List<string>();
-        public List<string> traceFunctions = new List<string>();
-        public List<string> IgnoreFunctions = new List<string>();
+        public ObservableCollection<Procedure> Procedures = new ObservableCollection<Procedure>();
+        public ListCollectionView EditProcedures
+        {
+            get
+            {
+                return new ListCollectionView(Procedures);
+            }
+        }
+
+        public ObservableCollection<Function> Functions = new ObservableCollection<Function>();
+        public ListCollectionView EditFunctions
+        {
+            get
+            {
+                return new ListCollectionView(Functions);
+            }
+        }
+
+        public List<Sch> Schemas = new List<Sch>();
+        
 
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + "source" + System.IO.Path.DirectorySeparatorChar;
@@ -38,26 +56,43 @@ namespace DBScriptSaver.ViewModels
             if (File.Exists(FilterFile))
             {
                 XElement DBObjects = XElement.Parse(File.ReadAllText(FilterFile));
-                XElement storedProcedures = DBObjects.Element(XName.Get("StoredProcedures"));
-                storedProcedures.Elements().ToList().ForEach(sp => traceProcedures.Add(sp.Value));
 
-                XElement IgnoredProcedures = DBObjects.Element(XName.Get("IgnoredProcedures"));
-                IgnoredProcedures.Elements().ToList().ForEach(sp => IgnoreProcedures.Add(sp.Value));
+                if (DBObjects.Elements(XName.Get("Schemas")).Count() > 0)
+                {
+                    XElement XSchemas = DBObjects.Element(XName.Get("Schemas"));
+                    XSchemas.Elements().ToList().ForEach(s => Schemas.Add(new Sch(s)));
+                }
 
-                XElement Functions = DBObjects.Element(XName.Get("Functions"));
-                Functions.Elements().ToList().ForEach(f => traceFunctions.Add(f.Value));
+                if (DBObjects.Elements(XName.Get("Procedures")).Count() > 0)
+                {
+                    XElement storedProcedures = DBObjects.Element(XName.Get("Procedures"));
+                    storedProcedures.Elements().ToList().ForEach(sp => Procedures.Add(new Procedure(sp)));
+                }
 
-                XElement IgnoredFunctions = DBObjects.Element(XName.Get("IgnoredFunctions"));
-                IgnoredFunctions.Elements().ToList().ForEach(f => IgnoreFunctions.Add(f.Value));
+                if (DBObjects.Elements(XName.Get("Functions")).Count() > 0)
+                {
+                    XElement storedFunctions = DBObjects.Element(XName.Get("Functions"));
+                    storedFunctions.Elements().ToList().ForEach(f => Functions.Add(new Function(f)));
+                }
             }
         }
 
         internal void UpdateScripts()
         {
+            UpdateFilterDataFromConfig();
+
             DirectoryInfo d = new DirectoryInfo(SourceFolder);
             Dictionary<string, Tuple<string, DateTime>> SourcesData = d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
                                     .OrderBy(f => f.LastWriteTime)
                                     .ToDictionary(f => f.Name, f => new Tuple<string, DateTime>(File.ReadAllText(f.FullName, GetEncoding(f.FullName)), f.LastWriteTime));
+
+            foreach (var procedure in Procedures.Where(p => p.IsTrace))
+            {
+                if (!SourcesData.Keys.Contains(procedure.FullName + ".sql"))
+                {
+                    SourcesData.Add(procedure.FullName + ".sql", new Tuple<string, DateTime>("", DateTime.Now));
+                }
+            }
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
             {
