@@ -23,8 +23,13 @@ namespace DBScriptSaver
     public partial class DBObjectsFiltering : Window
     {
         private ProjectDataBase db => ((ProjectDataBase)DataContext);
+
+        System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
         public DBObjectsFiltering(ProjectDataBase dB)
         {
+            timer.Tick += ApplyTextFilter;
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 400);
+
             DataContext = dB;
             
             Mouse.OverrideCursor = Cursors.Wait;
@@ -114,9 +119,23 @@ namespace DBScriptSaver
             }
         }
 
+        private void ApplyTextFilter(object sender, EventArgs e)
+        {
+            timer.Stop();
+            Filtering();
+        }
+
         private bool Filter(object obj)
         {
             var o = obj as DBObject;
+
+            if (tbFilter.Text.Length > 0)
+            {
+                if (!o.FullName.ToUpper().Contains(tbFilter.Text.ToUpper()))
+                {
+                    return false;
+                }
+            }
 
             switch (o.State)
             {
@@ -245,14 +264,24 @@ namespace DBScriptSaver
 
         private void ShowTraced_Checked(object sender, RoutedEventArgs e)
         {
+            Filtering();
+        }
+
+        private void Filtering()
+        {
             (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
             (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
         }
 
         private void gcSchemas_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
-            (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+            Filtering();
+        }
+
+        private void tbFilter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            timer.Stop();
+            timer.Start();
         }
     }
 }
