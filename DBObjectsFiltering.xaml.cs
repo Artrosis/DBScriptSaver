@@ -61,32 +61,17 @@ namespace DBScriptSaver
                 }
 
                 dataBase.Schemas.Cast<Schema>().ToList()
-                    .Where(s => !s.IsSystemObject).ToList()
+                    .Where(s => !s.IsSystemObject || s.Name == "dbo").ToList()
                     .ForEach(s =>
                     {
-                        StackPanel ElementPanel = new StackPanel() { Orientation = Orientation.Horizontal, Tag = "Element" };
-                        listShemas.Children.Add(ElementPanel);
-
                         string sName = $@"{s.Name}";
+                        Sch sch = dB.Schemas.SingleOrDefault(sh => sh.ToString() == sName);
 
-                        Sch sh = dB.Schemas.SingleOrDefault(sch => sch.ToString() == sName);
-
-                        ElementPanel.Children.Add(new Label()
+                        if (sch == null)
                         {
-                            Width = 300,
-                            HorizontalContentAlignment = HorizontalAlignment.Left,
-                            Content = sName
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
-                        {
-                            Width = 150,
-                            IsChecked = (sh?.State == ObjectState.Отслеживаемый)
-                        });
-                        ElementPanel.Children.Add(new CheckBox()
-                        {
-                            Width = 150,
-                            IsChecked = (sh?.State == ObjectState.Игнорируемый)
-                        });
+                            var NewSchema = new Sch(sName);
+                            dB.Schemas.Add(NewSchema);
+                        }
                     }
                     );
 
@@ -119,11 +104,46 @@ namespace DBScriptSaver
                         }
                     }
                     );
+
+                (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+                (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
             }
             finally
             {
                 Mouse.OverrideCursor = null;
-            }            
+            }
+        }
+
+        private bool Filter(object obj)
+        {
+            var o = obj as DBObject;
+
+            switch (o.State)
+            {
+                case ObjectState.Не_указан:
+                    return ShowOnSchema(o.Schema);
+                case ObjectState.Отслеживаемый:
+                    return ShowTraced.IsChecked ?? false;
+                case ObjectState.Игнорируемый:
+                    return ShowIgnored.IsChecked ?? false;
+                default:
+                    return true;
+            }
+        }
+
+        private bool ShowOnSchema(string schema)
+        {
+            switch (db.Schemas.Single(s => s.Name == schema).State)
+            {
+                case ObjectState.Не_указан:
+                    return true;
+                case ObjectState.Отслеживаемый:
+                    return ShowTraced.IsChecked ?? false;
+                case ObjectState.Игнорируемый:
+                    return ShowIgnored.IsChecked ?? false;
+                default:
+                    return true;
+            }
         }
 
         private bool HasConnection(string connectionString)
@@ -157,6 +177,16 @@ namespace DBScriptSaver
             }
 
             XElement DBObjects = new XElement("DBObjects");
+
+            var XSchemas = db.Schemas.Where(s => s.State != ObjectState.Не_указан).Select(s =>
+            {
+                var sch = new XElement("Schema", s);
+                sch.Add(new XAttribute(XName.Get("State"), s.State.ToString()));
+                return sch;
+            });
+
+            XElement schNames = new XElement("Schemas", XSchemas);
+            DBObjects.Add(schNames);
 
             var XProcedures = db.Procedures.Where(s => s.State != ObjectState.Не_указан).Select(s =>
             {
@@ -211,6 +241,18 @@ namespace DBScriptSaver
                     fn.IsTrace = true;
                 }
             }
+        }
+
+        private void ShowTraced_Checked(object sender, RoutedEventArgs e)
+        {
+            (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+            (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+        }
+
+        private void gcSchemas_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+            (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
         }
     }
 }

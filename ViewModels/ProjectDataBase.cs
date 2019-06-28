@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Xml.Linq;
 using Ude;
@@ -44,8 +45,14 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public List<Sch> Schemas = new List<Sch>();
-        
+        public ObservableCollection<Sch> Schemas = new ObservableCollection<Sch>();
+        public ListCollectionView EditSchemas
+        {
+            get
+            {
+                return new ListCollectionView(Schemas);
+            }
+        }
 
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + "source" + System.IO.Path.DirectorySeparatorChar;
@@ -60,19 +67,40 @@ namespace DBScriptSaver.ViewModels
                 if (DBObjects.Elements(XName.Get("Schemas")).Count() > 0)
                 {
                     XElement XSchemas = DBObjects.Element(XName.Get("Schemas"));
-                    XSchemas.Elements().ToList().ForEach(s => Schemas.Add(new Sch(s)));
+                    foreach (var s in XSchemas.Elements())
+                    {
+                        var sch = new Sch(s);
+                        if (!Schemas.Any(sh => sh.Name == sch.Name))
+                        {
+                            Schemas.Add(sch);
+                        }
+                    }
                 }
 
                 if (DBObjects.Elements(XName.Get("Procedures")).Count() > 0)
                 {
                     XElement storedProcedures = DBObjects.Element(XName.Get("Procedures"));
-                    storedProcedures.Elements().ToList().ForEach(sp => Procedures.Add(new Procedure(sp)));
+                    foreach (var s in storedProcedures.Elements())
+                    {
+                        var proc = new Procedure(s);
+                        if (!Procedures.Any(sp => sp.FullName == proc.FullName))
+                        {
+                            Procedures.Add(proc);
+                        }
+                    }
                 }
 
                 if (DBObjects.Elements(XName.Get("Functions")).Count() > 0)
                 {
                     XElement storedFunctions = DBObjects.Element(XName.Get("Functions"));
-                    storedFunctions.Elements().ToList().ForEach(f => Functions.Add(new Function(f)));
+                    foreach (var fn in storedFunctions.Elements())
+                    {
+                        var fun = new Function(fn);
+                        if (!Functions.Any(f => f.FullName == fun.FullName))
+                        {
+                            Functions.Add(fun);
+                        }
+                    }
                 }
             }
         }

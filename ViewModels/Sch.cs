@@ -6,5 +6,10 @@ namespace DBScriptSaver.ViewModels
     {
         public Sch(XElement f) : base(f) { }
         public Sch(string Name) : base(Name) { }
+        new public string FullName => Name;
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

@@ -7,8 +7,8 @@ namespace DBScriptSaver.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class DBObject
     {
-        protected string Schema;
-        protected string Name;
+        public string Schema;
+        public string Name;
 
         public ObjectState State;
 
@@ -32,10 +32,18 @@ namespace DBScriptSaver.ViewModels
         }
         private static string GetSchema(string s)
         {
+            if (s.IndexOf(@".") < 0)
+            {
+                return "";
+            }
             return s.Substring(0, s.IndexOf(@"."));
         }
         private static string GetName(string s)
         {
+            if (s.IndexOf(@".") < 0)
+            {
+                return s;
+            }
             return s.Substring(s.IndexOf(@".") + 1);
         }
 
