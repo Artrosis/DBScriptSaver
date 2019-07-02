@@ -30,7 +30,7 @@
                 Height="auto"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                ItemsSource="{Binding EditProjects, Mode=TwoWay}" 
+                ItemsSource="{Binding EditProjects}" 
                 AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Проект" Binding="{Binding Path=Name}" Width="200"></DataGridTextColumn>

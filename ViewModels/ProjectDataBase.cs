@@ -26,8 +26,9 @@ namespace DBScriptSaver.ViewModels
 
         [JsonIgnoreAttribute]
         public Project Project { get; set; }
-
+        [JsonIgnoreAttribute]
         public ObservableCollection<Procedure> Procedures = new ObservableCollection<Procedure>();
+        [JsonIgnoreAttribute]
         public ListCollectionView EditProcedures
         {
             get
@@ -35,8 +36,9 @@ namespace DBScriptSaver.ViewModels
                 return new ListCollectionView(Procedures);
             }
         }
-
+        [JsonIgnoreAttribute]
         public ObservableCollection<Function> Functions = new ObservableCollection<Function>();
+        [JsonIgnoreAttribute]
         public ListCollectionView EditFunctions
         {
             get
@@ -44,8 +46,9 @@ namespace DBScriptSaver.ViewModels
                 return new ListCollectionView(Functions);
             }
         }
-
+        [JsonIgnoreAttribute]
         public ObservableCollection<Sch> Schemas = new ObservableCollection<Sch>();
+        [JsonIgnoreAttribute]
         public ListCollectionView EditSchemas
         {
             get

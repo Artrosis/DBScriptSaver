@@ -128,7 +128,7 @@ namespace DBScriptSaver
 
         private static void SettingsItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            new fmProjectsEditor(new DBScriptViewModel()).Show();
+            new fmProjectsEditor(new DBScriptViewModel()).ShowDialog();
         }
 
         private static void CloseItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
