@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:DBScriptSaver"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Width="800"
-    Height="450"
+    Height="614.106"
     mc:Ignorable="d"
     Title="Настройка объектов базы данных" WindowStartupLocation="CenterScreen">
     <Grid>
@@ -52,7 +52,7 @@
                     HorizontalAlignment="Left"
                     TextChanged="tbFilter_TextChanged"
                     Text="{Binding theText, Delay=400, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Expander Header="Схемы" IsExpanded="True">
+                <Expander Header="Схемы" IsExpanded="False">
                     <StackPanel Orientation="Vertical">
                         <Label>Схемы</Label>
                         <DataGrid
@@ -117,6 +117,32 @@
                         VerticalAlignment="Top"
                         AutoGenerateColumns="False"
                         ItemsSource="{Binding EditFunctions}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="300"
+                                Binding="{Binding Path=FullName, Mode=OneWay}"
+                                Header="Название"
+                                IsReadOnly="True" />
+                            <DataGridCheckBoxColumn
+                                Width="150"
+                                Binding="{Binding Path=IsTrace}"
+                                Header="Отслеживать" />
+                            <DataGridCheckBoxColumn
+                                Width="150"
+                                Binding="{Binding Path=IsIgnore}"
+                                Header="Игнорировать" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+                <Expander Header="Таблицы" IsExpanded="True">
+                    <DataGrid
+                        x:Name="gcTables"
+                        Width="auto"
+                        Height="auto"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{Binding EditTables}">
                         <DataGrid.Columns>
                             <DataGridTextColumn
                                 Width="300"

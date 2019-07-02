@@ -110,8 +110,22 @@ namespace DBScriptSaver
                     }
                     );
 
-                (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
-                (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+                dataBase.Tables.Cast<Table>().ToList()
+                    .Where(t => t.Schema != "sys").ToList()
+                    .ForEach(t =>
+                    {
+                        string tblName = $@"{t.Schema}.{t.Name}";
+                        Tbl tbl = dB.Tables.SingleOrDefault(tab => tab.ToString() == tblName);
+
+                        if (tbl == null)
+                        {
+                            var NewTable = new Tbl(tblName);
+                            dB.Tables.Add(NewTable);
+                        }
+                    }
+                    );
+
+                Filtering();
             }
             finally
             {
@@ -271,6 +285,7 @@ namespace DBScriptSaver
         {
             (gcProcedures.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
             (gcFunctions.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+            (gcTables.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
         }
 
         private void gcSchemas_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)

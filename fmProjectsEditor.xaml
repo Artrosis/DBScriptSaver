@@ -6,15 +6,14 @@
     xmlns:local="clr-namespace:DBScriptSaver"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    d:DesignWidth="1010"
     Icon="ico/main.ico"
     Title="Проекты"
     WindowStartupLocation="CenterScreen">
 
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <StackPanel
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
                 <Button
                     Width="75"
                     Height="23"
@@ -22,7 +21,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     Click="btnAdd_Click"
-                    Content="Добавить"/>
+                    Content="Добавить" />
             </StackPanel>
             <DataGrid
                 x:Name="gcProjects"
@@ -30,23 +29,43 @@
                 Height="auto"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                ItemsSource="{Binding EditProjects}" 
-                AutoGenerateColumns="False">
+                AutoGenerateColumns="False"
+                ItemsSource="{Binding EditProjects}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Проект" Binding="{Binding Path=Name}" Width="200"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Путь" Binding="{Binding Path=Path}" Width="300"></DataGridTextColumn>
-                    <DataGridTextColumn Header="Сервер" Binding="{Binding Path=Server}" Width="300"></DataGridTextColumn>
-                    <DataGridTemplateColumn Header="Базы данных" Width="100">
+                    <DataGridTextColumn
+                        Width="200"
+                        Binding="{Binding Path=Name}"
+                        Header="Проект" />
+                    <DataGridTextColumn
+                        Width="300"
+                        Binding="{Binding Path=Path}"
+                        Header="Путь" />
+                    <DataGridTextColumn
+                        Width="200"
+                        Binding="{Binding Path=Server}"
+                        Header="Сервер" />
+                    <DataGridTextColumn
+                        Width="150"
+                        Binding="{Binding Path=DBLogin}"
+                        Header="Логин" />
+                    <DataGridTemplateColumn Width="100" Header="Пароль">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Настроить базы" Click="EditDataBase_Click"/>
+                                <PasswordBox PasswordChanged="pwdBox_PasswordChanged"></PasswordBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="100" Header="Базы данных">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="EditDataBase_Click" Content="Настроить базы" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Удалить" Click="Button_Click"/>
+                                <Button Click="Button_Click" Content="Удалить" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

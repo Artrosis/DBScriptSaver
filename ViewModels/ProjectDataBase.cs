@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -46,6 +48,7 @@ namespace DBScriptSaver.ViewModels
                 return new ListCollectionView(Functions);
             }
         }
+
         [JsonIgnoreAttribute]
         public ObservableCollection<Sch> Schemas = new ObservableCollection<Sch>();
         [JsonIgnoreAttribute]
@@ -54,6 +57,17 @@ namespace DBScriptSaver.ViewModels
             get
             {
                 return new ListCollectionView(Schemas);
+            }
+        }
+
+        [JsonIgnoreAttribute]
+        public ObservableCollection<Tbl> Tables = new ObservableCollection<Tbl>();
+        [JsonIgnoreAttribute]
+        public ListCollectionView EditTables
+        {
+            get
+            {
+                return new ListCollectionView(Tables);
             }
         }
 
@@ -105,6 +119,33 @@ namespace DBScriptSaver.ViewModels
                         }
                     }
                 }
+
+                if (DBObjects.Elements(XName.Get("Tables")).Count() > 0)
+                {
+                    XElement storedTables = DBObjects.Element(XName.Get("Tables"));
+                    foreach (var t in storedTables.Elements())
+                    {
+                        var tbl = new Tbl(t);
+                        if (!Tables.Any(tb => tb.FullName == tbl.FullName))
+                        {
+                            Tables.Add(tbl);
+                        }
+                    }
+                }
+            }
+        }
+
+        String SecureStringToString(SecureString value)
+        {
+            IntPtr valuePtr = IntPtr.Zero;
+            try
+            {
+                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+                return Marshal.PtrToStringUni(valuePtr);
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
             }
         }
 
@@ -129,8 +170,8 @@ namespace DBScriptSaver.ViewModels
             {
                 DataSource = Project.Server,
                 InitialCatalog = Name ?? @"master",
-                UserID = "Kobra_main",
-                Password = "Ggv123",
+                UserID = Project.DBLogin,
+                Password = SecureStringToString(Project.DBPassword),
                 ConnectTimeout = 3
             };
 
