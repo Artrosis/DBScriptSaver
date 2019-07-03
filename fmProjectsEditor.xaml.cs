@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,6 +25,13 @@ namespace DBScriptSaver
     /// </summary>
     public partial class fmProjectsEditor : Window
     {
+        const string Salt = nameof(DBScriptViewModel);
+
+        public static string GetSalt()
+        {
+            return Salt;
+        }
+
         public DBScriptViewModel Vm;
         public fmProjectsEditor(DBScriptViewModel viewModel)
         {
@@ -68,7 +77,7 @@ namespace DBScriptSaver
 
         private void pwdBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            CurProject.DBPassword = (sender as PasswordBox).SecurePassword;
+            CurProject.DBPassword = Cryptography.Encrypt((sender as PasswordBox).Password, fmProjectsEditor.GetSalt());            
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Data;
 
@@ -15,7 +17,7 @@ namespace DBScriptSaver.ViewModels
         [JsonIgnoreAttribute]
         public DBScriptViewModel vm;
         public string DBLogin { get; set; }
-        public SecureString DBPassword { get; set; }
+        public string DBPassword { get; set; }
         public Project(DBScriptViewModel vm) : base()
         {
             this.vm = vm;

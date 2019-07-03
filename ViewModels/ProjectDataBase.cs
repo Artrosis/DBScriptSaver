@@ -135,20 +135,6 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        String SecureStringToString(SecureString value)
-        {
-            IntPtr valuePtr = IntPtr.Zero;
-            try
-            {
-                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
-                return Marshal.PtrToStringUni(valuePtr);
-            }
-            finally
-            {
-                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
-            }
-        }
-
         internal void UpdateScripts()
         {
             UpdateFilterDataFromConfig();
@@ -205,7 +191,7 @@ namespace DBScriptSaver.ViewModels
                 DataSource = Project.Server,
                 InitialCatalog = Name ?? @"master",
                 UserID = Project.DBLogin,
-                Password = SecureStringToString(Project.DBPassword),
+                Password = Cryptography.Decrypt(Project.DBPassword, fmProjectsEditor.GetSalt()),
                 ConnectTimeout = 3
             };
             return builder.ConnectionString;

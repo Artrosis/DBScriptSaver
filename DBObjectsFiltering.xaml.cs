@@ -46,8 +46,7 @@ namespace DBScriptSaver
 
                 if (!HasConnection(dB.GetConnectionString()))
                 {
-                    MessageBox.Show($@"Не удалось подключиться к серверу: {dB.Project.Server}");
-                    return;
+                    throw new Exception($@"Не удалось подключиться к серверу: {dB.Project.Server}");
                 }
 
                 Database dataBase = server.Databases.Cast<Database>().ToList().SingleOrDefault(d => d.Name == dB.Name);

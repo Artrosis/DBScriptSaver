@@ -88,6 +88,10 @@ namespace DBScriptSaver.ViewModels
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == @"DBPassword")
+            {
+                return;
+            }
             SaveProjects();
         }
         public void SaveProjects()

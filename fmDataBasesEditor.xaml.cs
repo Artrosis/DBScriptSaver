@@ -42,8 +42,15 @@ namespace DBScriptSaver
                 return;
             }
 
-            var fmEditor = new DBObjectsFiltering(DB) { Owner = this };
-            fmEditor.ShowDialog();
+            try
+            {
+                var fmEditor = new DBObjectsFiltering(DB) { Owner = this };
+                fmEditor.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Фильтр объектов");
+            }
         }
 
         private void Compare_Click(object sender, RoutedEventArgs e)

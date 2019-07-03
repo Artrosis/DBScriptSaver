@@ -1,6 +1,7 @@
 ﻿using DBScriptSaver.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
 using System;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -36,10 +37,28 @@ namespace DBScriptSaver
 
                 foreach (var db in proj.DataBases)
                 {
+
+                    SqlConnection conn = new SqlConnection(db.GetConnectionString());
+
+                    bool HasConnect = false;
+
+                    try
+                    {
+                        conn.Open();
+                        HasConnect = true;
+                    }
+                    catch (Exception){}
+
                     var DBItem = new MenuItem();
-                    DBItem.Header = db.Name;
+                    
+                    DBItem.Header = db.Name + (!HasConnect? @"(Нет подключения)":"");
                     DBItem.Tag = db;
                     ProjectItem.Items.Add(DBItem);
+
+                    if (!HasConnect)
+                    {
+                        continue;
+                    }
 
                     var UpdateDBItem = new MenuItem();
                     UpdateDBItem.Header = "Обновить";
@@ -91,7 +110,14 @@ namespace DBScriptSaver
                 return;
             }
 
-            new DBObjectsFiltering(DB).ShowDialog();
+            try
+            {
+                new DBObjectsFiltering(DB).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Фильтр объектов");
+            }
         }
 
         private static void UpdateDBItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
