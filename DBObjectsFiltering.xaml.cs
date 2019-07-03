@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -39,19 +40,11 @@ namespace DBScriptSaver
 
                 InitializeComponent();
 
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
-                {
-                    DataSource = dB.Project.Server,
-                    InitialCatalog = dB.Name ?? @"master",
-                    UserID = "Kobra_main",
-                    Password = "Ggv123",
-                    ConnectTimeout = 3
-                };
-                SqlConnection conn = new SqlConnection(builder.ConnectionString);
+                SqlConnection conn = new SqlConnection(dB.GetConnectionString());
 
                 Server server = new Server(new ServerConnection(conn));
 
-                if (!HasConnection(builder.ConnectionString))
+                if (!HasConnection(dB.GetConnectionString()))
                 {
                     MessageBox.Show($@"Не удалось подключиться к серверу: {dB.Project.Server}");
                     return;

@@ -166,16 +166,7 @@ namespace DBScriptSaver.ViewModels
                 }
             }
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
-            {
-                DataSource = Project.Server,
-                InitialCatalog = Name ?? @"master",
-                UserID = Project.DBLogin,
-                Password = SecureStringToString(Project.DBPassword),
-                ConnectTimeout = 3
-            };
-
-            using (SqlConnection conn = new SqlConnection(builder.ConnectionString))
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
                 var cmd = conn.CreateCommand();
@@ -206,6 +197,20 @@ namespace DBScriptSaver.ViewModels
                 }
             }
         }
+
+        public string GetConnectionString()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
+            {
+                DataSource = Project.Server,
+                InitialCatalog = Name ?? @"master",
+                UserID = Project.DBLogin,
+                Password = SecureStringToString(Project.DBPassword),
+                ConnectTimeout = 3
+            };
+            return builder.ConnectionString;
+        }
+
         private static Encoding GetEncoding(string FullFileName)
         {
             var detector = new CharsetDetector();
