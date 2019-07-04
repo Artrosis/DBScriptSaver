@@ -152,6 +152,14 @@ namespace DBScriptSaver.ViewModels
                 }
             }
 
+            foreach (var function in Functions.Where(f => f.IsTrace))
+            {
+                if (!SourcesData.Keys.Contains(function.FullName + ".sql"))
+                {
+                    SourcesData.Add(function.FullName + ".sql", new Tuple<string, DateTime>("", DateTime.Now));
+                }
+            }
+
             using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
