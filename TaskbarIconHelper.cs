@@ -50,7 +50,8 @@ namespace DBScriptSaver
                     catch (Exception){}
 
                     var DBItem = new MenuItem();
-                    
+
+                    DBItem.IsEnabled = false;
                     DBItem.Header = db.Name + (!HasConnect? @"(Нет подключения)":"");
                     DBItem.Tag = db;
                     ProjectItem.Items.Add(DBItem);
@@ -65,14 +66,16 @@ namespace DBScriptSaver
                     UpdateDBItem.Tag = db;
                     UpdateDBItem.PreviewMouseDown += UpdateDBItem_PreviewMouseDown;
                     UpdateDBItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/Refresh.png")), Width = 16, Height = 16 };
-                    DBItem.Items.Add(UpdateDBItem);
+                    ProjectItem.Items.Add(UpdateDBItem);
 
                     var DBSettingsItem = new MenuItem();
                     DBSettingsItem.Header = "Настройки объектов БД";
                     DBSettingsItem.Tag = db;
                     DBSettingsItem.PreviewMouseDown += DBSettingsItem_PreviewMouseDown; ;
                     DBSettingsItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/Settings.png")), Width = 16, Height = 16 };
-                    DBItem.Items.Add(DBSettingsItem);
+                    ProjectItem.Items.Add(DBSettingsItem);
+
+                    ProjectItem.Items.Add(new Separator());
                 }
 
                 var ProjectSettingsItem = new MenuItem();
