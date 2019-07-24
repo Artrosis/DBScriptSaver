@@ -72,8 +72,10 @@ namespace DBScriptSaver.ViewModels
         }
 
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
-        public string SourceFolder => BaseFolder + "source" + System.IO.Path.DirectorySeparatorChar;
-        public string FilterFile => BaseFolder + "ObjectsFilter.cfg";
+        public string SourceFolder => BaseFolder + @"source" + System.IO.Path.DirectorySeparatorChar;
+        public string ChangesFolder => BaseFolder + @"changes" + System.IO.Path.DirectorySeparatorChar;
+        public string ChangesXML => ChangesFolder + @"changes.xml";
+        public string FilterFile => BaseFolder + @"ObjectsFilter.cfg";
 
         internal void UpdateFilterDataFromConfig()
         {

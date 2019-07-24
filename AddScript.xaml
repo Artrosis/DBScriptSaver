@@ -1,0 +1,34 @@
+﻿<Window x:Class="DBScriptSaver.AddScript"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DBScriptSaver"
+        mc:Ignorable="d"
+        Background="Beige"
+        Title="Миграция" Height="450" Width="800">
+    <StackPanel>
+        <Label Content="Название"></Label>
+        <TextBox x:Name="tbFileName" Margin="5" ></TextBox>
+        <Label Content="Скрипт"></Label>
+        <ScrollViewer            
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Background="AliceBlue"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <RichTextBox x:Name="tbScriptBody" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Margin="5"></RichTextBox>
+            </StackPanel>            
+        </ScrollViewer>
+        <Button
+                Width="75"
+                Height="23"
+                Margin="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="Save_Click"
+                Content="Сохранить" />
+    </StackPanel>
+</Window>

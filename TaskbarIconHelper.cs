@@ -56,20 +56,27 @@ namespace DBScriptSaver
                     DBItem.Tag = db;
                     ProjectItem.Items.Add(DBItem);
 
+                    var AddScriptItem = new MenuItem();
+                    AddScriptItem.Header = @"Добавить миграцию";
+                    AddScriptItem.Tag = db;
+                    AddScriptItem.PreviewMouseDown += AddScriptItem_PreviewMouseDown; ;
+                    AddScriptItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/add_script.png")), Width = 16, Height = 16 };
+                    ProjectItem.Items.Add(AddScriptItem);
+
                     if (!HasConnect)
                     {
                         continue;
                     }
 
                     var UpdateDBItem = new MenuItem();
-                    UpdateDBItem.Header = "Обновить";
+                    UpdateDBItem.Header = @"Обновить";
                     UpdateDBItem.Tag = db;
                     UpdateDBItem.PreviewMouseDown += UpdateDBItem_PreviewMouseDown;
                     UpdateDBItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/Refresh.png")), Width = 16, Height = 16 };
                     ProjectItem.Items.Add(UpdateDBItem);
 
                     var DBSettingsItem = new MenuItem();
-                    DBSettingsItem.Header = "Настройки объектов БД";
+                    DBSettingsItem.Header = @"Настройки объектов БД";
                     DBSettingsItem.Tag = db;
                     DBSettingsItem.PreviewMouseDown += DBSettingsItem_PreviewMouseDown; ;
                     DBSettingsItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/Settings.png")), Width = 16, Height = 16 };
@@ -79,7 +86,7 @@ namespace DBScriptSaver
                 }
 
                 var ProjectSettingsItem = new MenuItem();
-                ProjectSettingsItem.Header = "Настройки проекта";
+                ProjectSettingsItem.Header = @"Настройки проекта";
                 ProjectSettingsItem.Tag = proj;
                 ProjectSettingsItem.PreviewMouseDown += ProjectSettingsItem_PreviewMouseDown; ;
                 ProjectSettingsItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/Settings.png")), Width = 16, Height = 16 };
@@ -102,6 +109,18 @@ namespace DBScriptSaver
             menu.Items.Add(CloseItem);
 
             tbi.ContextMenu = menu;
+        }
+
+        private static void AddScriptItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var DB = ((MenuItem)sender).Tag as ProjectDataBase;
+
+            if (DB == null)
+            {
+                return;
+            }
+
+            new AddScript(DB).ShowDialog();
         }
 
         private static void DBSettingsItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)

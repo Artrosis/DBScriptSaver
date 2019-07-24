@@ -15,7 +15,7 @@
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
-            Background="Green"
+            Background="AliceBlue"
             VerticalScrollBarVisibility="Auto">
             <StackPanel Background="AliceBlue">
                 <StackPanel Orientation="Horizontal">

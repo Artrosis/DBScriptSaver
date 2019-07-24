@@ -76,8 +76,15 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddScript.xaml.cs">
+      <DependentUpon>AddScript.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Cryptography.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
+    <Page Include="AddScript.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -157,6 +164,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="img\Refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\add_script.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
