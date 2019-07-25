@@ -7,21 +7,18 @@
         mc:Ignorable="d"
         Background="Beige"
         Title="Миграция" Height="450" Width="800">
-    <StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <Label Content="Название"></Label>
-        <TextBox x:Name="tbFileName" Margin="5" ></TextBox>
-        <Label Content="Скрипт"></Label>
-        <ScrollViewer            
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Stretch"
-            Background="AliceBlue"
-            VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <RichTextBox x:Name="tbScriptBody" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Margin="5"></RichTextBox>
-            </StackPanel>            
-        </ScrollViewer>
+        <TextBox x:Name="tbFileName" Grid.Row="1" Margin="2" ></TextBox>
+        <Label Content="Скрипт" Grid.Row="2"></Label>
+        <RichTextBox x:Name="tbScriptBody" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="2" Grid.Row="3"></RichTextBox>
         <Button
                 Width="75"
                 Height="23"
@@ -29,6 +26,7 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Click="Save_Click"
-                Content="Сохранить" />
-    </StackPanel>
+                Content="Сохранить"
+                Grid.Row="4"/>
+    </Grid>
 </Window>
