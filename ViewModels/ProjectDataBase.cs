@@ -137,7 +137,7 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        internal void UpdateScripts()
+        public List<(string FileName, string FullPath, string ScriptText)> GetUpdateScripts()
         {
             UpdateFilterDataFromConfig();
 
@@ -176,6 +176,7 @@ namespace DBScriptSaver.ViewModels
 
                 using (SqlDataReader r = cmd.ExecuteReader())
                 {
+                    List<(string FileName, string FullPath, string ScriptText)> UpdateScripts = new List<(string FileName, string FullPath, string ScriptText)>();
                     while (r.Read())
                     {
                         string FileName = ((string)r["ObjectName"]) + ".sql";
@@ -187,12 +188,27 @@ namespace DBScriptSaver.ViewModels
 
                         if ((TextFromFile == null) || (TextFromFile != TextFromDB))
                         {
-                            File.WriteAllText(SourceFolder + FileName, TextFromDB, new UTF8Encoding(true));
+                            UpdateScripts.Add((FileName, SourceFolder + FileName, TextFromDB));
                         }
                     }
+
+                    return UpdateScripts;
                 }
             }
         }
+
+        public void UpdateScripts()
+        {
+            UpdateScripts(GetUpdateScripts());
+        }
+
+        public void UpdateScripts(List<(string FileName, string FullPath, string ScriptText)> scripts)
+        {
+            foreach (var script in scripts)
+            {
+                File.WriteAllText(script.FullPath, script.ScriptText, new UTF8Encoding(true));
+            }
+        }        
 
         public string GetConnectionString()
         {

@@ -1,6 +1,7 @@
 ﻿using DBScriptSaver.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -151,15 +152,26 @@ namespace DBScriptSaver
                 return;
             }
 
+            List<(string FileName, string FullPath, string ScriptText)> scripts;
+
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
-                DB.UpdateScripts();
+                scripts = DB.GetUpdateScripts();
             }
             finally
             {
                 Mouse.OverrideCursor = null;
-            }            
+            }
+
+            try
+            {
+                new CompareScripts(DB, scripts).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Изменения по скриптам");
+            }
         }
 
         private static void ProjectSettingsItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
