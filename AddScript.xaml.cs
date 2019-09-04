@@ -54,7 +54,7 @@ namespace DBScriptSaver
 
             var LastVer = xdoc.Element("project").Elements("ver").Last();
 
-            string NewFileName = tbFileName.Text + ".xml";
+            string NewFileName = tbFileName.Text + ".sql";
 
             var NewElement = new XElement("file", NewFileName);
             NewElement.Add(new XAttribute("autor", Environment.MachineName));
