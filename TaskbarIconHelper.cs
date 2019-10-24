@@ -154,23 +154,23 @@ namespace DBScriptSaver
 
             List<(string FileName, string FullPath, string ScriptText)> scripts;
 
-            Mouse.OverrideCursor = Cursors.Wait;
             try
             {
-                scripts = DB.GetUpdateScripts();
-            }
-            finally
-            {
-                Mouse.OverrideCursor = null;
-            }
-
-            try
-            {
+                Mouse.OverrideCursor = Cursors.Wait;
+                try
+                {
+                    scripts = DB.GetUpdateScripts();
+                }
+                finally
+                {
+                    Mouse.OverrideCursor = null;
+                }
                 new CompareScripts(DB, scripts).ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Изменения по скриптам");
+                MessageBox.Show($@"Ошибка обновления скриптов: {ex.Message}", @"Изменения по скриптам");
+                MessageBox.Show($@"Ошибка обновления скриптов: {ex.Message}", @"Изменения по скриптам");
             }
         }
 

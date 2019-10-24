@@ -142,6 +142,20 @@ namespace DBScriptSaver.ViewModels
             UpdateFilterDataFromConfig();
 
             DirectoryInfo d = new DirectoryInfo(SourceFolder);
+
+            d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
+                .ToList().ForEach(f =>
+                {
+                    if (f.Name.Contains(@".UserDefinedFunction"))
+                    {
+                        File.Move(f.FullName, f.DirectoryName + f.Name.Replace(@".UserDefinedFunction", ""));
+                    }
+                    if (f.Name.Contains(@".StoredProcedure"))
+                    {
+                        File.Move(f.FullName, f.DirectoryName + f.Name.Replace(@".StoredProcedure", ""));
+                    }
+                });
+
             Dictionary<string, Tuple<string, DateTime>> SourcesData = d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
                                     .OrderBy(f => f.LastWriteTime)
                                     .ToDictionary(f => f.Name, f => new Tuple<string, DateTime>(File.ReadAllText(f.FullName, GetEncoding(f.FullName)), f.LastWriteTime));

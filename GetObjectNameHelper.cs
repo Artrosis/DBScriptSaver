@@ -12,8 +12,12 @@ namespace DBScriptSaver
         }
         public static string GetName(this string s)
         {
-            s = s.Substring(s.IndexOf(@".") + 1);
-            return s.Substring(0, s.IndexOf(@"."));
+            var ss = s.Substring(s.IndexOf(@".") + 1);
+            if (ss.IndexOf(@".") < 0)
+            {
+                throw new Exception($@"Не корректное имя файла объекта: {s}");
+            }
+            return ss.Substring(0, ss.IndexOf(@"."));
         }
         public static string GetObjectIdString(this List<string> lst)
         {
