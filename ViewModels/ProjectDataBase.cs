@@ -148,11 +148,11 @@ namespace DBScriptSaver.ViewModels
                 {
                     if (f.Name.Contains(@".UserDefinedFunction"))
                     {
-                        File.Move(f.FullName, f.DirectoryName + f.Name.Replace(@".UserDefinedFunction", ""));
+                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".UserDefinedFunction", ""));
                     }
                     if (f.Name.Contains(@".StoredProcedure"))
                     {
-                        File.Move(f.FullName, f.DirectoryName + f.Name.Replace(@".StoredProcedure", ""));
+                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".StoredProcedure", ""));
                     }
                 });
 

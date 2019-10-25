@@ -4,63 +4,69 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DBScriptSaver"
-        mc:Ignorable="d"
-        SizeToContent="Height"
+        mc:Ignorable="d"  
+        WindowStartupLocation="CenterScreen"
         Title="Изменения" Height="450" Width="800">
-    <Grid        
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="0">
-            <Button 
-                Margin="5"
-                Width="Auto"
-                Height="23"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Click="ВыбратьВсе_Click"
-                Content="Выбрать все"/>
-            <Button 
-                Margin="5"
-                Width="Auto"
-                Height="23"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Click="ОтменитьВсе_Click"
-                Content="Отменить все"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1"
+    <Grid
+        Height="Auto"
+        HorizontalAlignment="Stretch">
+        <ScrollViewer
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
-            <DataGrid
-                x:Name="gcDBObjects"
-                Width="auto"
-                Height="auto"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                    Width="Auto"
-                    Binding="{Binding Path=FileName}"
-                    Header="Объект" />
-                    <DataGridCheckBoxColumn
+            VerticalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Background="AliceBlue"
+            VerticalScrollBarVisibility="Auto">
+            
+            <StackPanel
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal">
+                    <Button 
+                        Margin="5"
                         Width="Auto"
-                        Binding="{Binding Path=Save}"
-                        Header="Сохранить" />
-                </DataGrid.Columns>
-            </DataGrid>
+                        Height="23"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Click="ВыбратьВсе_Click"
+                        Content="Выбрать все"/>
+                    <Button 
+                        Margin="5"
+                        Width="Auto"
+                        Height="23"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Click="ОтменитьВсе_Click"
+                        Content="Отменить все"/>
+                </StackPanel>
+                <DataGrid
+                    x:Name="gcDBObjects"
+                    Width="auto"
+                    Height="auto"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding Path=FileName}"
+                            Header="Объект"
+                            IsReadOnly="True"/>
+                        <DataGridCheckBoxColumn
+                            Width="Auto"
+                            Binding="{Binding Path=Save}"
+                            Header="Сохранить" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
+            <Button Width="75"
+                Height="23"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="btnOK_Click"
+                Content="OK"/>
         </StackPanel>
-        <Button Grid.Row="2"
-            Width="75"
-            Height="23"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="btnOK_Click"
-            Content="OK"/>
     </Grid>
 </Window>
