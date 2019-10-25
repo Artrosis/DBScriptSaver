@@ -240,31 +240,51 @@ namespace DBScriptSaver
 
         private void CheckFromSaved_Click(object sender, RoutedEventArgs e)
         {
-            string SourceFolder = db.BaseFolder + @"source";
-
-            DirectoryInfo dir = new DirectoryInfo(SourceFolder);
-
-            List<string> SavedObjects = new List<string>();
-
-            foreach (var proc in dir.GetFiles("*.sql", SearchOption.TopDirectoryOnly))
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
             {
-                SavedObjects.Add(Path.GetFileNameWithoutExtension(proc.Name));
-            }
+                string SourceFolder = db.BaseFolder + @"source";
 
-            foreach (var sp in db.Procedures)
-            {
-                if (SavedObjects.Contains(sp.FullName))
+                DirectoryInfo dir = new DirectoryInfo(SourceFolder);
+
+                List<string> SavedObjects = new List<string>();
+
+                foreach (var proc in dir.GetFiles("*.sql", SearchOption.TopDirectoryOnly))
                 {
-                    sp.IsTrace = true;
+                    SavedObjects.Add(Path.GetFileNameWithoutExtension(proc.Name));
                 }
-            }
 
-            foreach (var fn in db.Functions)
-            {
-                if (SavedObjects.Contains(fn.FullName))
+                foreach (var sp in db.Procedures)
                 {
-                    fn.IsTrace = true;
+                    if (SavedObjects.Contains(sp.FullName))
+                    {
+                        sp.IsTrace = true;
+                    }
                 }
+
+                foreach (var fn in db.Functions)
+                {
+                    if (SavedObjects.Contains(fn.FullName))
+                    {
+                        fn.IsTrace = true;
+                    }
+                }
+
+                List<string> UsesSchemas = SavedObjects.Select(o => o.GetSchema()).Distinct().ToList();
+
+                foreach (var s in db.Schemas)
+                {
+                    if (s.State == ObjectState.Не_указан && !UsesSchemas.Contains(s.Name))
+                    {
+                        s.IsIgnore = true;
+                    }
+                }
+                Filtering();
+                DataPanel.UpdateLayout();
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
             }
         }
 

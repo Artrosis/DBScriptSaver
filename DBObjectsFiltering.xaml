@@ -17,7 +17,7 @@
             VerticalContentAlignment="Stretch"
             Background="AliceBlue"
             VerticalScrollBarVisibility="Auto">
-            <StackPanel Background="AliceBlue">
+            <StackPanel Background="AliceBlue" x:Name="DataPanel">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox
                         x:Name="ShowTraced"
