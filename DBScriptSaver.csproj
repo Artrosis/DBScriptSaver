@@ -83,6 +83,7 @@
       <DependentUpon>CompareScripts.xaml</DependentUpon>
     </Compile>
     <Compile Include="Cryptography.cs" />
+    <Compile Include="FileComparer.cs" />
     <Compile Include="ScriptWrapper.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
     <Page Include="AddScript.xaml">

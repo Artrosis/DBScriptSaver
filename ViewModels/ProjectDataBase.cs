@@ -180,7 +180,9 @@ namespace DBScriptSaver.ViewModels
             {
                 conn.Open();
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = @"SELECT s.[name] + N'.' + o.[name] AS ObjectName, sm.[definition], o.[TYPE]" + Environment.NewLine
+                cmd.CommandText = @"SELECT s.[name] + N'.' + o.[name] AS ObjectName, sm.[definition], o.[TYPE]," + Environment.NewLine
+                                + @"ISNULL(sm.uses_ansi_nulls, 0) AS uses_ansi_nulls," + Environment.NewLine
+                                + @"ISNULL(sm.uses_quoted_identifier, 0) AS uses_quoted_identifier" + Environment.NewLine
                                 + @"FROM   sys.sql_modules   AS sm" + Environment.NewLine
                                 + @"       JOIN sys.objects  AS o" + Environment.NewLine
                                 + @"            ON  o.[object_id] = sm.[object_id]" + Environment.NewLine
@@ -194,7 +196,22 @@ namespace DBScriptSaver.ViewModels
                     while (r.Read())
                     {
                         string FileName = ((string)r["ObjectName"]) + ".sql";
-                        string TextFromDB = ((string)r["definition"]);
+
+                        string TextFromDB = string.Empty;
+
+                        if ((bool)r["uses_ansi_nulls"])
+                        {
+                            TextFromDB += @"SET ANSI_NULLS ON" + Environment.NewLine;
+                            TextFromDB += @"GO" + Environment.NewLine;
+                        }
+
+                        if ((bool)r["uses_quoted_identifier"])
+                        {
+                            TextFromDB += @"SET QUOTED_IDENTIFIER ON" + Environment.NewLine;
+                            TextFromDB += @"GO" + Environment.NewLine;
+                        }
+                        
+                        TextFromDB += ((string)r["definition"]);
 
                         string SourcesKey = SourcesData.Keys.Select(k => new { Value = k, Upper = k.ToUpper() }).SingleOrDefault(k => k.Upper == FileName.ToUpper())?.Value;
                         Tuple<string, DateTime> SavedText = SourcesData[SourcesKey];

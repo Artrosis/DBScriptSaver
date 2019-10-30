@@ -45,7 +45,8 @@
                     Height="auto"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    AutoGenerateColumns="False">
+                    AutoGenerateColumns="False"
+                    MouseDoubleClick="GcDBObjects_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="Auto"

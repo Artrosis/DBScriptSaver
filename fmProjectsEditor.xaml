@@ -9,75 +9,107 @@
     d:DesignWidth="1010"
     Icon="ico/main.ico"
     Title="Проекты"
+    Background="BurlyWood"
     WindowStartupLocation="CenterScreen">
-
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+    
+    <Window.Resources>
+        <ControlTemplate x:Key="validationFailed">
+            <StackPanel Orientation="Horizontal">
+                <Border BorderBrush="Violet" BorderThickness="2">
+                    <AdornedElementPlaceholder />
+                </Border>
+                <TextBlock Foreground="Red" FontSize="24" FontWeight="Bold">!</TextBlock>
+            </StackPanel>
+        </ControlTemplate>
+    </Window.Resources>
+    <TabControl Background="Beige">
+        <TabItem Header="Базы данных">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+                        <Button
+                            Width="75"
+                            Height="23"
+                            Margin="3"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Click="btnAdd_Click"
+                            Content="Добавить" />
+                    </StackPanel>
+                    <DataGrid
+                        x:Name="gcProjects"
+                        Width="auto"
+                        Height="auto"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{Binding EditProjects}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="200"
+                                Binding="{Binding Path=Name}"
+                                Header="Проект" />
+                            <DataGridTextColumn
+                                Width="300"
+                                Binding="{Binding Path=Path}"
+                                Header="Путь" />
+                            <DataGridTextColumn
+                                Width="200"
+                                Binding="{Binding Path=Server}"
+                                Header="Сервер" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding Path=DBLogin}"
+                                Header="Логин" />
+                            <DataGridTemplateColumn Width="100" Header="Пароль">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <PasswordBox PasswordChanged="pwdBox_PasswordChanged" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="100" Header="Базы данных">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Click="EditDataBase_Click" Content="Настроить базы" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Click="Button_Click" Content="Удалить" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
                 <Button
                     Width="75"
                     Height="23"
-                    Margin="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Click="btnAdd_Click"
-                    Content="Добавить" />
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Click="btnOK_Click"
+                    Content="OK" />
+            </Grid>
+        </TabItem>
+        <TabItem Header="Настройки">
+            <StackPanel>
+                <Label Content="Инструмент сравнения" />
+                <TextBox
+                    x:Name="tbComparerPath"
+                    Margin="2"
+                    Validation.ErrorTemplate="{StaticResource validationFailed}">
+                    <TextBox.Text>
+                        <Binding Path="Comparer">
+                            <Binding.ValidationRules>
+                                <DataErrorValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </StackPanel>
-            <DataGrid
-                x:Name="gcProjects"
-                Width="auto"
-                Height="auto"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                AutoGenerateColumns="False"
-                ItemsSource="{Binding EditProjects}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Width="200"
-                        Binding="{Binding Path=Name}"
-                        Header="Проект" />
-                    <DataGridTextColumn
-                        Width="300"
-                        Binding="{Binding Path=Path}"
-                        Header="Путь" />
-                    <DataGridTextColumn
-                        Width="200"
-                        Binding="{Binding Path=Server}"
-                        Header="Сервер" />
-                    <DataGridTextColumn
-                        Width="150"
-                        Binding="{Binding Path=DBLogin}"
-                        Header="Логин" />
-                    <DataGridTemplateColumn Width="100" Header="Пароль">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <PasswordBox PasswordChanged="pwdBox_PasswordChanged"></PasswordBox>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Width="100" Header="Базы данных">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Click="EditDataBase_Click" Content="Настроить базы" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Click="Button_Click" Content="Удалить" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </StackPanel>
-        <Button
-            Width="75"
-            Height="23"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="btnOK_Click"
-            Content="OK"/>
-    </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

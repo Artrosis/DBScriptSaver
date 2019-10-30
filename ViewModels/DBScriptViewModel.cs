@@ -13,9 +13,25 @@ using System.Windows.Data;
 
 namespace DBScriptSaver.ViewModels
 {
-    public class DBScriptViewModel
+    public class DBScriptViewModel: IDataErrorInfo
     {
         public ObservableCollection<Project> Projects { get; }
+
+        string comparer;
+        //Путь к инструменту развёртывания
+        public string Comparer
+        {
+            get
+            {
+                return comparer;
+            }
+            set
+            {
+                comparer = value;
+                FileComparer.SetPath(comparer);
+                SaveAppSettings();
+            }
+        }
 
         public ListCollectionView EditProjects
         {
@@ -25,9 +41,31 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        const string SettingsFileName = @"Settings.cfg";
+        string IDataErrorInfo.Error => throw new NotImplementedException();
+
+        string IDataErrorInfo.this[string columnName]
+        {
+            get
+            {
+                string error = String.Empty;
+                switch (columnName)
+                {
+                    case "Comparer":
+                        if (!File.Exists(Comparer))
+                        {
+                            error = "Не найден файл инструмента сравнения!";
+                        }
+                        break;
+                }
+                return error;
+            }
+        }
+
+        const string ProjectSettingsFileName = @"Settings.cfg";
+        const string AppSettingsFileName = @"AppSettings.cfg";
 
         private string Settings = string.Empty;
+        private string AppSettings = string.Empty;
 
         public DBScriptViewModel()
         {
@@ -37,26 +75,49 @@ namespace DBScriptSaver.ViewModels
             {
                 Directory.CreateDirectory(SettingsDirectory);
             }
-            Settings = Path.Combine(SettingsDirectory, SettingsFileName);
-            if (!File.Exists(Settings))
+
+            AppSettings = Path.Combine(SettingsDirectory, AppSettingsFileName);
+
+            string AppSettingsData = "";
+
+            using (FileStream fs = File.Open(AppSettings, FileMode.OpenOrCreate))
             {
-                File.Create(Settings);
+                byte[] bytes = new byte[fs.Length];
+                fs.Read(bytes, 0, (int)fs.Length);
+                AppSettingsData = Encoding.UTF8.GetString(bytes);
             }
 
-            string ProjectsData = File.ReadAllText(Settings);
+            if (!string.IsNullOrEmpty(AppSettingsData))
+            {
+                Dictionary<string, string> AppSet = JsonConvert.DeserializeObject<Dictionary<string, string>>(AppSettingsData);
+                if (AppSet.ContainsKey("Comparer"))
+                {
+                    Comparer = AppSet["Comparer"];
+                }
+            }
 
-            if (ProjectsData != string.Empty)
+            Settings = Path.Combine(SettingsDirectory, ProjectSettingsFileName);
+
+            using (FileStream fs = File.Open(Settings, FileMode.OpenOrCreate))
             {
-                Projects = new ObservableCollection<Project>(JsonConvert.DeserializeObject<List<Project>>(ProjectsData));
-                Projects.ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
-                Projects.ToList().ForEach(p => p.vm = this);
-                Projects.ToList().SelectMany(i => i.DataBases).ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
+                byte[] bytes = new byte[fs.Length];
+                fs.Read(bytes, 0, (int)fs.Length);
+
+                string ProjectsData = Encoding.UTF8.GetString(bytes);
+
+                if (!string.IsNullOrEmpty(ProjectsData))
+                {
+                    Projects = new ObservableCollection<Project>(JsonConvert.DeserializeObject<List<Project>>(ProjectsData));
+                    Projects.ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
+                    Projects.ToList().ForEach(p => p.vm = this);
+                    Projects.ToList().SelectMany(i => i.DataBases).ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
+                }
+                else
+                {
+                    Projects = new ObservableCollection<Project>(new List<Project>());
+                }
             }
-            else
-            {
-                Projects = new ObservableCollection<Project>(new List<Project>());
-            }
-            
+
             Projects.CollectionChanged += ContentCollectionChanged;
         }
 
@@ -98,6 +159,14 @@ namespace DBScriptSaver.ViewModels
         {
             File.WriteAllText(Settings, JsonConvert.SerializeObject(Projects));
             TaskbarIconHelper.UpdateContextMenu();
+        }
+        public void SaveAppSettings()
+        {
+            Dictionary<string, string> AppSet = new Dictionary<string, string>();
+
+            AppSet.Add("Comparer", Comparer);
+
+            File.WriteAllText(AppSettings, JsonConvert.SerializeObject(AppSet));
         }
 
         public void AddProject()

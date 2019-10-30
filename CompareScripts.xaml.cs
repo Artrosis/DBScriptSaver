@@ -1,6 +1,8 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,6 +51,18 @@ namespace DBScriptSaver
         private void ОтменитьВсе_Click(object sender, RoutedEventArgs e)
         {
             ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().ToList().ForEach(w => w.Save = false);
+        }
+
+        private void GcDBObjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (gcDBObjects.SelectedItem is ScriptWrapper s)
+            {
+                string tempFile = System.IO.Path.GetTempFileName();
+
+                File.WriteAllText(tempFile, s.ScriptText);
+
+                Process.Start(FileComparer.GetPath(), $@"""{s.FullPath}"" ""{tempFile}""");
+            }
         }
     }
 }

@@ -6,50 +6,50 @@
     xmlns:local="clr-namespace:DBScriptSaver"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    Background="Beige"
     Title="{Binding Path=Name}" WindowStartupLocation="CenterScreen">
-
     <Grid
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch">
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
         <StackPanel
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
             <Label Content="Базы данных"></Label>
             <StackPanel Orientation="Horizontal">
                 <Button
-                    Width="75"
-                    Height="23"
-                    Margin="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Click="btnAdd_Click"
-                    Content="Добавить"/>
+                                Width="75"
+                                Height="23"
+                                Margin="3"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Click="btnAdd_Click"
+                                Content="Добавить"/>
                 <Button
-                    Width="75"
-                    Height="23"
-                    Margin="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Click="btnDel_Click"
-                    Content="Удалить"/>
+                                Width="75"
+                                Height="23"
+                                Margin="3"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Click="btnDel_Click"
+                                Content="Удалить"/>
             </StackPanel>
             <DataGrid
-                x:Name="gcDataBases"
-                Width="auto"
-                Height="auto"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                AutoGenerateColumns="False"
-                ItemsSource="{Binding DataBases}">
+                        x:Name="gcDataBases"
+                        Width="auto"
+                        Height="auto"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        AutoGenerateColumns="False"
+                        ItemsSource="{Binding DataBases}">
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                    Width="200"
-                    Binding="{Binding Path=Name}"
-                    Header="Наименование базы данных" />
+                            Width="200"
+                            Binding="{Binding Path=Name}"
+                            Header="Наименование базы данных" />
                     <DataGridTextColumn
-                    Width="300"
-                    Binding="{Binding Path=Path}"
-                    Header="Расположение" />
+                            Width="300"
+                            Binding="{Binding Path=Path}"
+                            Header="Расположение" />
                     <DataGridTemplateColumn Header="Базы данных" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -68,11 +68,11 @@
             </DataGrid>
         </StackPanel>
         <Button
-            Width="75"
-            Height="23"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="btnOK_Click"
-            Content="OK"/>
+                    Width="75"
+                    Height="23"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Click="btnOK_Click"
+                    Content="OK"/>
     </Grid>
 </Window>
