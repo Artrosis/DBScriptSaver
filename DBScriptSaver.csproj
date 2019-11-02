@@ -83,8 +83,13 @@
       <DependentUpon>CompareScripts.xaml</DependentUpon>
     </Compile>
     <Compile Include="Cryptography.cs" />
+    <Compile Include="DependenciesSettings.xaml.cs">
+      <DependentUpon>DependenciesSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileComparer.cs" />
     <Compile Include="ScriptWrapper.cs" />
+    <Compile Include="ViewModels\Dependence.cs" />
+    <Compile Include="ViewModels\DependenceObject.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
     <Page Include="AddScript.xaml">
       <SubType>Designer</SubType>
@@ -118,6 +123,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DBObjectsFiltering.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DependenciesSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -179,6 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="img\save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\chain.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

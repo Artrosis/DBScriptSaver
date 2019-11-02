@@ -64,6 +64,13 @@ namespace DBScriptSaver
                     AddScriptItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/add_script.png")), Width = 16, Height = 16 };
                     ProjectItem.Items.Add(AddScriptItem);
 
+                    var DBDependenciesItem = new MenuItem();
+                    DBDependenciesItem.Header = @"Зависимости развёртывания";
+                    DBDependenciesItem.Tag = db;
+                    DBDependenciesItem.PreviewMouseDown += DBDependenciesItem_PreviewMouseDown;
+                    DBDependenciesItem.Icon = new Image() { Source = new BitmapImage(new Uri("pack://application:,,,/DBScriptSaver;component/img/chain.png")), Width = 16, Height = 16 };
+                    ProjectItem.Items.Add(DBDependenciesItem);
+
                     if (!HasConnect)
                     {
                         continue;
@@ -110,6 +117,18 @@ namespace DBScriptSaver
             menu.Items.Add(CloseItem);
 
             tbi.ContextMenu = menu;
+        }
+
+        private static void DBDependenciesItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var DB = ((MenuItem)sender).Tag as ProjectDataBase;
+
+            if (DB == null)
+            {
+                return;
+            }
+
+            new DependenciesSettings(DB).ShowDialog();
         }
 
         private static void AddScriptItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)

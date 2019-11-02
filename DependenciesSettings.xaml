@@ -1,0 +1,76 @@
+﻿<Window x:Class="DBScriptSaver.DependenciesSettings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DBScriptSaver"
+        mc:Ignorable="d"
+        Background="Beige"
+        Title="Зависимости развёртывания" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Новая зависимость"></Label>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <ComboBox
+                x:Name="cbDepObj"
+                Width="250"
+                IsEditable="True"
+                ItemsSource="{Binding ViewScripts}"
+                SelectedValue=""
+                TextBoxBase.TextChanged="CbDepObj_TextChanged"
+                Margin="5">
+            </ComboBox>
+            <ComboBox
+                x:Name="cbDependency"
+                Width="250"
+                IsEditable="True"
+                ItemsSource="{Binding ViewScripts}"
+                TextBoxBase.TextChanged="CbDepObj_TextChanged"
+                Margin="5">
+            </ComboBox>
+            <Button Margin="5" Click="AddDependence">
+                Добавить
+            </Button>
+        </StackPanel>        
+
+        <DataGrid
+            x:Name="gcDependencies"
+            Grid.Row="3"
+            IsReadOnly="True"
+            Width="auto"
+            Height="auto"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            AutoGenerateColumns="False"
+            ItemsSource="{Binding EditDependencies}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                            Width="200"
+                            Binding="{Binding Path=ObjName}"
+                            Header="Объект" />
+                <DataGridTextColumn
+                            Width="300"
+                            Binding="{Binding Path=ListDependence}"
+                            Header="Зависимости" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+
+        <Button
+                Width="75"
+                Height="23"
+                Margin="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="Save_Click"
+                Content="Сохранить"
+                Grid.Row="4"/>
+    </Grid>
+</Window>

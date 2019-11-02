@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Xml.Linq;
@@ -26,11 +27,11 @@ namespace DBScriptSaver.ViewModels
         public string Name { get; set; }
         public string Path { get; set; }
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public Project Project { get; set; }
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ObservableCollection<Procedure> Procedures = new ObservableCollection<Procedure>();
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ListCollectionView EditProcedures
         {
             get
@@ -38,9 +39,15 @@ namespace DBScriptSaver.ViewModels
                 return new ListCollectionView(Procedures);
             }
         }
-        [JsonIgnoreAttribute]
+
+        internal void SaveDependencies()
+        {
+            File.WriteAllText(DependenciesFile, JsonConvert.SerializeObject(Dependencies, Formatting.Indented));
+        }
+
+        [JsonIgnore]
         public ObservableCollection<Function> Functions = new ObservableCollection<Function>();
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ListCollectionView EditFunctions
         {
             get
@@ -49,9 +56,9 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ObservableCollection<Sch> Schemas = new ObservableCollection<Sch>();
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ListCollectionView EditSchemas
         {
             get
@@ -60,9 +67,9 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ObservableCollection<Tbl> Tables = new ObservableCollection<Tbl>();
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ListCollectionView EditTables
         {
             get
@@ -71,11 +78,92 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
+        public List<DependenceObject> GetDbObjects()
+        {
+            DirectoryInfo d = new DirectoryInfo(SourceFolder);
+
+            d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
+                .ToList().ForEach(f =>
+                {
+                    if (f.Name.Contains(@".UserDefinedFunction"))
+                    {
+                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".UserDefinedFunction", ""));
+                    }
+                    if (f.Name.Contains(@".StoredProcedure"))
+                    {
+                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".StoredProcedure", ""));
+                    }
+                });
+
+            return d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
+                    .Select(f => new DependenceObject() { ObjectType = "source", ObjectName = f.Name })
+                    .ToList();
+        }
+
+        public List<DependenceObject> GetChanges()
+        {
+            DirectoryInfo d = new DirectoryInfo(ChangesFolder);
+
+            return d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
+                    .Select(f => new DependenceObject() { ObjectType = "change", ObjectName = f.Name })
+                    .ToList();
+        }
+
+        public List<DependenceObject> GetScripts()
+        {
+            List<DependenceObject> result = new List<DependenceObject>();
+            result.AddRange(GetDbObjects());
+            result.AddRange(GetChanges());
+            return result
+                    .OrderBy(o => o.ObjectName)
+                    .ToList();
+        }
+
+        [JsonIgnore]
+        public ListCollectionView ViewScripts
+        {
+            get
+            {
+                return new ListCollectionView(GetScripts());
+            }
+        }
+
+        [JsonIgnore]
+        public ObservableCollection<Dependence> Dependencies = new ObservableCollection<Dependence>();
+        [JsonIgnore]
+        public ListCollectionView EditDependencies
+        {
+            get
+            {
+                return new ListCollectionView(Dependencies);
+            }
+        }
+
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + @"source" + System.IO.Path.DirectorySeparatorChar;
         public string ChangesFolder => BaseFolder + @"changes" + System.IO.Path.DirectorySeparatorChar;
         public string ChangesXML => ChangesFolder + @"changes.xml";
         public string FilterFile => BaseFolder + @"ObjectsFilter.cfg";
+        public string DependenciesFile => BaseFolder + @"Dependencies.cfg";
+
+        internal void UpdateDBObjects()
+        {
+            if (File.Exists(DependenciesFile))
+            {
+                try
+                {
+                    Dependencies.Clear();
+                    JsonConvert
+                        .DeserializeObject<List<Dependence>>(File.ReadAllText(DependenciesFile))
+                        .ForEach(d => Dependencies.Add(d));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($@"Не удалось определить зависимости. {ex.Message}");
+                    MessageBox.Show($@"Не удалось определить зависимости. {ex.Message}");
+                }
+            }
+        }
 
         internal void UpdateFilterDataFromConfig()
         {

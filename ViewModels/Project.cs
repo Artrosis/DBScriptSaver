@@ -14,7 +14,7 @@ namespace DBScriptSaver.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class Project
     {
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public DBScriptViewModel vm;
         public string DBLogin { get; set; }
         public string DBPassword { get; set; }
@@ -41,7 +41,7 @@ namespace DBScriptSaver.ViewModels
         public string Server { get; set; }
         public ObservableCollection<ProjectDataBase> DataBases { get; } = new ObservableCollection<ProjectDataBase>();
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public ListCollectionView EditDataBases
         {
             get
