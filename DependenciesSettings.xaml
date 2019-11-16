@@ -38,7 +38,10 @@
             <Button Margin="5" Click="AddDependence">
                 Добавить
             </Button>
-        </StackPanel>        
+            <Button Margin="5" Click="DeleteDependence">
+                Удалить
+            </Button>
+        </StackPanel>
 
         <DataGrid
             x:Name="gcDependencies"

@@ -84,5 +84,32 @@ namespace DBScriptSaver
             CollectionView cv = (CollectionView)CollectionViewSource.GetDefaultView(cb.ItemsSource);
             cv.Filter = s => ((DependenceObject)s).ObjectName.IndexOf(cb.Text, StringComparison.CurrentCultureIgnoreCase) >= 0;                
         }
+
+        private void DeleteDependence(object sender, RoutedEventArgs e)
+        {
+            var depObj = cbDepObj.SelectedItem as DependenceObject;
+            var dependency = cbDependency.SelectedItem as DependenceObject;
+
+            if (depObj == null || dependency == null)
+            {
+                return;
+            }
+
+            var curDepObj = dB.Dependencies
+                                .SingleOrDefault(d => d.ЗависимыйОбъект.ObjectType == depObj.ObjectType
+                                                    && d.ЗависимыйОбъект.ObjectName == depObj.ObjectName);
+
+            if (curDepObj != null)
+            {
+                var curDependency = curDepObj.Зависимости
+                                                .SingleOrDefault(d => d.ObjectType == dependency.ObjectType
+                                                                    && d.ObjectName == dependency.ObjectName);
+
+                if (curDependency != null)
+                {
+                    curDepObj.Зависимости.Remove(curDependency);
+                }
+            }
+        }
     }
 }
