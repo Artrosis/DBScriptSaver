@@ -23,7 +23,6 @@
                 Width="250"
                 IsEditable="True"
                 ItemsSource="{Binding ViewScripts}"
-                SelectedValue=""
                 TextBoxBase.TextChanged="CbDepObj_TextChanged"
                 Margin="5">
             </ComboBox>

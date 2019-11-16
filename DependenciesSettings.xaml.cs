@@ -30,9 +30,6 @@ namespace DBScriptSaver
         {
             DataContext = dB;
             dB.UpdateDBObjects();
-
-            cbDependency.Text = "";
-            cbDepObj.Text = "";
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -78,11 +75,9 @@ namespace DBScriptSaver
         {
             ComboBox cb = (ComboBox)sender;
             cb.IsDropDownOpen = true;
-            // убрать selection, если dropdown только открылся
             var tb = (TextBox)e.OriginalSource;
-            tb.Select(tb.SelectionStart + tb.SelectionLength, 0);
             CollectionView cv = (CollectionView)CollectionViewSource.GetDefaultView(cb.ItemsSource);
-            cv.Filter = s => ((DependenceObject)s).ObjectName.IndexOf(cb.Text, StringComparison.CurrentCultureIgnoreCase) >= 0;                
+            cv.Filter = s => ((DependenceObject)s).ObjectName.IndexOf(cb.Text.Substring(0, tb.SelectionStart), StringComparison.CurrentCultureIgnoreCase) >= 0;                
         }
 
         private void DeleteDependence(object sender, RoutedEventArgs e)
