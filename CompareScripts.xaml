@@ -55,8 +55,18 @@
                             IsReadOnly="True"/>
                         <DataGridCheckBoxColumn
                             Width="Auto"
-                            Binding="{Binding Path=Save}"
-                            Header="Сохранить" />
+                            Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
+                            Header="Сохранить">
+                            <DataGridCheckBoxColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="IsEditing" Value="True" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridCheckBoxColumn.CellStyle>
+                        </DataGridCheckBoxColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
