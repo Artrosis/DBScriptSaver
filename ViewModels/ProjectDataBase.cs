@@ -268,6 +268,17 @@ namespace DBScriptSaver.ViewModels
             {
                 conn.Open();
                 var cmd = conn.CreateCommand();
+
+                var (ОтслеживаемыеСхемы, ОтслеживаемыеОбъекты) = GetFilters();
+
+                List<string> @objects = SourcesData.Keys.ToList();
+
+                if (ОтслеживаемыеОбъекты != null && ОтслеживаемыеОбъекты.Count > 0)
+                {
+                    @objects.AddRange(ОтслеживаемыеОбъекты);
+                    @objects = @objects.Distinct().ToList();
+                }
+
                 cmd.CommandText = @"SELECT s.[name] + N'.' + o.[name] AS ObjectName, sm.[definition], o.[TYPE]," + Environment.NewLine
                                 + @"ISNULL(sm.uses_ansi_nulls, 0) AS uses_ansi_nulls," + Environment.NewLine
                                 + @"ISNULL(sm.uses_quoted_identifier, 0) AS uses_quoted_identifier" + Environment.NewLine
@@ -276,7 +287,13 @@ namespace DBScriptSaver.ViewModels
                                 + @"            ON  o.[object_id] = sm.[object_id]" + Environment.NewLine
                                 + @"       JOIN sys.schemas  AS s" + Environment.NewLine
                                 + @"            ON  o.[schema_id] = s.[schema_id]" + Environment.NewLine
-                                + $"WHERE  sm.object_id IN ({SourcesData.Keys.ToList().GetObjectIdString()})";
+                                + $"WHERE  sm.object_id IN ({@objects.GetObjectIdString()})";
+
+                if (ОтслеживаемыеСхемы != null && ОтслеживаемыеСхемы.Count > 0)
+                {
+                    cmd.CommandText += Environment.NewLine;
+                    cmd.CommandText += $" OR s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
+                }
 
                 using (SqlDataReader r = cmd.ExecuteReader())
                 {
@@ -314,6 +331,44 @@ namespace DBScriptSaver.ViewModels
                     return UpdateScripts;
                 }
             }
+        }
+
+        private (List<string> ОтслеживаемыеСхемы, List<string> ОтслеживаемыеОбъекты) GetFilters()
+        {
+            if (!File.Exists(FilterFile))
+            {
+                return (null, null);
+            }
+
+            XDocument xFilter = XDocument.Load(FilterFile);
+
+            List<string> schemas = xFilter
+                                    .Element("DBObjects")
+                                    .Element("Schemas")
+                                    .Elements("Schema")
+                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Select(e => e.Value)
+                                    .ToList();
+
+            List<string> @objects = xFilter
+                                    .Element("DBObjects")
+                                    .Element("Procedures")
+                                    .Elements("Procedure")
+                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Select(e => e.Value)
+                                    .ToList();
+
+            List<string> functions = xFilter
+                                    .Element("DBObjects")
+                                    .Element("Functions")
+                                    .Elements("Function")
+                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Select(e => e.Value)
+                                    .ToList();
+
+            @objects.AddRange(functions);
+
+            return (schemas, @objects);
         }
 
         public void UpdateScripts()

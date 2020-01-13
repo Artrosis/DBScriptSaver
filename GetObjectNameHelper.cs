@@ -32,5 +32,18 @@ namespace DBScriptSaver
             }
             return result;
         }
+        public static string GetObjectsList(this List<string> lst)
+        {
+            string result = "";
+            foreach (string ObjectName in lst)
+            {
+                if (result != "")
+                {
+                    result += ", ";
+                }
+                result += $"N'{ObjectName.GetSchema()}')";
+            }
+            return result;
+        }
     }
 }
