@@ -22,6 +22,7 @@ namespace DBScriptSaver.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class ProjectDataBase
     {
+        private XDocument xFilter = null;
         public ProjectDataBase(Project Project)
         {
             this.Project = Project;
@@ -29,8 +30,20 @@ namespace DBScriptSaver.ViewModels
         public string Name { get; set; }
         public string Path { get; set; }
 
+        private Project _project;
+
         [JsonIgnore]
-        public Project Project { get; set; }
+        public Project Project {
+            get => _project;
+            set
+            {
+                _project = value;
+                if (File.Exists(FilterFile))
+                {
+                    xFilter = XDocument.Load(FilterFile);
+                }
+            }
+        }
         [JsonIgnore]
         public ObservableCollection<Procedure> Procedures = new ObservableCollection<Procedure>();
         [JsonIgnore]
@@ -177,9 +190,10 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
+        public string BaseFolder => _project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + @"source" + System.IO.Path.DirectorySeparatorChar;
         public string ChangesFolder => BaseFolder + @"changes" + System.IO.Path.DirectorySeparatorChar;
+        public string TableFolder => BaseFolder + @"tables" + System.IO.Path.DirectorySeparatorChar;
         public string ChangesXML => ChangesFolder + @"changes.xml";
         public string FilterFile => BaseFolder + @"ObjectsFilter.cfg";
         public string DependenciesFile => BaseFolder + @"Dependencies.cfg";
@@ -333,9 +347,11 @@ namespace DBScriptSaver.ViewModels
                     cmd.CommandText += $" OR s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
                 }
 
+                List<(string FileName, string FullPath, string ScriptText)> UpdateScripts 
+                        = new List<(string FileName, string FullPath, string ScriptText)>();
+
                 using (SqlDataReader r = cmd.ExecuteReader())
                 {
-                    List<(string FileName, string FullPath, string ScriptText)> UpdateScripts = new List<(string FileName, string FullPath, string ScriptText)>();
                     while (r.Read())
                     {
                         string FileName = ((string)r["ObjectName"]) + ".sql";
@@ -356,18 +372,44 @@ namespace DBScriptSaver.ViewModels
                         
                         TextFromDB += ((string)r["definition"]);
 
-                        string SourcesKey = SourcesData.Keys.Select(k => new { Value = k, Upper = k.ToUpper() }).SingleOrDefault(k => k.Upper == FileName.ToUpper())?.Value;
-                        Tuple<string, DateTime> SavedText = SourcesData[SourcesKey];
-                        string TextFromFile = SavedText?.Item1;
+                        string SourcesKey = SourcesData
+                                            .Keys
+                                            .Select(k => new { Value = k, Upper = k.ToUpper() })
+                                            .SingleOrDefault(k => k.Upper == FileName.ToUpper())
+                                            ?.Value;
+                        string TextFromFile = (SourcesKey != null) ? SourcesData[SourcesKey].Item1 : null;
 
                         if ((TextFromFile == null) || (TextFromFile != TextFromDB))
                         {
                             UpdateScripts.Add((FileName, SourceFolder + FileName, TextFromDB));
                         }
                     }
-
-                    return UpdateScripts;
                 }
+
+                Server server = new Server(new ServerConnection(conn));
+                var dataBase = server.Databases.Cast<object>().Cast<Database>().Single(db => db.Name == Name);
+
+                if (ОтслеживаемыеСхемы != null)
+                {
+                    var tbls = dataBase.Tables.Cast<object>().Cast<Table>().Where(t => ОтслеживаемыеСхемы.Contains(t.Schema)).ToList();
+
+                    foreach (var tbl in tbls)
+                    {
+                        string fileName = $@"{tbl.Schema}.{tbl.Name}.sql";
+                        string script = "";
+                        tbl.Script().Cast<string>().ToList().ForEach(l =>
+                        {
+                            if (l != "")
+                            {
+                                script += "GO" + Environment.NewLine;
+                            }
+                            script += l + Environment.NewLine;
+                        });
+                        UpdateScripts.Add((fileName, TableFolder + fileName, script));
+                    }
+                }
+
+                return UpdateScripts;
             }
         }
 
@@ -378,13 +420,16 @@ namespace DBScriptSaver.ViewModels
                 return (null, null);
             }
 
-            XDocument xFilter = XDocument.Load(FilterFile);
+            if (xFilter == null)
+            {
+                xFilter = XDocument.Load(FilterFile);
+            }
 
             List<string> schemas = xFilter
                                     .Element("DBObjects")
                                     .Element("Schemas")
                                     .Elements("Schema")
-                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
 
@@ -392,7 +437,7 @@ namespace DBScriptSaver.ViewModels
                                     .Element("DBObjects")
                                     .Element("Procedures")
                                     .Elements("Procedure")
-                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
 
@@ -400,7 +445,7 @@ namespace DBScriptSaver.ViewModels
                                     .Element("DBObjects")
                                     .Element("Functions")
                                     .Elements("Function")
-                                    .Where(e => e.Attribute("State").ToString() == ObjectState.Отслеживаемый.ToString())
+                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
 
@@ -418,9 +463,14 @@ namespace DBScriptSaver.ViewModels
         {
             foreach (var script in scripts)
             {
+                string dir = System.IO.Path.GetDirectoryName(script.FullPath);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
                 File.WriteAllText(script.FullPath, script.ScriptText, new UTF8Encoding(true));
             }
-        }        
+        }
 
         public string GetConnectionString()
         {

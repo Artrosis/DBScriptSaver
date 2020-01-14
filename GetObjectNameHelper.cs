@@ -41,7 +41,7 @@ namespace DBScriptSaver
                 {
                     result += ", ";
                 }
-                result += $"N'{ObjectName.GetSchema()}')";
+                result += $"N'{ObjectName}'";
             }
             return result;
         }
