@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
+using Newtonsoft.Json;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
@@ -98,6 +100,42 @@ namespace DBScriptSaver.ViewModels
             return d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
                     .Select(f => new DependenceObject() { ObjectType = "source", ObjectName = f.Name })
                     .ToList();
+        }
+
+        internal void RevertObject(string objectFileName)
+        {
+            if (!File.Exists(SourceFolder + objectFileName))
+            {
+                throw new Exception("Не найден скрипт");
+            }
+
+            if (MessageBox.Show("Отменить изменения в базе данных?", "Отмена изменений", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            string Script = File.ReadAllText(SourceFolder + objectFileName);
+
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var DelCmd = conn.CreateCommand();
+
+                if (Script.ToUpper().Contains("CREATE PROCEDURE".ToUpper()))
+                {
+                    DelCmd.CommandText = $@"DROP PROCEDURE [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
+                }
+
+                if (Script.ToUpper().Contains("CREATE FUNCTION".ToUpper()))
+                {
+                    DelCmd.CommandText = $@"DROP FUNCTION [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
+                }
+
+                DelCmd.ExecuteNonQuery();
+
+                Server server = new Server(new ServerConnection(conn));
+                server.ConnectionContext.ExecuteNonQuery(Script);
+            }
         }
 
         public List<DependenceObject> GetChanges()

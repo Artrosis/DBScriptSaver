@@ -67,6 +67,13 @@
                                 </Style>
                             </DataGridCheckBoxColumn.CellStyle>
                         </DataGridCheckBoxColumn>
+                        <DataGridTemplateColumn Header="Отменить изменения в базе" Width="170">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Отменить" Click="Revert_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

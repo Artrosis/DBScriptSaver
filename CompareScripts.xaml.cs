@@ -1,19 +1,11 @@
 ﻿using DBScriptSaver.ViewModels;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace DBScriptSaver
 {
@@ -55,9 +47,14 @@ namespace DBScriptSaver
 
         private void GcDBObjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (!File.Exists(FileComparer.GetPath()))
+            {
+                //не указана сравнивалка
+                return;
+            }
             if (gcDBObjects.SelectedItem is ScriptWrapper s)
             {
-                string tempFile = System.IO.Path.GetTempFileName();
+                string tempFile = Path.GetTempFileName();
 
                 File.WriteAllText(tempFile, s.ScriptText);
 
@@ -65,6 +62,15 @@ namespace DBScriptSaver
 
                 Process.Start(FileComparer.GetPath(), $@"""{s.FullPath}"" ""{tempFile}""");
             }
+        }
+
+        private ScriptWrapper SelectedObject => gcDBObjects.SelectedItem as ScriptWrapper;
+
+        private void Revert_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptWrapper obj = SelectedObject;
+            DB.RevertObject(obj.FileName); 
+            ((ListCollectionView)gcDBObjects.ItemsSource).Remove(SelectedObject);
         }
     }
 }
