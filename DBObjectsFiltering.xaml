@@ -73,11 +73,31 @@
                                 <DataGridCheckBoxColumn
                                     Width="150"
                                     Binding="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"
-                                    Header="Отслеживать" />
+                                    Header="Отслеживать">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="IsEditing" Value="True" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
                                 <DataGridCheckBoxColumn
                                     Width="150"
                                     Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
-                                    Header="Игнорировать" />
+                                    Header="Игнорировать">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="IsEditing" Value="True" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -100,11 +120,31 @@
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsTrace}"
-                                Header="Отслеживать" />
+                                Header="Отслеживать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsIgnore}"
-                                Header="Игнорировать" />
+                                Header="Игнорировать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Expander>
@@ -126,11 +166,31 @@
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsTrace}"
-                                Header="Отслеживать" />
+                                Header="Отслеживать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsIgnore}"
-                                Header="Игнорировать" />
+                                Header="Игнорировать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Expander>
@@ -152,11 +212,31 @@
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsTrace}"
-                                Header="Отслеживать" />
+                                Header="Отслеживать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
                                 Binding="{Binding Path=IsIgnore}"
-                                Header="Игнорировать" />
+                                Header="Игнорировать">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="IsEditing" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Expander>
