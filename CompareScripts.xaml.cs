@@ -1,4 +1,5 @@
 ﻿using DBScriptSaver.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,10 +16,35 @@ namespace DBScriptSaver
     public partial class CompareScripts : Window
     {
         private ProjectDataBase DB;
+        System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
 
         public CompareScripts()
         {
             InitializeComponent();
+            timer.Tick += ApplyTextFilter;
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 400);
+        }
+        private void ApplyTextFilter(object sender, EventArgs e)
+        {
+            timer.Stop();
+            Filtering();
+        }
+        private void Filtering()
+        {
+            (gcDBObjects.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
+        }
+        private bool Filter(object obj)
+        {
+            var o = obj as ScriptWrapper;
+
+            if (tbFilter.Text.Length > 0)
+            {
+                if (!o.FileName.ToUpper().Contains(tbFilter.Text.ToUpper()))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public CompareScripts(ProjectDataBase db, List<(string FileName, string FullPath, string ScriptText)> scripts) : this()
@@ -71,6 +97,12 @@ namespace DBScriptSaver
             ScriptWrapper obj = SelectedObject;
             DB.RevertObject(obj.FileName); 
             ((ListCollectionView)gcDBObjects.ItemsSource).Remove(SelectedObject);
+        }
+
+        private void tbFilter_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            timer.Stop();
+            timer.Start();
         }
     }
 }
