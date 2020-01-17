@@ -213,25 +213,56 @@ namespace DBScriptSaver
             XElement schNames = new XElement("Schemas", XSchemas);
             DBObjects.Add(schNames);
 
-            var XProcedures = db.Procedures.Where(s => s.State != ObjectState.Не_указан).Select(s =>
-            {
-                var sp = new XElement("Procedure", s);
-                sp.Add(new XAttribute(XName.Get("State"), s.State.ToString()));
-                return sp;
-            });
+            var XProcedures = db.Procedures
+                                .Where(p => p.State != ObjectState.Не_указан)
+                                .Where(p =>
+                                {
+                                    var schema = db.Schemas.SingleOrDefault(chs => chs.Name == p.Schema);
+                                    return schema != null && schema.State != p.State;
+                                })
+                                .Select(p =>
+                                {
+                                    var sp = new XElement("Procedure", p);
+                                    sp.Add(new XAttribute(XName.Get("State"), p.State.ToString()));
+                                    return sp;
+                                });
 
             XElement spNames = new XElement("Procedures", XProcedures);
             DBObjects.Add(spNames);
 
-            var XFunctions = db.Functions.Where(s => s.State != ObjectState.Не_указан).Select(s =>
-            {
-                var fn = new XElement("Function", s);
-                fn.Add(new XAttribute(XName.Get("State"), s.State.ToString()));
-                return fn;
-            });
+            var XFunctions = db.Functions
+                                .Where(f => f.State != ObjectState.Не_указан)
+                                .Where(f =>
+                                {
+                                    var schema = db.Schemas.SingleOrDefault(chs => chs.Name == f.Schema);
+                                    return schema != null && schema.State != f.State;
+                                })
+                                .Select(f =>
+                                {
+                                    var fn = new XElement("Function", f);
+                                    fn.Add(new XAttribute(XName.Get("State"), f.State.ToString()));
+                                    return fn;
+                                });
 
             XElement fnNames = new XElement("Functions", XFunctions);
             DBObjects.Add(fnNames);
+
+            var XTables = db.Tables
+                                .Where(t => t.State != ObjectState.Не_указан)
+                                .Where(t =>
+                                {
+                                    var schema = db.Schemas.SingleOrDefault(chs => chs.Name == t.Schema);
+                                    return schema != null && schema.State != t.State;
+                                })
+                                .Select(t =>
+                                {
+                                    var fn = new XElement("Table", t);
+                                    fn.Add(new XAttribute(XName.Get("State"), t.State.ToString()));
+                                    return fn;
+                                });
+
+            XElement tblNames = new XElement("Tables", XTables);
+            DBObjects.Add(tblNames);
 
             File.AppendAllText(db.FilterFile, DBObjects.ToString());
 

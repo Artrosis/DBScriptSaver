@@ -119,7 +119,7 @@
                                 IsReadOnly="True" />
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsTrace}"
+                                Binding="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Отслеживать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
@@ -133,7 +133,7 @@
                             </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsIgnore}"
+                                Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Игнорировать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
@@ -165,7 +165,7 @@
                                 IsReadOnly="True" />
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsTrace}"
+                                Binding="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Отслеживать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
@@ -179,7 +179,7 @@
                             </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsIgnore}"
+                                Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Игнорировать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
@@ -211,7 +211,7 @@
                                 IsReadOnly="True" />
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsTrace}"
+                                Binding="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Отслеживать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
@@ -225,7 +225,7 @@
                             </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
                                 Width="150"
-                                Binding="{Binding Path=IsIgnore}"
+                                Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Игнорировать">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">

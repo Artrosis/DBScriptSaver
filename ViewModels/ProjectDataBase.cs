@@ -327,7 +327,7 @@ namespace DBScriptSaver.ViewModels
 
                 if (ОтслеживаемыеОбъекты != null && ОтслеживаемыеОбъекты.Count > 0)
                 {
-                    @objects.AddRange(ОтслеживаемыеОбъекты);
+                    @objects.AddRange(ОтслеживаемыеОбъекты.Select(o => o + ".sql").ToList());
                     @objects = @objects.Distinct().ToList();
                 }
 
