@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -82,7 +83,7 @@ namespace DBScriptSaver
             {
                 string tempFile = Path.GetTempFileName();
 
-                File.WriteAllText(tempFile, s.ScriptText);
+                File.WriteAllText(tempFile, s.ScriptText, new UTF8Encoding(true));
 
                 s.EditedFilePath = tempFile;
 
@@ -101,8 +102,7 @@ namespace DBScriptSaver
 
         private void Revert_Click(object sender, RoutedEventArgs e)
         {
-            ScriptWrapper obj = SelectedObject;
-            DB.RevertObject(obj.FileName); 
+            DB.RevertObject(SelectedObject);
             ((ListCollectionView)gcDBObjects.ItemsSource).Remove(SelectedObject);
         }
 

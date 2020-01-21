@@ -30,7 +30,7 @@ namespace DBScriptSaver
         public string FileName => tuple.FileName;
         public string FullPath => tuple.FullPath;
         public string ScriptText => tuple.ScriptText;
-        public bool Save { get; set; } = true;
+        public bool Save { get; set; } = false;
 
         public string EditedFilePath { get; internal set; }
     }

@@ -22,7 +22,6 @@ namespace DBScriptSaver.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class ProjectDataBase
     {
-        private XDocument xFilter = null;
         public ProjectDataBase(Project Project)
         {
             this.Project = Project;
@@ -30,20 +29,8 @@ namespace DBScriptSaver.ViewModels
         public string Name { get; set; }
         public string Path { get; set; }
 
-        private Project _project;
-
         [JsonIgnore]
-        public Project Project {
-            get => _project;
-            set
-            {
-                _project = value;
-                if (File.Exists(FilterFile))
-                {
-                    xFilter = XDocument.Load(FilterFile);
-                }
-            }
-        }
+        public Project Project { get; set; }
         [JsonIgnore]
         public ObservableCollection<Procedure> Procedures = new ObservableCollection<Procedure>();
         [JsonIgnore]
@@ -115,19 +102,18 @@ namespace DBScriptSaver.ViewModels
                     .ToList();
         }
 
-        internal void RevertObject(string objectFileName)
+        internal void RevertObject(ScriptWrapper obj)
         {
-            if (!File.Exists(SourceFolder + objectFileName))
-            {
-                throw new Exception("Не найден скрипт");
-            }
+            string objectFileName = obj.FileName;
+            bool delete = !File.Exists(SourceFolder + objectFileName);
 
             if (MessageBox.Show("Отменить изменения в базе данных?", "Отмена изменений", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
             {
                 return;
             }
 
-            string Script = File.ReadAllText(SourceFolder + objectFileName);
+            string Script = delete ? obj.ScriptText 
+                                    : File.ReadAllText(SourceFolder + objectFileName);
 
             using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
@@ -146,8 +132,11 @@ namespace DBScriptSaver.ViewModels
 
                 DelCmd.ExecuteNonQuery();
 
-                Server server = new Server(new ServerConnection(conn));
-                server.ConnectionContext.ExecuteNonQuery(Script);
+                if (!delete)
+                {
+                    Server server = new Server(new ServerConnection(conn));
+                    server.ConnectionContext.ExecuteNonQuery(Script);
+                }
             }
         }
 
@@ -190,7 +179,7 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public string BaseFolder => _project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
+        public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
         public string SourceFolder => BaseFolder + @"source" + System.IO.Path.DirectorySeparatorChar;
         public string ChangesFolder => BaseFolder + @"changes" + System.IO.Path.DirectorySeparatorChar;
         public string TableFolder => BaseFolder + @"tables" + System.IO.Path.DirectorySeparatorChar;
@@ -405,6 +394,13 @@ namespace DBScriptSaver.ViewModels
                             }
                             script += l + Environment.NewLine;
                         });
+
+                        string tableFileName = TableFolder + fileName;
+                        if (File.Exists(tableFileName) && script == File.ReadAllText(tableFileName))
+                        {
+                            continue;
+                        }
+
                         UpdateScripts.Add((fileName, TableFolder + fileName, script));
                     }
                 }
@@ -420,10 +416,7 @@ namespace DBScriptSaver.ViewModels
                 return (null, null);
             }
 
-            if (xFilter == null)
-            {
-                xFilter = XDocument.Load(FilterFile);
-            }
+            XDocument xFilter = XDocument.Load(FilterFile);
 
             List<string> schemas = xFilter
                                     .Element("DBObjects")
