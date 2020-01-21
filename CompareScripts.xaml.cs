@@ -86,7 +86,14 @@ namespace DBScriptSaver
 
                 s.EditedFilePath = tempFile;
 
-                Process.Start(FileComparer.GetPath(), $@"""{s.FullPath}"" ""{tempFile}""");
+                if (!File.Exists(s.FullPath))
+                {
+                    Process.Start(FileComparer.GetPath(), $@"""{tempFile}"" ""{tempFile}""");
+                }
+                else
+                {
+                    Process.Start(FileComparer.GetPath(), $@"""{s.FullPath}"" ""{tempFile}""");
+                }
             }
         }
 
