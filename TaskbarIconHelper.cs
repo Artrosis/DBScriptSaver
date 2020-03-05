@@ -38,13 +38,11 @@ namespace DBScriptSaver
 
                 foreach (var db in proj.DataBases)
                 {
-
-                    SqlConnection conn = new SqlConnection(db.GetConnectionString());
-
                     bool HasConnect = false;
 
                     try
                     {
+                        SqlConnection conn = new SqlConnection(db.GetConnectionString());
                         conn.Open();
                         HasConnect = true;
                     }
