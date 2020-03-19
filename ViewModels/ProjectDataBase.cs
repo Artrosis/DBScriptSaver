@@ -307,7 +307,7 @@ namespace DBScriptSaver.ViewModels
                 conn.Open();
                 var cmd = conn.CreateCommand();
 
-                var (ОтслеживаемыеСхемы, ОтслеживаемыеОбъекты) = GetFilters();
+                var (ОтслеживаемыеСхемы, ИгнорируемыеСхемы, ОтслеживаемыеОбъекты, ИгнорируемыеОбъекты) = GetFilters();
 
                 List<string> @objects = SourcesData.Keys.ToList();
 
@@ -325,13 +325,23 @@ namespace DBScriptSaver.ViewModels
                                 + @"            ON  o.[object_id] = sm.[object_id]" + Environment.NewLine
                                 + @"       JOIN sys.schemas  AS s" + Environment.NewLine
                                 + @"            ON  o.[schema_id] = s.[schema_id]" + Environment.NewLine
-                                + $"WHERE  sm.object_id IN ({@objects.GetObjectIdString()})";
+                                + $"WHERE" + Environment.NewLine;
+
+                var condition = $"sm.object_id IN ({@objects.GetObjectIdString()})";
 
                 if (ОтслеживаемыеСхемы != null && ОтслеживаемыеСхемы.Count > 0)
                 {
-                    cmd.CommandText += Environment.NewLine;
-                    cmd.CommandText += $" OR s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
+                    condition += Environment.NewLine;
+                    condition += $" OR s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
                 }
+
+                if (ИгнорируемыеОбъекты != null && ИгнорируемыеОбъекты.Count > 0)
+                {
+                    condition = $@"({condition})" +  Environment.NewLine;
+                    condition += $" AND sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
+                }
+
+                cmd.CommandText += condition;
 
                 List<(string FileName, string FullPath, string ScriptText)> UpdateScripts 
                         = new List<(string FileName, string FullPath, string ScriptText)>();
@@ -406,11 +416,11 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        private (List<string> ОтслеживаемыеСхемы, List<string> ОтслеживаемыеОбъекты) GetFilters()
+        private (List<string> ОтслеживаемыеСхемы, List<string> ИгнорируемыеСхемы, List<string> ОтслеживаемыеОбъекты, List<string> ИгнорируемыеОбъекты) GetFilters()
         {
             if (!File.Exists(FilterFile))
             {
-                return (null, null);
+                return (null, null, null, null);
             }
 
             XDocument xFilter = XDocument.Load(FilterFile);
@@ -422,6 +432,14 @@ namespace DBScriptSaver.ViewModels
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
+
+            List<string> ignoreSchemas = xFilter
+                                        .Element("DBObjects")
+                                        .Element("Schemas")
+                                        .Elements("Schema")
+                                        .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
+                                        .Select(e => e.Value)
+                                        .ToList();
 
             List<string> @objects = xFilter
                                     .Element("DBObjects")
@@ -441,7 +459,27 @@ namespace DBScriptSaver.ViewModels
 
             @objects.AddRange(functions);
 
-            return (schemas, @objects);
+            List<string> ignoreObjects = xFilter
+                                        .Element("DBObjects")
+                                        .Element("Procedures")
+                                        .Elements("Procedure")
+                                        .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
+                                        .Select(e => e.Value)
+                                        .ToList();
+
+            
+
+            List<string> ignoreFunctions = xFilter
+                                            .Element("DBObjects")
+                                            .Element("Functions")
+                                            .Elements("Function")
+                                            .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
+                                            .Select(e => e.Value)
+                                            .ToList();
+
+            ignoreObjects.AddRange(ignoreFunctions);
+
+            return (schemas, ignoreSchemas, @objects, ignoreObjects);
         }
 
         public void UpdateScripts()
