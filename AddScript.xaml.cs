@@ -48,13 +48,21 @@ namespace DBScriptSaver
                 project.Add(VersionElem);
 
                 EmptyChanges.Save(dB.ChangesXML);
+            }            
+
+            string NewFileName = tbFileName.Text + ".sql";
+            foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars())
+            {
+                NewFileName = NewFileName.Replace(invalidChar, '_');
             }
+
+            string ScriptBody = new TextRange(tbScriptBody.Document.ContentStart, tbScriptBody.Document.ContentEnd).Text;
+
+            File.WriteAllText(dB.ChangesFolder + NewFileName, ScriptBody, new UTF8Encoding(true));
 
             XDocument xdoc = XDocument.Load(dB.ChangesXML);
 
             var LastVer = xdoc.Element("project").Elements("ver").Last();
-
-            string NewFileName = tbFileName.Text + ".sql";
 
             var NewElement = new XElement("file", NewFileName);
             NewElement.Add(new XAttribute("autor", Environment.MachineName));
@@ -63,10 +71,6 @@ namespace DBScriptSaver
             LastVer.Add(NewElement);
 
             xdoc.Save(dB.ChangesXML);
-
-            string ScriptBody = new TextRange(tbScriptBody.Document.ContentStart, tbScriptBody.Document.ContentEnd).Text;
-
-            File.WriteAllText(dB.ChangesFolder + NewFileName, ScriptBody, new UTF8Encoding(true));
 
             DialogResult = true;
         }
