@@ -383,7 +383,7 @@ namespace DBScriptSaver.ViewModels
                 }
 
                 Server server = new Server(new ServerConnection(conn));
-                var dataBase = server.Databases.Cast<object>().Cast<Database>().Single(db => db.Name == Name);
+                var dataBase = server.Databases.Cast<Database>().Single(db => db.Name.ToUpper() == Name.ToUpper());
 
                 if (ОтслеживаемыеСхемы != null)
                 {
