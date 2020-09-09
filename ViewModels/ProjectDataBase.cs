@@ -1,11 +1,11 @@
-﻿using Microsoft.SqlServer.Management.Common;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
