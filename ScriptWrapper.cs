@@ -1,4 +1,5 @@
-﻿using PropertyChanged;
+﻿using DBScriptSaver.ViewModels;
+using PropertyChanged;
 using System.IO;
 
 namespace DBScriptSaver
@@ -7,12 +8,17 @@ namespace DBScriptSaver
     [AddINotifyPropertyChangedInterface]
     internal class ScriptWrapper
     {
-        private (string FileName, string FullPath, string ScriptText) t;
-        public (string FileName, string FullPath, string ScriptText) tuple
+        private Script t;
+        public Script getScript
         {
             get
             {
-                (string FileName, string FullPath, string ScriptText) result = (t.FileName, t.FullPath, t.ScriptText);
+                Script result = new Script()
+                {
+                    FileName = t.FileName,
+                    FullPath = t.FullPath,
+                    ScriptText = t.ScriptText
+                };
 
                 if (!string.IsNullOrWhiteSpace(EditedFilePath) && File.Exists(EditedFilePath))
                 {
@@ -22,14 +28,16 @@ namespace DBScriptSaver
             }
         }
 
-        public ScriptWrapper((string FileName, string FullPath, string ScriptText) t)
+        public ScriptWrapper(Script t)
         {
             this.t = t;
         }
 
-        public string FileName => tuple.FileName;
-        public string FullPath => tuple.FullPath;
-        public string ScriptText => tuple.ScriptText;
+        public string FileName => getScript.FileName;
+        public string FullPath => getScript.FullPath;
+        public string ScriptText => getScript.ScriptText;
+        public string ObjectType => getScript.ObjectType;
+        public string ChangeState => getScript.ChangeState;
         public bool Save { get; set; } = false;
 
         public string EditedFilePath { get; internal set; }

@@ -48,7 +48,7 @@ namespace DBScriptSaver
             return true;
         }
 
-        public CompareScripts(ProjectDataBase db, List<(string FileName, string FullPath, string ScriptText)> scripts) : this()
+        public CompareScripts(ProjectDataBase db, List<Script> scripts) : this()
         {
             DataContext = scripts;
             gcDBObjects.ItemsSource = new ListCollectionView(scripts.Select(t => new ScriptWrapper(t)).ToList());
@@ -57,7 +57,7 @@ namespace DBScriptSaver
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
-            var Выбранные_скрипты = ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().Where(w => w.Save).Select(w => w.tuple).ToList();
+            var Выбранные_скрипты = ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().Where(w => w.Save).Select(w => w.getScript).ToList();
             DB.UpdateScripts(Выбранные_скрипты);
             DialogResult = true;
         }

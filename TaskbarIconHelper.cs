@@ -169,7 +169,7 @@ namespace DBScriptSaver
                 return;
             }
 
-            List<(string FileName, string FullPath, string ScriptText)> scripts;
+            List<Script> scripts;
 
             try
             {

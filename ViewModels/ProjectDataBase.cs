@@ -263,7 +263,7 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public List<(string FileName, string FullPath, string ScriptText)> GetUpdateScripts()
+        public List<Script> GetUpdateScripts()
         {
             UpdateFilterDataFromConfig();
 
@@ -343,14 +343,15 @@ namespace DBScriptSaver.ViewModels
 
                 cmd.CommandText += condition;
 
-                List<(string FileName, string FullPath, string ScriptText)> UpdateScripts 
-                        = new List<(string FileName, string FullPath, string ScriptText)>();
+                List<Script> UpdateScripts = new List<Script>();
 
                 using (SqlDataReader r = cmd.ExecuteReader())
                 {
                     while (r.Read())
                     {
                         string FileName = ((string)r["ObjectName"]) + ".sql";
+
+                        string objectType = objectTypeDescription((string)r["TYPE"]);
 
                         string TextFromDB = string.Empty;
 
@@ -365,8 +366,8 @@ namespace DBScriptSaver.ViewModels
                             TextFromDB += @"SET QUOTED_IDENTIFIER ON" + Environment.NewLine;
                             TextFromDB += @"GO" + Environment.NewLine;
                         }
-                        
-                        TextFromDB += ((string)r["definition"]);
+
+                        TextFromDB += (string)r["definition"];
 
                         string SourcesKey = SourcesData
                                             .Keys
@@ -377,7 +378,17 @@ namespace DBScriptSaver.ViewModels
 
                         if ((TextFromFile == null) || (TextFromFile != TextFromDB))
                         {
-                            UpdateScripts.Add((FileName, SourceFolder + FileName, TextFromDB));
+                            string ChangeType = (TextFromFile == null) ? @"Новый" : @"Изменённый";
+                            
+                            UpdateScripts.Add( 
+                                new Script()
+                                {
+                                    FileName = FileName,
+                                    FullPath = SourceFolder + FileName,
+                                    ScriptText = TextFromDB,
+                                    ObjectType = objectType,
+                                    ChangeState = ChangeType
+                                });
                         }
                     }
                 }
@@ -408,12 +419,86 @@ namespace DBScriptSaver.ViewModels
                             continue;
                         }
 
-                        UpdateScripts.Add((fileName, TableFolder + fileName, script));
+                        string ChangeType = !File.Exists(tableFileName) ? @"Новый" : @"Изменённый";
+
+                        UpdateScripts.Add(
+                            new Script()
+                            {
+                                FileName = fileName,
+                                FullPath = TableFolder + fileName,
+                                ScriptText = script,
+                                ObjectType = @"Таблица",
+                                ChangeState = ChangeType
+                            });
                     }
                 }
 
                 return UpdateScripts;
             }
+        }
+
+        private static string objectTypeDescription(string type)
+        {
+            string objectType;
+            switch (type)
+            {
+                case "C":
+                    objectType = @"Ограничение: проверка";
+                    break;
+                case "D":
+                    objectType = @"Ограничение: значение по умолчанию";
+                    break;
+                case "F":
+                    objectType = @"Внешний ключ";
+                    break;
+                case "FN":
+                    objectType = @"Функция";
+                    break;
+                case "IF":
+                    objectType = @"Встраиваемая табличная функция";
+                    break;
+                case "IT":
+                    objectType = @"Внутренняя таблица";
+                    break;
+                case "P":
+                    objectType = @"Хранимая процедура";
+                    break;
+                case "PK":
+                    objectType = @"Основной ключ";
+                    break;
+                case "S":
+                    objectType = @"Системная таблица";
+                    break;
+                case "SN":
+                    objectType = @"Синоним";
+                    break;
+                case "SQ":
+                    objectType = @"Служба очередей";
+                    break;
+                case "TF":
+                    objectType = @"Табличная функция";
+                    break;
+                case "TR":
+                    objectType = @"Триггер";
+                    break;
+                case "TT":
+                    objectType = @"Табличный тип";
+                    break;
+                case "U":
+                    objectType = @"Таблица";
+                    break;
+                case "UQ":
+                    objectType = @"Ограничение на уникальность";
+                    break;
+                case "V":
+                    objectType = @"Представление";
+                    break;
+                default:
+                    objectType = type;
+                    break;
+            }
+
+            return objectType;
         }
 
         private (List<string> ОтслеживаемыеСхемы, List<string> ИгнорируемыеСхемы, List<string> ОтслеживаемыеОбъекты, List<string> ИгнорируемыеОбъекты) GetFilters()
@@ -487,7 +572,7 @@ namespace DBScriptSaver.ViewModels
             UpdateScripts(GetUpdateScripts());
         }
 
-        public void UpdateScripts(List<(string FileName, string FullPath, string ScriptText)> scripts)
+        public void UpdateScripts(List<Script> scripts)
         {
             foreach (var script in scripts)
             {

@@ -61,6 +61,16 @@
                             Binding="{Binding Path=FileName}"
                             Header="Объект"
                             IsReadOnly="True"/>
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding Path=ObjectType}"
+                            Header="Тип"
+                            IsReadOnly="True"/>
+                        <DataGridTextColumn
+                            Width="Auto"
+                            Binding="{Binding Path=ChangeState}"
+                            Header="Сотояние"
+                            IsReadOnly="True"/>
                         <DataGridCheckBoxColumn
                             Width="Auto"
                             Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
