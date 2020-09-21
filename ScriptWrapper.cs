@@ -17,7 +17,9 @@ namespace DBScriptSaver
                 {
                     FileName = t.FileName,
                     FullPath = t.FullPath,
-                    ScriptText = t.ScriptText
+                    ScriptText = t.ScriptText,
+                    ChangeState = t.ChangeState,
+                    ObjectType = t.ObjectType
                 };
 
                 if (!string.IsNullOrWhiteSpace(EditedFilePath) && File.Exists(EditedFilePath))
@@ -31,11 +33,11 @@ namespace DBScriptSaver
         {
             this.t = t;
         }
-        public string FileName => getScript.FileName;
-        public string FullPath => getScript.FullPath;
+        public string FileName => t.FileName;
+        public string FullPath => t.FullPath;
         public string ScriptText => getScript.ScriptText;
-        public string ObjectType => getScript.ObjectType;
-        public string ChangeState => getScript.ChangeState;
+        public string ObjectType => t.ObjectType;
+        public string ChangeState => t.ChangeState;
         public bool Save { get; set; } = false;
         public string EditedFilePath { get; internal set; }
     }

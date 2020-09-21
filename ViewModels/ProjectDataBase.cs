@@ -442,13 +442,13 @@ namespace DBScriptSaver.ViewModels
             string objectType;
             switch (type)
             {
-                case "C":
+                case "C ":
                     objectType = @"Ограничение: проверка";
                     break;
-                case "D":
+                case "D ":
                     objectType = @"Ограничение: значение по умолчанию";
                     break;
-                case "F":
+                case "F ":
                     objectType = @"Внешний ключ";
                     break;
                 case "FN":
@@ -460,13 +460,13 @@ namespace DBScriptSaver.ViewModels
                 case "IT":
                     objectType = @"Внутренняя таблица";
                     break;
-                case "P":
+                case "P ":
                     objectType = @"Хранимая процедура";
                     break;
                 case "PK":
                     objectType = @"Основной ключ";
                     break;
-                case "S":
+                case "S ":
                     objectType = @"Системная таблица";
                     break;
                 case "SN":
@@ -484,13 +484,13 @@ namespace DBScriptSaver.ViewModels
                 case "TT":
                     objectType = @"Табличный тип";
                     break;
-                case "U":
+                case "U ":
                     objectType = @"Таблица";
                     break;
                 case "UQ":
                     objectType = @"Ограничение на уникальность";
                     break;
-                case "V":
+                case "V ":
                     objectType = @"Представление";
                     break;
                 default:
