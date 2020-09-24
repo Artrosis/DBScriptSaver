@@ -16,7 +16,21 @@ namespace DBScriptSaver.ViewModels
     public class DBScriptViewModel: IDataErrorInfo
     {
         public ObservableCollection<Project> Projects { get; }
-
+        public ListCollectionView EditProjects
+        {
+            get
+            {
+                return new ListCollectionView(Projects);
+            }
+        }
+        public ObservableCollection<ProjectServer> Servers { get; }
+        public ListCollectionView EditServers
+        {
+            get
+            {
+                return new ListCollectionView(Servers);
+            }
+        }
         string comparer;
         //Путь к инструменту развёртывания
         public string Comparer
@@ -30,14 +44,6 @@ namespace DBScriptSaver.ViewModels
                 comparer = value;
                 FileComparer.SetPath(comparer);
                 SaveAppSettings();
-            }
-        }
-
-        public ListCollectionView EditProjects
-        {
-            get
-            {
-                return new ListCollectionView(Projects);
             }
         }
 
@@ -107,7 +113,11 @@ namespace DBScriptSaver.ViewModels
 
                 if (!string.IsNullOrEmpty(ProjectsData))
                 {
-                    Projects = new ObservableCollection<Project>(JsonConvert.DeserializeObject<List<Project>>(ProjectsData));
+                    var (tempServers, tempProjects) = JsonConvert.DeserializeObject<(List<ProjectServer>, List<Project>)>(ProjectsData);
+
+                    Servers = new ObservableCollection<ProjectServer>(tempServers);
+
+                    Projects = new ObservableCollection<Project>(tempProjects);
                     Projects.ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
                     Projects.ToList().ForEach(p => p.vm = this);
                     Projects.ToList().SelectMany(i => i.DataBases).ToList().ForEach(i => (i as INotifyPropertyChanged).PropertyChanged += Item_PropertyChanged);
@@ -115,6 +125,7 @@ namespace DBScriptSaver.ViewModels
                 else
                 {
                     Projects = new ObservableCollection<Project>(new List<Project>());
+                    Servers = new ObservableCollection<ProjectServer>(new List<ProjectServer>());
                 }
             }
 
@@ -157,7 +168,7 @@ namespace DBScriptSaver.ViewModels
         }
         public void SaveProjects()
         {
-            File.WriteAllText(Settings, JsonConvert.SerializeObject(Projects));
+            File.WriteAllText(Settings, JsonConvert.SerializeObject((Servers, Projects)));
             TaskbarIconHelper.UpdateContextMenu();
         }
         public void SaveAppSettings()

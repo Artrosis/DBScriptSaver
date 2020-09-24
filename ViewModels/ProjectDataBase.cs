@@ -589,10 +589,10 @@ namespace DBScriptSaver.ViewModels
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
             {
-                DataSource = Project.Server,
+                DataSource = Project.Server.Path,
                 InitialCatalog = Name ?? @"master",
-                UserID = Project.DBLogin,
-                Password = Cryptography.Decrypt(Project.DBPassword, fmProjectsEditor.GetSalt()),
+                UserID = Project.Server.DBLogin,
+                Password = Cryptography.Decrypt(Project.Server.DBPassword, fmProjectsEditor.GetSalt()),
                 ConnectTimeout = 3
             };
             return builder.ConnectionString;

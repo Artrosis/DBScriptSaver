@@ -16,14 +16,14 @@ namespace DBScriptSaver.ViewModels
     {
         [JsonIgnore]
         public DBScriptViewModel vm;
-        public string DBLogin { get; set; }
-        public string DBPassword { get; set; }
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public ProjectServer Server { get; set; }
         public Project(DBScriptViewModel vm) : base()
         {
             this.vm = vm;
             DataBases.CollectionChanged += DataBases_CollectionChanged;
         }
-
         private void DataBases_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace)
@@ -34,11 +34,6 @@ namespace DBScriptSaver.ViewModels
                 }
             }
         }
-
-        public string Name { get; set; }
-        public string Path { get; set; }
-
-        public string Server { get; set; }
         public ObservableCollection<ProjectDataBase> DataBases { get; } = new ObservableCollection<ProjectDataBase>();
 
         [JsonIgnore]
