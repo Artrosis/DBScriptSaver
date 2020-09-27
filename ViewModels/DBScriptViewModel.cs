@@ -15,6 +15,14 @@ namespace DBScriptSaver.ViewModels
 {
     public class DBScriptViewModel: IDataErrorInfo
     {
+        private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+            DateTimeZoneHandling = DateTimeZoneHandling.Local
+        };
         public ObservableCollection<Project> Projects { get; }
         public ListCollectionView EditProjects
         {
@@ -113,7 +121,7 @@ namespace DBScriptSaver.ViewModels
 
                 if (!string.IsNullOrEmpty(ProjectsData))
                 {
-                    var (tempServers, tempProjects) = JsonConvert.DeserializeObject<(List<ProjectServer>, List<Project>)>(ProjectsData);
+                    var (tempServers, tempProjects) = JsonConvert.DeserializeObject<(List<ProjectServer>, List<Project>)>(ProjectsData, _settings);
 
                     Servers = new ObservableCollection<ProjectServer>(tempServers);
 
@@ -168,7 +176,7 @@ namespace DBScriptSaver.ViewModels
         }
         public void SaveProjects()
         {
-            File.WriteAllText(Settings, JsonConvert.SerializeObject((Servers, Projects)));
+            File.WriteAllText(Settings, JsonConvert.SerializeObject((Servers, Projects), _settings));
             TaskbarIconHelper.UpdateContextMenu();
         }
         public void SaveAppSettings()
@@ -177,7 +185,7 @@ namespace DBScriptSaver.ViewModels
 
             AppSet.Add("Comparer", Comparer);
 
-            File.WriteAllText(AppSettings, JsonConvert.SerializeObject(AppSet));
+            File.WriteAllText(AppSettings, JsonConvert.SerializeObject(AppSet, _settings));
         }
 
         public void AddProject()

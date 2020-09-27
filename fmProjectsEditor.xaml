@@ -54,9 +54,10 @@
                                 Binding="{Binding Path=Path}"
                                 Header="Путь" />
                             <DataGridComboBoxColumn
+                                x:Name="cmbServers"
                                 Width="200"
                                 SelectedItemBinding="{Binding Path=Server}"
-                                ItemsSource="{Binding Servers}"
+                                DisplayMemberPath="Name"
                                 Header="Сервер" />
                             <DataGridTemplateColumn Width="100" Header="Базы данных">
                                 <DataGridTemplateColumn.CellTemplate>
