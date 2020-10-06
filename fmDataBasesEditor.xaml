@@ -32,6 +32,15 @@
                                 VerticalAlignment="Top"
                                 Click="btnDel_Click"
                                 Content="Удалить"/>
+                <CheckBox
+                        x:Name="cbUseMigrations"
+                        Width="auto"
+                        Margin="10"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Right"
+                        IsChecked="True">
+                    Создавать миграции автоматически
+                </CheckBox>
             </StackPanel>
             <DataGrid
                         x:Name="gcDataBases"

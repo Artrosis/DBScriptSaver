@@ -37,7 +37,7 @@ namespace DBScriptSaver
         public string FullPath => t.FullPath;
         public string ScriptText => getScript.ScriptText;
         public string ObjectType => t.ObjectType;
-        public string ChangeState => t.ChangeState;
+        public ChangeType ChangeState => t.ChangeState;
         public bool Save { get; set; } = false;
         public string EditedFilePath { get; internal set; }
     }

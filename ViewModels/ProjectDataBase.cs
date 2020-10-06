@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Sdk.Sfc;
 using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using PropertyChanged;
@@ -378,7 +379,7 @@ namespace DBScriptSaver.ViewModels
 
                         if ((TextFromFile == null) || (TextFromFile != TextFromDB))
                         {
-                            string ChangeType = (TextFromFile == null) ? @"Новый" : @"Изменённый";
+                            ChangeType ChangeType = (TextFromFile == null) ? ChangeType.Новый : ChangeType.Изменённый;
                             
                             UpdateScripts.Add( 
                                 new Script()
@@ -419,22 +420,61 @@ namespace DBScriptSaver.ViewModels
                             continue;
                         }
 
-                        string ChangeType = !File.Exists(tableFileName) ? @"Новый" : @"Изменённый";
+                        ChangeType ChangeType = !File.Exists(tableFileName) ? ChangeType.Новый : ChangeType.Изменённый;
 
-                        UpdateScripts.Add(
-                            new Script()
-                            {
-                                FileName = fileName,
-                                FullPath = TableFolder + fileName,
-                                ScriptText = script,
-                                ObjectType = @"Таблица",
-                                ChangeState = ChangeType
-                            });
+                        Script tblScript = new Script()
+                        {
+                            FileName = fileName,
+                            FullPath = TableFolder + fileName,
+                            ScriptText = script,
+                            ObjectType = @"Таблица",
+                            ChangeState = ChangeType
+                        };
+
+                        if (ChangeType == ChangeType.Новый)
+                        {
+                            tblScript.Migration = MakeCreateTableMigration(server, tbl);
+                        }
+
+                        UpdateScripts.Add(tblScript);
                     }
                 }
 
                 return UpdateScripts;
             }
+        }
+
+        public Migration MakeCreateTableMigration(Server myServer, Table tbl)
+        {
+            StringBuilder sb = new StringBuilder();
+            StringBuilder sbConstraints = new StringBuilder();
+            Scripter createScrp = default(Scripter);
+            createScrp = new Scripter(myServer);
+            createScrp.Options.ScriptSchema = true;
+            createScrp.Options.ScriptBatchTerminator = true;
+            createScrp.Options.DriAll = true;
+            createScrp.Options.IncludeIfNotExists = true;
+            createScrp.Options.ExtendedProperties = true;
+
+            foreach (string s in createScrp.EnumScript(new Urn[] { tbl.Urn }))
+            {
+                sb.AppendLine(s);
+            }
+
+            string MigrationName = $@"Create_{tbl.Name}";
+
+            int postIndex = 0;
+            string postFix = "";
+
+            while (File.Exists(MigrationName + postFix))
+            {
+                postIndex++;
+                postFix = $@"({postIndex})";
+            }
+
+            MigrationName += postFix;
+
+            return new Migration() { Name = MigrationName, Script = sb.ToString() };
         }
 
         private static string objectTypeDescription(string type)
@@ -567,12 +607,12 @@ namespace DBScriptSaver.ViewModels
             return (schemas, ignoreSchemas, @objects, ignoreObjects);
         }
 
-        public void UpdateScripts()
+        public void UpdateScripts(bool UseMigrations)
         {
-            UpdateScripts(GetUpdateScripts());
+            UpdateScripts(GetUpdateScripts(), UseMigrations);
         }
 
-        public void UpdateScripts(List<Script> scripts)
+        public void UpdateScripts(List<Script> scripts, bool UseMigrations)
         {
             foreach (var script in scripts)
             {
@@ -582,6 +622,66 @@ namespace DBScriptSaver.ViewModels
                     Directory.CreateDirectory(dir);
                 }
                 File.WriteAllText(script.FullPath, script.ScriptText, new UTF8Encoding(true));
+
+                if (!UseMigrations)
+                {
+                    continue;
+                }
+
+                if (script.Migration != null || script.Migration.Script != "")
+                {
+                    CreateChangesXML();
+                    AddMigration(script.Migration);
+                }
+            }
+        }
+
+        public void AddMigration(Migration migration)
+        {
+            string NewFileName = migration.Name + ".sql";
+
+            File.WriteAllText(ChangesFolder + NewFileName, migration.Script, new UTF8Encoding(true));
+
+            XDocument xdoc = XDocument.Load(ChangesXML);
+
+            var LastVer = xdoc.Element("project").Elements("ver").Last();
+
+            var NewElement = new XElement("file", NewFileName);
+            NewElement.Add(new XAttribute("autor", Environment.MachineName));
+            NewElement.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
+
+            LastVer.Add(NewElement);
+
+            xdoc.Save(ChangesXML);
+        }
+
+        private bool HasChangesXML = false;
+
+        public void CreateChangesXML()
+        {
+            if (HasChangesXML)
+            {
+                return;
+            }
+
+            if (!File.Exists(ChangesXML))
+            {
+                XDocument EmptyChanges = new XDocument();
+                XElement project = new XElement("project");
+                project.Add(new XAttribute("name", Project.Name));
+
+                XElement VersionElem = new XElement("ver");
+                VersionElem.Add(new XAttribute("id", "1.0.0.0"));
+                VersionElem.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
+                project.Add(VersionElem);
+
+                EmptyChanges.Save(ChangesXML);
+
+                HasChangesXML = true;
+            }
+            else
+            {
+                HasChangesXML = true;
             }
         }
 

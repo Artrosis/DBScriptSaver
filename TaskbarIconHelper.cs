@@ -1,14 +1,16 @@
 ﻿using DBScriptSaver.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
+using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Linq;
 
 namespace DBScriptSaver
 {
@@ -160,7 +162,7 @@ namespace DBScriptSaver
             }
         }
 
-        private static void UpdateDBItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private static void UpdateDBItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             var DB = ((MenuItem)sender).Tag as ProjectDataBase;
 
@@ -191,7 +193,7 @@ namespace DBScriptSaver
             }
         }
 
-        private static void ProjectSettingsItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private static void ProjectSettingsItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             var proj = ((MenuItem)sender).Tag as Project;
 
@@ -203,12 +205,12 @@ namespace DBScriptSaver
             new fmDataBasesEditor(proj).ShowDialog();
         }
 
-        private static void SettingsItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private static void SettingsItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             new fmProjectsEditor(new DBScriptViewModel()).ShowDialog();
         }
 
-        private static void CloseItem_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private static void CloseItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             Application.Current.Shutdown();
         }

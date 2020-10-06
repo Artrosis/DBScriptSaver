@@ -36,21 +36,9 @@ namespace DBScriptSaver
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            if (!File.Exists(dB.ChangesXML))
-            {
-                XDocument EmptyChanges = new XDocument();
-                XElement project = new XElement("project");
-                project.Add(new XAttribute("name", dB.Project.Name));
+            dB.CreateChangesXML();
 
-                XElement VersionElem = new XElement("ver");
-                VersionElem.Add(new XAttribute("id", "1.0.0.0"));
-                VersionElem.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
-                project.Add(VersionElem);
-
-                EmptyChanges.Save(dB.ChangesXML);
-            }            
-
-            string NewFileName = tbFileName.Text + ".sql";
+            string NewFileName = tbFileName.Text;
             foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars())
             {
                 NewFileName = NewFileName.Replace(invalidChar, '_');
@@ -58,19 +46,7 @@ namespace DBScriptSaver
 
             string ScriptBody = new TextRange(tbScriptBody.Document.ContentStart, tbScriptBody.Document.ContentEnd).Text;
 
-            File.WriteAllText(dB.ChangesFolder + NewFileName, ScriptBody, new UTF8Encoding(true));
-
-            XDocument xdoc = XDocument.Load(dB.ChangesXML);
-
-            var LastVer = xdoc.Element("project").Elements("ver").Last();
-
-            var NewElement = new XElement("file", NewFileName);
-            NewElement.Add(new XAttribute("autor", Environment.MachineName));
-            NewElement.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
-
-            LastVer.Add(NewElement);
-
-            xdoc.Save(dB.ChangesXML);
+            dB.AddMigration(new Migration() { Name = NewFileName, Script = ScriptBody });
 
             DialogResult = true;
         }

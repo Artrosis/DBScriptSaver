@@ -55,8 +55,7 @@ namespace DBScriptSaver
 
         private void Compare_Click(object sender, RoutedEventArgs e)
         {
-            var DB = SelectedBase;
-            DB.UpdateScripts();
+            SelectedBase.UpdateScripts(cbUseMigrations.IsChecked ?? false);
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)

@@ -6,6 +6,7 @@
         public string FullPath;
         public string ScriptText;
         public string ObjectType;
-        public string ChangeState;
+        public ChangeType ChangeState;
+        public Migration Migration;
     }
 }

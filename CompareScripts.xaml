@@ -38,6 +38,15 @@
                         VerticalAlignment="Bottom"
                         Click="ОтменитьВсе_Click"
                         Content="Отменить все"/>
+                    <CheckBox
+                        x:Name="cbUseMigrations"
+                        Width="auto"
+                        Margin="10"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Right"
+                        IsChecked="True">
+                        Создавать миграции автоматически
+                    </CheckBox>
                 </StackPanel>
                 <Label>Поиск:</Label>
                 <TextBox

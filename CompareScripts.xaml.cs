@@ -58,7 +58,7 @@ namespace DBScriptSaver
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
             var Выбранные_скрипты = ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().Where(w => w.Save).Select(w => w.getScript).ToList();
-            DB.UpdateScripts(Выбранные_скрипты);
+            DB.UpdateScripts(Выбранные_скрипты, cbUseMigrations.IsChecked ?? false);
             DialogResult = true;
         }
 

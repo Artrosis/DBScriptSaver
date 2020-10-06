@@ -205,8 +205,10 @@
     <Compile Include="FileComparer.cs" />
     <Compile Include="ScriptWrapper.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
+    <Compile Include="ViewModels\ChangeType.cs" />
     <Compile Include="ViewModels\Dependence.cs" />
     <Compile Include="ViewModels\DependenceObject.cs" />
+    <Compile Include="ViewModels\Migration.cs" />
     <Compile Include="ViewModels\Script.cs" />
     <Compile Include="ViewModels\ProjectServer.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
