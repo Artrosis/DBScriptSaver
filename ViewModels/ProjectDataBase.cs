@@ -628,7 +628,7 @@ namespace DBScriptSaver.ViewModels
                     continue;
                 }
 
-                if (script.Migration != null || script.Migration.Script != "")
+                if (script.Migration != null || ((script.Migration?.Script ?? "") != ""))
                 {
                     CreateChangesXML();
                     AddMigration(script.Migration);
