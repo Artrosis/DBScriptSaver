@@ -24,11 +24,14 @@ namespace DBScriptSaver
     public partial class fmDataBasesEditor : Window
     {
         private Project project => DataContext as Project;
+        public List<string> List_NamesOfDB { get; set; }
         public fmDataBasesEditor(Project proj)
         {
             InitializeComponent();
 
             DataContext = proj;
+            List_NamesOfDB = project.vm.GetNamesOfDB();
+            cmbDBNames.ItemsSource = List_NamesOfDB;
         }
 
         private ProjectDataBase SelectedBase => gcDataBases.SelectedItem as ProjectDataBase;

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -191,6 +193,29 @@ namespace DBScriptSaver.ViewModels
         public void AddProject()
         {
             Projects.Add(new Project(this) { Name = Resources.НовыйПроект });
+        }
+        public List<string> GetNamesOfDB()
+        {
+            List<string> list = new List<string>();
+
+            string conString = "server=84.17.23.172;uid=rds_aer;pwd=Rds_Aer; database=rds_aer";
+
+            using (SqlConnection con = new SqlConnection(conString))
+            {
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand("SELECT name FROM master.sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con))
+                {
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            list.Add(dr[0].ToString());
+                        }
+                    }
+                }
+            }
+            return list;
         }
     }
 }

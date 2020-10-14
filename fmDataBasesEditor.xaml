@@ -51,9 +51,10 @@
                         AutoGenerateColumns="False"
                         ItemsSource="{Binding DataBases}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn
+                    <DataGridComboBoxColumn
+                            x:Name="cmbDBNames"
                             Width="200"
-                            Binding="{Binding Path=Name}"
+                            SelectedItemBinding="{Binding list}"
                             Header="Наименование базы данных" />
                     <DataGridTextColumn
                             Width="300"
