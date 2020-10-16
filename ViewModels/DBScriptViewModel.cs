@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace DBScriptSaver.ViewModels
@@ -216,6 +217,28 @@ namespace DBScriptSaver.ViewModels
                 }
             }
             return list;
+        }
+
+        public List<string> dirlist = new List<string>();
+        public List<string> GetPathsForDB()
+        {
+
+            List<string> list = new List<string>();
+
+            string path = @"C:\Users\Alik\source\repos\Test_Console\";
+            list.AddRange(Directory.GetDirectories(path, "changes*", SearchOption.AllDirectories)
+             .Concat(Directory.GetDirectories(path, "source*", SearchOption.AllDirectories))
+             .Concat(Directory.GetDirectories(path, "tables*", SearchOption.AllDirectories)));
+
+
+            dirlist = new List<string>();
+
+            foreach (var item in list)
+            {
+                dirlist.Add(Path.GetFileName(Path.GetDirectoryName(item)));
+            }
+
+            return dirlist.Union(dirlist).ToList();           
         }
     }
 }

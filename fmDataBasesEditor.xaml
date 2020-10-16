@@ -56,9 +56,10 @@
                             Width="200"
                             SelectedItemBinding="{Binding list}"
                             Header="Наименование базы данных" />
-                    <DataGridTextColumn
+                    <DataGridComboBoxColumn
+                            x:Name="cmbDBPath"
                             Width="300"
-                            Binding="{Binding Path=Path}"
+                            SelectedItemBinding="{Binding Path}"
                             Header="Расположение" />
                     <DataGridTemplateColumn Header="Базы данных" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
