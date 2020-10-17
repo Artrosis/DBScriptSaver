@@ -2,6 +2,7 @@
 using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using Microsoft.Data.SqlClient;
 using System.Windows.Data;
 
 namespace DBScriptSaver.ViewModels
@@ -23,6 +24,19 @@ namespace DBScriptSaver.ViewModels
         public override string ToString()
         {
             return Name;
+        }
+
+        public string GetConnectionString()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
+            {
+                DataSource = Path,
+                InitialCatalog = @"master",
+                UserID = DBLogin,
+                Password = Cryptography.Decrypt(DBPassword, fmProjectsEditor.GetSalt()),
+                ConnectTimeout = 3
+            };
+            return builder.ConnectionString;
         }
     }
 }
