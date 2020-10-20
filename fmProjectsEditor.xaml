@@ -129,7 +129,7 @@
                             <DataGridTemplateColumn Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Click="Button_Click" Content="Удалить" />
+                                        <Button Click="ServerDelete_Click" Content="Удалить" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
