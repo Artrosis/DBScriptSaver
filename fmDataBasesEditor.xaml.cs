@@ -38,7 +38,7 @@ namespace DBScriptSaver
 
             cmbDBNames.ItemsSource = proj.Server.GetNamesOfDB();
 
-            List_ofPath = GetPathsForDB(@"" + project.Path);// + Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName);
+            List_ofPath = GetPathsForDB(@"" + project.Path);
             cmbDBPath.ItemsSource = List_ofPath;
         }
 
@@ -55,7 +55,10 @@ namespace DBScriptSaver
 
             foreach (var item in list)
             {
-                dirlist.Add(System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(item)));
+
+                var dir = System.IO.Path.GetDirectoryName(item);
+                var dirparent = System.IO.Path.GetDirectoryName(dir);
+                dirlist.Add(System.IO.Path.GetFileName(dirparent) +'\\'+ System.IO.Path.GetFileName(dir));
             }
 
             return dirlist.Union(dirlist).ToList();
