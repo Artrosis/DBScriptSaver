@@ -1,6 +1,7 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -28,15 +29,16 @@ namespace DBScriptSaver
         
         public List<string> List_NamesOfDB { get; set; }
         public List<string> List_ofPath { get; set; }
+
         public fmDataBasesEditor(Project proj)
         {
             InitializeComponent();
 
             DataContext = proj;
-            List_NamesOfDB = project.vm.GetNamesOfDB();
-            cmbDBNames.ItemsSource = List_NamesOfDB;
-           
-            List_ofPath = GetPathsForDB(@"" + Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName);
+
+            cmbDBNames.ItemsSource = proj.Server.GetNamesOfDB();
+
+            List_ofPath = GetPathsForDB(@"" + project.Path);// + Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName);
             cmbDBPath.ItemsSource = List_ofPath;
         }
 
@@ -50,8 +52,6 @@ namespace DBScriptSaver
              .Concat(Directory.GetDirectories(path, "source*", SearchOption.AllDirectories))
              .Concat(Directory.GetDirectories(path, "tables*", SearchOption.AllDirectories)));
 
-
-            dirlist = new List<string>();
 
             foreach (var item in list)
             {

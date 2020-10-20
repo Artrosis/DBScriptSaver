@@ -16,7 +16,7 @@ using System.Windows.Data;
 
 namespace DBScriptSaver.ViewModels
 {
-    public class DBScriptViewModel: IDataErrorInfo
+    public class DBScriptViewModel : IDataErrorInfo
     {
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
         {
@@ -87,7 +87,7 @@ namespace DBScriptSaver.ViewModels
         public DBScriptViewModel()
         {
             string SettingsDirectory = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}{Path.DirectorySeparatorChar}DBScriptHelper";
-            
+
             if (!Directory.Exists(SettingsDirectory))
             {
                 Directory.CreateDirectory(SettingsDirectory);
@@ -195,30 +195,5 @@ namespace DBScriptSaver.ViewModels
         {
             Projects.Add(new Project(this) { Name = Resources.НовыйПроект });
         }
-        public List<string> GetNamesOfDB()
-        {
-            List<string> list = new List<string>();
-
-            string conString = "server=84.17.23.172;uid=rds_aer;pwd=Rds_Aer; database=rds_aer";
-
-            using (SqlConnection con = new SqlConnection(conString))
-            {
-                con.Open();
-
-                using (SqlCommand cmd = new SqlCommand("SELECT name FROM master.sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con))
-                {
-                    using (IDataReader dr = cmd.ExecuteReader())
-                    {
-                        while (dr.Read())
-                        {
-                            list.Add(dr[0].ToString());
-                        }
-                    }
-                }
-            }
-            return list;
-        }
-
-
     }
 }

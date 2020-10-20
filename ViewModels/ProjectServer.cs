@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Microsoft.Data.SqlClient;
 using System.Windows.Data;
+using System.Collections.Generic;
+using System.Data;
 
 namespace DBScriptSaver.ViewModels
 {
@@ -37,6 +39,25 @@ namespace DBScriptSaver.ViewModels
                 ConnectTimeout = 3
             };
             return builder.ConnectionString;
+        }
+        public List<string> GetNamesOfDB()
+        {
+            List<string> list = new List<string>();
+
+            using (SqlConnection con = new SqlConnection(GetConnectionString()))
+            {
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand("SELECT name FROM master.sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con))
+                using (IDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        list.Add(dr[0].ToString());
+                    }
+                }
+            }
+            return list;
         }
     }
 }
