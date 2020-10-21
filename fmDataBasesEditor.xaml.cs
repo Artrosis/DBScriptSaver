@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -36,12 +36,14 @@ namespace DBScriptSaver
 
             DataContext = proj;
 
-            cmbDBNames.ItemsSource = proj.Server.GetNamesOfDB();
+            List_NamesOfDB = new List<string>(proj.Server.GetNamesOfDB());
+            cmbDBNames.ItemsSource = List_NamesOfDB;
 
-            List_ofPath = GetPathsForDB(@"" + project.Path);
+            List_ofPath = GetPathsForDB(@"" + proj.Path);
             cmbDBPath.ItemsSource = List_ofPath;
         }
 
+        
         public List<string> dirlist = new List<string>();
         public List<string> GetPathsForDB(string path)
         {
