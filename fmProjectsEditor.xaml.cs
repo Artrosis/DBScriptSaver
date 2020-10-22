@@ -24,9 +24,6 @@ namespace DBScriptSaver
             Vm = viewModel;
 
             DataContext = Vm;
-
-            cmbServers.ItemsSource = Vm.EditServers;
-            cmbServers.DisplayMemberPath = "Name";
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
