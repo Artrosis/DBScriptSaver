@@ -40,7 +40,9 @@ namespace DBScriptSaver.ViewModels
             };
             return builder.ConnectionString;
         }
-        public List<string> GetNamesOfDB()
+        [JsonIgnore]
+        public List<string> DBNames => GetNamesOfDB();
+        private List<string> GetNamesOfDB()
         {
             List<string> list = new List<string>();
 

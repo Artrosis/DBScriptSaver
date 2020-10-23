@@ -35,36 +35,8 @@ namespace DBScriptSaver
             InitializeComponent();
 
             DataContext = proj;
-
-            List_NamesOfDB = new List<string>(proj.Server.GetNamesOfDB());
-            cmbDBNames.ItemsSource = List_NamesOfDB;
-
-            List_ofPath = GetPathsForDB(@"" + proj.Path);
-            cmbDBPath.ItemsSource = List_ofPath;
         }
-
         
-        public List<string> dirlist = new List<string>();
-        public List<string> GetPathsForDB(string path)
-        {
-
-            List<string> list = new List<string>();
-
-            list.AddRange(Directory.GetDirectories(path, "changes*", SearchOption.AllDirectories)
-             .Concat(Directory.GetDirectories(path, "source*", SearchOption.AllDirectories))
-             .Concat(Directory.GetDirectories(path, "tables*", SearchOption.AllDirectories)));
-
-
-            foreach (var item in list)
-            {
-
-                var dir = System.IO.Path.GetDirectoryName(item);
-                var dirparent = System.IO.Path.GetDirectoryName(dir);
-                dirlist.Add(System.IO.Path.GetFileName(dirparent) +'\\'+ System.IO.Path.GetFileName(dir));
-            }
-
-            return dirlist.Union(dirlist).ToList();
-        }
         private ProjectDataBase SelectedBase => gcDataBases.SelectedItem as ProjectDataBase;
 
         private void EditDBObjects_Click(object sender, RoutedEventArgs e)
