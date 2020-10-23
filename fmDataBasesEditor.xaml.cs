@@ -85,5 +85,18 @@ namespace DBScriptSaver
             }
             project.DataBases.Remove(SelectedBase);
         }
+
+        private void cmbPath_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (gcDataBases.SelectedItem == null)
+            {
+                return;
+            }
+            var s = ((ComboBox)sender).Text;
+            if (!string.IsNullOrEmpty(s))
+            {
+                ((ProjectDataBase)(gcDataBases.SelectedItem)).Path = s;
+            }
+        }
     }
 }

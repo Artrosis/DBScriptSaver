@@ -69,11 +69,14 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox
-                                    x:Name="cmbPath"
+                                    IsEditable="True"
+                                    IsReadOnly="False"
+                                    LostFocus="cmbPath_LostFocus"
                                     ItemsSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}, Path=DataContext.DBPaths}"
                                     SelectedItem="{Binding Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     SelectedValue="{Binding Path}"
-                                    SelectedValuePath=""/>
+                                    SelectedValuePath=""
+                                    Text="{Binding Path}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
