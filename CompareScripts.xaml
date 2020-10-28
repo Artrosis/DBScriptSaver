@@ -59,7 +59,10 @@
                 <DataGrid
                     x:Name="gcDBObjects"
                     Width="auto"
-                    Height="auto"
+                    Height="500"
+		            ScrollViewer.CanContentScroll="True" 
+		            ScrollViewer.VerticalScrollBarVisibility="Auto"
+		            ScrollViewer.HorizontalScrollBarVisibility="Auto"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     AutoGenerateColumns="False"
