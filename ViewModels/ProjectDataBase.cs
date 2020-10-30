@@ -105,11 +105,6 @@ namespace DBScriptSaver.ViewModels
             string objectFileName = obj.FileName;
             bool delete = !File.Exists(SourceFolder + objectFileName);
 
-            if (MessageBox.Show("Отменить изменения в базе данных?", "Отмена изменений", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-            {
-                return;
-            }
-
             string Script = delete ? obj.ScriptText 
                                     : File.ReadAllText(SourceFolder + objectFileName);
 

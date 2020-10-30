@@ -102,6 +102,10 @@ namespace DBScriptSaver
 
         private void Revert_Click(object sender, RoutedEventArgs e)
         {
+            if (MessageBox.Show("Отменить изменения в базе данных?", "Отмена изменений", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            {
+                return;
+            }
             DB.RevertObject(SelectedObject);
             ((ListCollectionView)gcDBObjects.ItemsSource).Remove(SelectedObject);
         }
