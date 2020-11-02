@@ -87,7 +87,22 @@ namespace DBScriptSaver
 
         private void Compare_Click(object sender, RoutedEventArgs e)
         {
-            SelectedBase.UpdateScripts(cbUseMigrations.IsChecked ?? false);
+            var DB = SelectedBase;
+
+            if (DB == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var fmCompare = new CompareScripts();
+                fmCompare.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Сравнить");
+            }
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
