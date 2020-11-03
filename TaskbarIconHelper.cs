@@ -171,20 +171,9 @@ namespace DBScriptSaver
                 return;
             }
 
-            List<Script> scripts;
-
             try
             {
-                Mouse.OverrideCursor = Cursors.Wait;
-                try
-                {
-                    scripts = DB.GetUpdateScripts();
-                }
-                finally
-                {
-                    Mouse.OverrideCursor = null;
-                }
-                new CompareScripts(DB, scripts).ShowDialog();
+                new CompareScripts(DB).ShowDialog();
             }
             catch (Exception ex)
             {

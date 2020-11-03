@@ -48,11 +48,20 @@ namespace DBScriptSaver
             return true;
         }
 
-        public CompareScripts(ProjectDataBase db, List<Script> scripts) : this()
+        public CompareScripts(ProjectDataBase db) : this()
         {
-            DataContext = scripts;
-            gcDBObjects.ItemsSource = new ListCollectionView(scripts.Select(t => new ScriptWrapper(t)).ToList());
-            DB = db;
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
+            {
+                var scripts = db.GetUpdateScripts();
+                DataContext = scripts;
+                gcDBObjects.ItemsSource = new ListCollectionView(scripts.Select(t => new ScriptWrapper(t)).ToList());
+                DB = db;
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
