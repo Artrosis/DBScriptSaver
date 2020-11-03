@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DBScriptSaver"
         mc:Ignorable="d"  
         WindowStartupLocation="CenterScreen"
-        Title="Изменения" Height="450" Width="800">
+        Title="Изменения" Height="450" Width="800" x:Name="Window1">
     <Grid
         Height="Auto"
         HorizontalAlignment="Stretch">
@@ -58,8 +58,8 @@
                     Text="{Binding theText, Delay=400, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGrid
                     x:Name="gcDBObjects"
-                    Width="auto"
-                    Height="500"
+                    Width="{Binding ElementName=window1, Path=ActualWidth}"
+                    
 		            ScrollViewer.CanContentScroll="True" 
 		            ScrollViewer.VerticalScrollBarVisibility="Auto"
 		            ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -69,22 +69,22 @@
                     MouseDoubleClick="GcDBObjects_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn
-                            Width="Auto"
+                            Width="*"
                             Binding="{Binding Path=FileName}"
                             Header="Объект"
                             IsReadOnly="True"/>
                         <DataGridTextColumn
-                            Width="Auto"
+                            Width="*"
                             Binding="{Binding Path=ObjectType}"
                             Header="Тип"
                             IsReadOnly="True"/>
                         <DataGridTextColumn
-                            Width="Auto"
+                            Width="*"
                             Binding="{Binding Path=ChangeState}"
                             Header="Сотояние"
                             IsReadOnly="True"/>
                         <DataGridCheckBoxColumn
-                            Width="Auto"
+                            Width="*"
                             Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
                             Header="Сохранить">
                             <DataGridCheckBoxColumn.CellStyle>
