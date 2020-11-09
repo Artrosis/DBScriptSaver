@@ -9,15 +9,15 @@
         Title="Изменения" Height="450" Width="800" x:Name="Window1">
     <Grid
         Height="Auto"
-        HorizontalAlignment="Stretch">
+        Background="AliceBlue"
+        HorizontalAlignment="Stretch" Margin="0,0,0,2">
         <ScrollViewer
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
-            Background="AliceBlue"
-            VerticalScrollBarVisibility="Auto">
-            
+            VerticalScrollBarVisibility="Auto" Margin="0,0,0,23" RenderTransformOrigin="0.518,0.876"
+            PreviewMouseWheel="scv_PreviewMouseWheel">
             <StackPanel
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
@@ -66,7 +66,8 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     AutoGenerateColumns="False"
-                    MouseDoubleClick="GcDBObjects_MouseDoubleClick">
+                    MouseDoubleClick="GcDBObjects_MouseDoubleClick"
+                    PreviewKeyDown="gcDBObjects_PreviewKeyDown">
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="*"
@@ -81,10 +82,10 @@
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding Path=ChangeState}"
-                            Header="Сотояние"
+                            Header="Состояние"
                             IsReadOnly="True"/>
                         <DataGridCheckBoxColumn
-                            Width="*"
+                            Width="auto"
                             Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
                             Header="Сохранить">
                             <DataGridCheckBoxColumn.CellStyle>
@@ -107,14 +108,15 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
+
         </ScrollViewer>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
-            <Button Width="75"
+                <Button Width="75"
                 Height="23"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Click="btnOK_Click"
                 Content="OK"/>
-        </StackPanel>
+            </StackPanel>
     </Grid>
 </Window>

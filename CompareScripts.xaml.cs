@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -110,6 +111,20 @@ namespace DBScriptSaver
         {
             timer.Stop();
             timer.Start();
+        }
+        private void gcDBObjects_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up || e.Key == Key.Down)
+            {
+                gcDBObjects.CancelEdit();
+            }
+        }
+
+        private void scv_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scv = (ScrollViewer)sender;
+            scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
+            e.Handled = true;
         }
     }
 }
