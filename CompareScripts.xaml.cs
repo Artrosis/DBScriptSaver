@@ -75,6 +75,10 @@ namespace DBScriptSaver
 
         private void GcDBObjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            Cmp_Files();
+        }
+        private void Cmp_Files()
+        {
             if (!File.Exists(FileComparer.GetPath()))
             {
                 //не указана сравнивалка
@@ -114,6 +118,9 @@ namespace DBScriptSaver
         }
         private void gcDBObjects_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Enter)
+                Cmp_Files();
+
             if (e.Key == Key.Up || e.Key == Key.Down)
             {
                 gcDBObjects.CancelEdit();
