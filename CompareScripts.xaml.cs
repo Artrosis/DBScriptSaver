@@ -126,12 +126,16 @@ namespace DBScriptSaver
                 gcDBObjects.CancelEdit();
             }
         }
-
         private void scv_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
             e.Handled = true;
+        }
+        private void gcDBObjects_Loaded(object sender, RoutedEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+            dataGrid.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
     }
 }

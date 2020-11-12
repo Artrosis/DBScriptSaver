@@ -59,10 +59,11 @@
                 <DataGrid
                     x:Name="gcDBObjects"
                     Width="{Binding ElementName=window1, Path=ActualWidth}"
-                    
+                    SelectedIndex="0" Loaded="gcDBObjects_Loaded"
 		            ScrollViewer.CanContentScroll="True" 
 		            ScrollViewer.VerticalScrollBarVisibility="Auto"
 		            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    SelectionUnit="FullRow"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     AutoGenerateColumns="False"
