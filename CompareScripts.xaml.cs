@@ -118,13 +118,14 @@ namespace DBScriptSaver
         }
         private void gcDBObjects_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var u = e.OriginalSource as UIElement;
             if (e.Key == Key.Enter)
-                Cmp_Files();
-
-            if (e.Key == Key.Up || e.Key == Key.Down)
             {
-                gcDBObjects.CancelEdit();
+                Cmp_Files();
+                e.Handled = true;
+                u.MoveFocus(new TraversalRequest(FocusNavigationDirection.Last));
             }
+
             CheckBox cb = new CheckBox();
             if (e.Key == Key.Space && gcDBObjects.SelectedItem != null)
             {
