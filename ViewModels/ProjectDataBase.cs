@@ -105,11 +105,6 @@ namespace DBScriptSaver.ViewModels
             string objectFileName = obj.FileName;
             bool delete = !File.Exists(SourceFolder + objectFileName);
 
-            if (MessageBox.Show("Отменить изменения в базе данных?", "Отмена изменений", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-            {
-                return;
-            }
-
             string Script = delete ? obj.ScriptText 
                                     : File.ReadAllText(SourceFolder + objectFileName);
 
@@ -182,12 +177,19 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
+        [JsonIgnore]
         public string BaseFolder => Project.Path + System.IO.Path.DirectorySeparatorChar + Path + System.IO.Path.DirectorySeparatorChar;
+        [JsonIgnore]
         public string SourceFolder => BaseFolder + @"source" + System.IO.Path.DirectorySeparatorChar;
+        [JsonIgnore]
         public string ChangesFolder => BaseFolder + @"changes" + System.IO.Path.DirectorySeparatorChar;
+        [JsonIgnore]
         public string TableFolder => BaseFolder + @"tables" + System.IO.Path.DirectorySeparatorChar;
+        [JsonIgnore]
         public string ChangesXML => ChangesFolder + @"changes.xml";
+        [JsonIgnore]
         public string FilterFile => BaseFolder + @"ObjectsFilter.cfg";
+        [JsonIgnore]
         public string DependenciesFile => BaseFolder + @"Dependencies.cfg";
 
         internal void UpdateDBObjects()

@@ -24,9 +24,6 @@ namespace DBScriptSaver
             Vm = viewModel;
 
             DataContext = Vm;
-
-            cmbServers.ItemsSource = Vm.EditServers;
-            cmbServers.DisplayMemberPath = "Name";
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
@@ -62,6 +59,14 @@ namespace DBScriptSaver
             Vm.Projects.Add(new Project(Vm));
         }
         ProjectServer CurServer => gcServers.SelectedItem as ProjectServer;
+        private void ServerDelete_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Удалить сервер?", "Внимание!", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.OK)
+            {
+                Vm.Servers.Remove(CurServer);
+            }
+        }
         private void pwdBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
             CurServer.DBPassword = Cryptography.Encrypt((sender as PasswordBox).Password, GetSalt());

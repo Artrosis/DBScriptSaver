@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -35,34 +35,8 @@ namespace DBScriptSaver
             InitializeComponent();
 
             DataContext = proj;
-
-            cmbDBNames.ItemsSource = proj.Server.GetNamesOfDB();
-
-            List_ofPath = GetPathsForDB(@"" + project.Path);
-            cmbDBPath.ItemsSource = List_ofPath;
         }
-
-        public List<string> dirlist = new List<string>();
-        public List<string> GetPathsForDB(string path)
-        {
-
-            List<string> list = new List<string>();
-
-            list.AddRange(Directory.GetDirectories(path, "changes*", SearchOption.AllDirectories)
-             .Concat(Directory.GetDirectories(path, "source*", SearchOption.AllDirectories))
-             .Concat(Directory.GetDirectories(path, "tables*", SearchOption.AllDirectories)));
-
-
-            foreach (var item in list)
-            {
-
-                var dir = System.IO.Path.GetDirectoryName(item);
-                var dirparent = System.IO.Path.GetDirectoryName(dir);
-                dirlist.Add(System.IO.Path.GetFileName(dirparent) +'\\'+ System.IO.Path.GetFileName(dir));
-            }
-
-            return dirlist.Union(dirlist).ToList();
-        }
+        
         private ProjectDataBase SelectedBase => gcDataBases.SelectedItem as ProjectDataBase;
 
         private void EditDBObjects_Click(object sender, RoutedEventArgs e)
@@ -125,6 +99,19 @@ namespace DBScriptSaver
                 return;
             }
             project.DataBases.Remove(SelectedBase);
+        }
+
+        private void cmbPath_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (gcDataBases.SelectedItem == null)
+            {
+                return;
+            }
+            var s = ((ComboBox)sender).Text;
+            if (!string.IsNullOrEmpty(s))
+            {
+                ((ProjectDataBase)(gcDataBases.SelectedItem)).Path = s;
+            }
         }
     }
 }

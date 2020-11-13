@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Data;
+using SysPath = System.IO.Path;
 
 namespace DBScriptSaver.ViewModels
 {
@@ -48,6 +51,25 @@ namespace DBScriptSaver.ViewModels
         public override string ToString()
         {
             return Name;
+        }
+        [JsonIgnore]
+        public List<string> DBPaths
+        { 
+            get
+            {
+                List<string> fullPaths = new List<string>();
+
+                fullPaths.AddRange(Directory.GetDirectories(Path, "changes*", SearchOption.AllDirectories)
+                                    .Concat(Directory.GetDirectories(Path, "source*", SearchOption.AllDirectories))
+                                    .Concat(Directory.GetDirectories(Path, "tables*", SearchOption.AllDirectories)));
+
+                return fullPaths
+                           .Select(p => SysPath.GetDirectoryName(p))
+                           .Distinct()
+                           .Select(p => p.Replace(Path, ""))
+                           .Where(p => p.Length > 0)
+                           .ToList();
+            }
         }
     }
 }
