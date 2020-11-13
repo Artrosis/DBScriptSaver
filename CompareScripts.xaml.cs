@@ -125,6 +125,12 @@ namespace DBScriptSaver
             {
                 gcDBObjects.CancelEdit();
             }
+            CheckBox cb = new CheckBox();
+            if (e.Key == Key.Space && gcDBObjects.SelectedItem != null)
+            {
+                cb = gcDBObjects.Columns[3].GetCellContent(gcDBObjects.SelectedItem) as CheckBox;
+                cb.IsChecked = !cb.IsChecked;
+            }
         }
         private void scv_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
