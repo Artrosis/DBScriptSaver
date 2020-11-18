@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DBScriptSaver"
         mc:Ignorable="d"  
         WindowStartupLocation="CenterScreen"
-        Title="Изменения" Height="450" Width="800" x:Name="Window1">
+        Title="Изменения" Height="450" Width="800" x:Name="window1">
     <Grid
         Height="Auto"
         Background="AliceBlue"
@@ -78,13 +78,51 @@
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding Path=ObjectType}"
-                            Header="Тип"
-                            IsReadOnly="True"/>
+                            IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Тип" />
+                                    <Button Name="btnTypeFilter" 
+                                            Margin="3,0,0,0" 
+                                            Click="btnTypeFilter_Click" 
+                                            Width="67">
+                                        <Button.Template>
+                                            <ControlTemplate>
+                                                <Image Source="/img/filter.png" 
+                                                       Width="Auto" 
+                                                       Height="17" 
+                                                       Margin="89,0,-91,0" />
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding Path=ChangeState}"
-                            Header="Состояние"
-                            IsReadOnly="True"/>
+                            IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Состояние" />
+                                    <Button 
+                                        Name="btnStateFilter"
+                                        Click="btnStateFilter_Click" 
+                                        Width="65"  
+                                        Margin="3,0,0,0">
+                                        <Button.Template>
+                                            <ControlTemplate>
+                                                <Image 
+                                                    Source="/img/filter.png" 
+                                                    Width="Auto" 
+                                                    Height="17" 
+                                                    Margin="65,0,-55,0"/>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
                         <DataGridCheckBoxColumn
                             Width="auto"
                             Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
@@ -108,16 +146,43 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                <Popup x:Name="popType" Width="300" Height="150" Placement="Bottom" MouseLeave="popGrid_MouseLeave" Loaded="popType_Loaded">
+                    <Border Background="White" BorderBrush="Gray">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel x:Name="filterTypes" DockPanel.Dock="Top">
+                            </StackPanel>
+                            <Button x:Name="btnApplyType" Grid.Row="2" Margin="10,10.2,10,10" Click="btnApplyType_Click">Применить</Button>
+                        </Grid>
+                    </Border>
+                </Popup>
+                <Popup x:Name="popState" Width="300" Height="100" Placement="Bottom" MouseLeave="popGrid_MouseLeave" Loaded="popState_Loaded">
+                    <Border Background="White" BorderBrush="Gray">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel x:Name="filterStates" DockPanel.Dock="Top">
+                            </StackPanel>
+                            <Button x:Name="btnApplyState" Grid.Row="2" Margin="10,10.2,10,10" Click="btnApplyState_Click">Применить</Button>
+                        </Grid>
+                    </Border>
+                </Popup>
             </StackPanel>
-
         </ScrollViewer>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
-                <Button Width="75"
+            <Button Width="75"
                 Height="23"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Click="btnOK_Click"
                 Content="OK"/>
-            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>

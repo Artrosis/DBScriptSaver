@@ -1,6 +1,9 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,7 +22,6 @@ namespace DBScriptSaver
     {
         private ProjectDataBase DB;
         System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-
         public CompareScripts()
         {
             InitializeComponent();
@@ -156,6 +158,86 @@ namespace DBScriptSaver
         {
             DataGrid dataGrid = sender as DataGrid;
             dataGrid.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+        }
+        private void popGrid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Point leavePoint1 = e.GetPosition(btnTypeFilter);
+            Point leavePoint2 = e.GetPosition(btnStateFilter);
+            if (leavePoint1.X > btnTypeFilter.ActualWidth || leavePoint2.X > btnStateFilter.ActualWidth)
+            {
+                popType.IsOpen = false;
+                popState.IsOpen = false;
+            }
+        }
+        public ICollectionView FilterCollectionView { get; private set; }
+        private void btnTypeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            popType.PlacementTarget = sender as Button;
+            popType.IsOpen = true;
+        }
+        private void btnApplyType_Click(object sender, RoutedEventArgs e)
+        {
+            popType.IsOpen = false;
+
+            var checkedTypes = new List<string>();
+            foreach (CheckBox checkBox in filterTypes.Children)
+            {
+                if (checkBox.IsChecked == true)
+                {
+                    checkedTypes.Add((string)checkBox.Content);
+                }
+            }
+            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
+            FilterCollectionView.Filter = t => checkedTypes.Contains((t as ScriptWrapper).ObjectType);
+        }
+        private void popType_Loaded(object sender, RoutedEventArgs e)
+        {
+            var rows = gcDBObjects.ItemsSource.OfType<ScriptWrapper>();
+            var cols = rows.Select(t => t.ObjectType).Distinct();
+
+            foreach (var type in cols)
+            {
+                var cb = new CheckBox
+                {
+                    IsChecked = true,
+                    Content = type
+                };
+                filterTypes.Children.Add(cb);
+            }
+        }
+        private void btnStateFilter_Click(object sender, RoutedEventArgs e)
+        {
+            popState.PlacementTarget = sender as Button;
+            popState.IsOpen = true;
+        }
+        private void btnApplyState_Click(object sender, RoutedEventArgs e)
+        {
+            popState.IsOpen = false;
+
+            var checkedTypes = new List<ChangeType>();
+            foreach (CheckBox checkBox in filterStates.Children)
+            {
+                if (checkBox.IsChecked == true)
+                {
+                    checkedTypes.Add((ChangeType)checkBox.Content);
+                }
+            }
+            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
+            FilterCollectionView.Filter = t  => checkedTypes.Contains((t as ScriptWrapper).ChangeState);
+        }
+        private void popState_Loaded(object sender, RoutedEventArgs e)
+        {
+            var rows = (Enum.GetValues(typeof(ChangeType)).Cast<ChangeType>());
+
+            foreach (var text in rows)
+            {
+                var cb = new CheckBox
+                {
+                    IsChecked = true,
+                    Content = text
+                };
+                filterStates.Children.Add(cb);
+            }
         }
     }
 }
