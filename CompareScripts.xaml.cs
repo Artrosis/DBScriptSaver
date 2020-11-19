@@ -159,26 +159,11 @@ namespace DBScriptSaver
             DataGrid dataGrid = sender as DataGrid;
             dataGrid.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
-        private void popGrid_MouseLeave(object sender, MouseEventArgs e)
+        private void popType_MouseLeave(object sender, MouseEventArgs e)
         {
-            Point leavePoint1 = e.GetPosition(btnTypeFilter);
-            Point leavePoint2 = e.GetPosition(btnStateFilter);
-            if (leavePoint1.X > btnTypeFilter.ActualWidth || leavePoint2.X > btnStateFilter.ActualWidth)
-            {
+            Point leavePoint = e.GetPosition(btnTypeFilter);
+            if (leavePoint.X > btnTypeFilter.ActualWidth)
                 popType.IsOpen = false;
-                popState.IsOpen = false;
-            }
-        }
-        public ICollectionView FilterCollectionView { get; private set; }
-        private void btnTypeFilter_Click(object sender, RoutedEventArgs e)
-        {
-            popType.PlacementTarget = sender as Button;
-            popType.IsOpen = true;
-        }
-        private void btnApplyType_Click(object sender, RoutedEventArgs e)
-        {
-            popType.IsOpen = false;
-
             var checkedTypes = new List<string>();
             foreach (CheckBox checkBox in filterTypes.Children)
             {
@@ -189,6 +174,29 @@ namespace DBScriptSaver
             }
             FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
             FilterCollectionView.Filter = t => checkedTypes.Contains((t as ScriptWrapper).ObjectType);
+        }
+        private void popState_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Point leavePoint = e.GetPosition(btnStateFilter);
+            if (leavePoint.X > btnTypeFilter.ActualWidth)
+                popState.IsOpen = false;
+
+            var checkedTypes = new List<ChangeType>();
+            foreach (CheckBox checkBox in filterStates.Children)
+            {
+                if (checkBox.IsChecked == true)
+                {
+                    checkedTypes.Add((ChangeType)checkBox.Content);
+                }
+            }
+            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
+            FilterCollectionView.Filter = t => checkedTypes.Contains((t as ScriptWrapper).ChangeState);
+        }
+        public ICollectionView FilterCollectionView { get; private set; }
+        private void btnTypeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            popType.PlacementTarget = sender as Button;
+            popType.IsOpen = true;
         }
         private void popType_Loaded(object sender, RoutedEventArgs e)
         {
@@ -209,21 +217,6 @@ namespace DBScriptSaver
         {
             popState.PlacementTarget = sender as Button;
             popState.IsOpen = true;
-        }
-        private void btnApplyState_Click(object sender, RoutedEventArgs e)
-        {
-            popState.IsOpen = false;
-
-            var checkedTypes = new List<ChangeType>();
-            foreach (CheckBox checkBox in filterStates.Children)
-            {
-                if (checkBox.IsChecked == true)
-                {
-                    checkedTypes.Add((ChangeType)checkBox.Content);
-                }
-            }
-            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
-            FilterCollectionView.Filter = t  => checkedTypes.Contains((t as ScriptWrapper).ChangeState);
         }
         private void popState_Loaded(object sender, RoutedEventArgs e)
         {
