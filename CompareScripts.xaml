@@ -82,15 +82,17 @@
                             <DataGridTextColumn.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Тип" />
-                                    <Button Name="btnTypeFilter" 
-                                            Margin="3,0,0,0" 
-                                            Click="btnTypeFilter_Click" 
-                                            Width="67">
+                                    <Button 
+                                        Name="btnTypeFilter" 
+                                        Margin="3,0,0,0" 
+                                        Click="btnTypeFilter_Click"
+                                        Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
                                                 <Image Source="/img/filter.png" 
                                                        Width="Auto" 
-                                                       Height="16"/>
+                                                       Height="16"
+                                                       HorizontalAlignment="Right"/>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
@@ -108,14 +110,15 @@
                                     <Button 
                                         Name="btnStateFilter"
                                         Click="btnStateFilter_Click" 
-                                        Width="65"  
-                                        Margin="3,0,0,0">
+                                        Width="18"
+                                        Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
                                                 <Image 
                                                     Source="/img/filter.png" 
                                                     Width="Auto" 
-                                                    Height="16" />
+                                                    Height="16" 
+                                                    HorizontalAlignment="Right"/>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
@@ -145,20 +148,41 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Popup x:Name="popType" Width="auto" Height="auto" Placement="Bottom" MouseLeave="popType_MouseLeave" Loaded="popType_Loaded">
-                    <Border Background="White" BorderBrush="Green">
+                <Popup 
+                    x:Name="popType" 
+                    Width="auto"
+                    Height="auto"
+                    Placement="Bottom" 
+                    MouseLeave="popType_MouseLeave"
+                    Loaded="popType_Loaded"
+                    StaysOpen="False">
+                    <Border Background="White" BorderBrush="Black">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-                            <StackPanel x:Name="filterTypes" DockPanel.Dock="Top">
+                            <StackPanel x:Name="filterTypes" DockPanel.Dock="Top" >
+                                <CheckBox
+                                    x:Name="cbSelectAllTypes"
+                                    Width="auto"
+                                    IsChecked="True"
+                                    Click="cbSelectAllTypes_Click"
+                                    Cursor="Hand">
+                                    Выбрать все
+                                </CheckBox>
                             </StackPanel>
                         </Grid>
                     </Border>
                 </Popup>
-                <Popup x:Name="popState" Width="auto" Height="auto" Placement="Bottom" MouseLeave="popState_MouseLeave" Loaded="popState_Loaded" >
+                <Popup x:Name="popState"
+                       Width="auto" 
+                       Height="auto"
+                       Placement="Bottom" 
+                       MouseLeave="popState_MouseLeave" 
+                       Loaded="popState_Loaded"
+                       StaysOpen="False">
                     <Border Background="White" BorderBrush="Gray">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -167,6 +191,13 @@
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
                             <StackPanel x:Name="filterStates" DockPanel.Dock="Top">
+                                <CheckBox
+                                    x:Name="cbSelectAllStates"
+                                    Width="auto"
+                                    IsChecked="True"
+                                    Click="cbSelectAllStates_Click">
+                                    Выбрать все
+                                </CheckBox>
                             </StackPanel>
                         </Grid>
                     </Border>
