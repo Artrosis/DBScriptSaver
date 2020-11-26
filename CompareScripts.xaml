@@ -58,7 +58,7 @@
                     Text="{Binding theText, Delay=400, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGrid
                     x:Name="gcDBObjects"
-                    Width="{Binding ElementName=window1, Path=ActualWidth}"
+                    Width="auto"
                     SelectedIndex="0" Loaded="gcDBObjects_Loaded"
 		            ScrollViewer.CanContentScroll="True" 
 		            ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -86,6 +86,7 @@
                                         Name="btnTypeFilter" 
                                         Margin="3,0,0,0" 
                                         Click="btnTypeFilter_Click"
+                                        MouseLeave="btnTypeFilter_MouseLeave"
                                         Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
@@ -152,10 +153,11 @@
                     x:Name="popType" 
                     Width="auto"
                     Height="auto"
-                    Placement="Bottom" 
+                    Placement="Center" 
                     MouseLeave="popType_MouseLeave"
                     Loaded="popType_Loaded"
-                    StaysOpen="False">
+                    AllowsTransparency="True"
+                    StaysOpen="True">
                     <Border Background="White" BorderBrush="Black">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -168,6 +170,8 @@
                                     x:Name="cbSelectAllTypes"
                                     Width="auto"
                                     IsChecked="True"
+                                    Checked="cb_CheckedType"    
+                                    Unchecked="cb_CheckedType"
                                     Click="cbSelectAllTypes_Click"
                                     Cursor="Hand">
                                     Выбрать все
@@ -177,12 +181,12 @@
                     </Border>
                 </Popup>
                 <Popup x:Name="popState"
-                       Width="auto" 
-                       Height="auto"
-                       Placement="Bottom" 
-                       MouseLeave="popState_MouseLeave" 
-                       Loaded="popState_Loaded"
-                       StaysOpen="False">
+                    Width="auto" 
+                    Height="auto"
+                    Placement="Center" 
+                    MouseLeave="popState_MouseLeave" 
+                    Loaded="popState_Loaded"
+                    AllowsTransparency="True">
                     <Border Background="White" BorderBrush="Gray">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -195,6 +199,8 @@
                                     x:Name="cbSelectAllStates"
                                     Width="auto"
                                     IsChecked="True"
+                                    Checked="cb_CheckedState"
+                                    Unchecked="cb_CheckedState"
                                     Click="cbSelectAllStates_Click">
                                     Выбрать все
                                 </CheckBox>
