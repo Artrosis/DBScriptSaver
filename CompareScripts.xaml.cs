@@ -27,7 +27,7 @@ namespace DBScriptSaver
             InitializeComponent();
             timer.Tick += ApplyTextFilter;
             timer.Interval = new TimeSpan(0, 0, 0, 0, 400);
-        }      
+        }
         public ICollectionView FilterCollectionView { get; private set; }
         private void PopFilter()
         {
@@ -41,9 +41,8 @@ namespace DBScriptSaver
                 if (checkBox.Name != "cbSelectAllStates" && checkBox.IsChecked == true)
                     checkedState.Add((ChangeType)checkBox.Content);
 
-            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
             FilterCollectionView.Filter += t => checkedTypes.Contains((t as ScriptWrapper).ObjectType) &&
-                                                checkedState.Contains((t as ScriptWrapper).ChangeState);
+                               					checkedState.Contains((t as ScriptWrapper).ChangeState);
         }
         private void ApplyTextFilter(object sender, EventArgs e)
         {
@@ -58,13 +57,16 @@ namespace DBScriptSaver
         {
             var o = obj as ScriptWrapper;
 
-            if (tbFilter.Text.Length > 0)
-            {
-                if (!o.FileName.ToUpper().Contains(tbFilter.Text.ToUpper()))
+            if (filterTypes.Children.OfType<CheckBox>().Where(cb => cb.Name != "cbSelectAllTypes" && cb.IsChecked == true).Count() > 0 &&
+                filterStates.Children.OfType<CheckBox>().Where(cb => cb.Name != "cbSelectAllStates" && cb.IsChecked == true).Count() > 0)
+                if (tbFilter.Text.Length > 0)
                 {
-                    return false;
+                    if (!o.FileName.ToUpper().Contains(tbFilter.Text.ToUpper()))
+                    {
+                        return false;
+                    }
+
                 }
-            }
             return true;
         }
         public CompareScripts(ProjectDataBase db) : this()
@@ -174,6 +176,7 @@ namespace DBScriptSaver
         {
             DataGrid dataGrid = sender as DataGrid;
             dataGrid.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            FilterCollectionView = CollectionViewSource.GetDefaultView(gcDBObjects.ItemsSource);
         }
         private void popType_MouseLeave(object sender, MouseEventArgs e)
         {
