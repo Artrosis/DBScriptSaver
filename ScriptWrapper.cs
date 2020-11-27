@@ -8,7 +8,7 @@ namespace DBScriptSaver
     [AddINotifyPropertyChangedInterface]
     internal class ScriptWrapper
     {
-        private Script t;
+        private readonly Script t;
         public Script getScript
         {
             get

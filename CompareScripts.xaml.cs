@@ -1,14 +1,19 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace DBScriptSaver
 {
@@ -17,9 +22,8 @@ namespace DBScriptSaver
     /// </summary>
     public partial class CompareScripts : Window
     {
-        private ProjectDataBase DB;
-        System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
-
+        private readonly ProjectDataBase DB;
+        readonly DispatcherTimer timer = new DispatcherTimer();
         public CompareScripts()
         {
             InitializeComponent();
@@ -46,9 +50,33 @@ namespace DBScriptSaver
                     return false;
                 }
             }
+
+            var filteredTypes = filterTypes.Children.OfType<CheckBox>();
+
+            if (!filteredTypes.Any(cb => (cb == cbSelectAllTypes) && cb.IsChecked == true))
+            {
+                if (!filteredTypes.Any(cb => cb != cbSelectAllTypes 
+                                        && cb.IsChecked == true 
+                                        && (cb.Content as string) == o.ObjectType))
+                {
+                    return false;
+                }
+            }
+
+            var filteredStates = filterStates.Children.OfType<CheckBox>();
+
+            if (!filteredStates.Any(cb => (cb == cbSelectAllStates) && cb.IsChecked == true))
+            {
+                if (!filteredStates.Any(cb => cb != cbSelectAllStates
+                                        && (cb.IsChecked == true)
+                                        && (cb.Content as ChangeType?) == o.ChangeState))
+                {
+                    return false;
+                }
+            }
+                
             return true;
         }
-
         public CompareScripts(ProjectDataBase db) : this()
         {
             Mouse.OverrideCursor = Cursors.Wait;
@@ -139,10 +167,9 @@ namespace DBScriptSaver
                 u.MoveFocus(new TraversalRequest(FocusNavigationDirection.Last));
             }
 
-            CheckBox cb = new CheckBox();
             if (e.Key == Key.Space && gcDBObjects.SelectedItem != null)
             {
-                cb = gcDBObjects.Columns[3].GetCellContent(gcDBObjects.SelectedItem) as CheckBox;
+                CheckBox cb = gcDBObjects.Columns[3].GetCellContent(gcDBObjects.SelectedItem) as CheckBox;
                 cb.IsChecked = !cb.IsChecked;
             }
         }
@@ -156,6 +183,110 @@ namespace DBScriptSaver
         {
             DataGrid dataGrid = sender as DataGrid;
             dataGrid.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+        }
+        private void btnTypeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            popType.IsOpen = true;
+        }
+        private void popType_Loaded(object sender, RoutedEventArgs e)
+        {
+            var rows = gcDBObjects.ItemsSource.OfType<ScriptWrapper>();
+            var types = rows.Select(t => t.ObjectType).Distinct();
+
+            foreach (var type in types)
+            {
+                var cb = new CheckBox
+                {
+                    IsChecked = false,
+                    Content = type,
+                    Cursor = Cursors.Hand
+                };
+                cb.Checked += cb_CheckedType;
+                cb.Unchecked += cb_CheckedType;
+                filterTypes.Children.Add(cb);
+            }
+        }
+        private void cb_CheckedType(object sender, RoutedEventArgs e)
+        {
+            cbSelectAllTypes.IsChecked = !filterTypes
+                                            .Children
+                                            .OfType<CheckBox>()
+                                            .Any(cb => cb != cbSelectAllTypes && cb.IsChecked == true);
+            timer.Stop();
+            timer.Start();
+        }
+        private void btnStateFilter_Click(object sender, RoutedEventArgs e)
+        {
+            popState.IsOpen = true;
+        }
+        private void popState_Loaded(object sender, RoutedEventArgs e)
+        {
+            var rows = (Enum.GetValues(typeof(ChangeType)).Cast<ChangeType>());
+            foreach (var state in rows)
+            {
+                var cb = new CheckBox
+                {
+                    IsChecked = false,
+                    Content = state,
+                    Cursor = Cursors.Hand
+                };
+                cb.Checked += cb_CheckedState;
+                cb.Unchecked += cb_CheckedState;
+                filterStates.Children.Add(cb);
+            }
+        }
+        private void cb_CheckedState(object sender, RoutedEventArgs e)
+        {
+            cbSelectAllStates.IsChecked = !filterStates
+                                            .Children
+                                            .OfType<CheckBox>()
+                                            .Any(cb => cb != cbSelectAllStates && cb.IsChecked == true);
+            timer.Stop();
+            timer.Start();
+        }
+        private void cbSelectAllTypes_Click(object sender, RoutedEventArgs e)
+        {
+            if (cbSelectAllTypes.IsChecked != true)
+            {
+                return;
+            }
+
+            foreach (CheckBox cb in filterTypes.Children.OfType<CheckBox>().Where(chb => chb != cbSelectAllTypes))
+            {
+                cb.Checked -= cb_CheckedType;
+                cb.Unchecked -= cb_CheckedType;
+                try
+                {
+                    cb.IsChecked = false;
+                }
+                finally
+                {
+                    cb.Checked += cb_CheckedType;
+                    cb.Unchecked += cb_CheckedType;
+                }
+            }
+        }
+        private void cbSelectAllStates_Click(object sender, RoutedEventArgs e)
+        {
+            if (cbSelectAllStates.IsChecked != true)
+            {
+                return;
+            }
+
+            foreach (CheckBox cb in filterStates.Children.OfType<CheckBox>().Where(chb => chb != cbSelectAllStates))
+            {
+                cb.Checked -= cb_CheckedState;
+                cb.Unchecked -= cb_CheckedState;
+                try
+                {
+                    cb.IsChecked = false;
+                }
+                finally
+                {
+                    cb.Checked += cb_CheckedState;
+                    cb.Unchecked += cb_CheckedState;
+                }
+            }
         }
     }
 }

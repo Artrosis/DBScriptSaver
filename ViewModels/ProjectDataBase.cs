@@ -454,9 +454,7 @@ namespace DBScriptSaver.ViewModels
         public Migration MakeCreateTableMigration(Server myServer, Table tbl)
         {
             StringBuilder sb = new StringBuilder();
-            StringBuilder sbConstraints = new StringBuilder();
-            Scripter createScrp = default(Scripter);
-            createScrp = new Scripter(myServer);
+            Scripter createScrp = new Scripter(myServer);
             createScrp.Options.ScriptSchema = true;
             createScrp.Options.ScriptBatchTerminator = true;
             createScrp.Options.DriAll = true;
