@@ -75,57 +75,86 @@
                             Binding="{Binding Path=FileName}"
                             Header="Объект"
                             IsReadOnly="True"/>
-                        <DataGridTextColumn
+                        <DataGridTemplateColumn
                             Width="*"
-                            Binding="{Binding Path=ObjectType}"
                             IsReadOnly="True">
-                            <DataGridTextColumn.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Тип" />
+                            <DataGridColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </DataGridColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition></ColumnDefinition>
+                                        <ColumnDefinition></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Тип" Width="Auto"  />
                                     <Button 
-                                        Name="btnTypeFilter" 
-                                        Margin="3,0,0,0" 
+                                        Grid.Column="1"
+                                        Name="btnTypeFilter"
+                                        Margin="3,0,0,0"
                                         Click="btnTypeFilter_Click"
-                                        MouseLeave="btnTypeFilter_MouseLeave"
                                         Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
-                                                <Image Source="/img/filter.png" 
-                                                       Width="Auto" 
-                                                       Height="16"
-                                                       HorizontalAlignment="Right"/>
+                                                <Image 
+                                                    Source="/img/filter.png"
+                                                    Width="Auto"
+                                                    Height="8"
+                                                    HorizontalAlignment="Right" 
+                                                    VerticalAlignment="Top"/>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-                                </StackPanel>
-                            </DataGridTextColumn.Header>
-
-                        </DataGridTextColumn>
-                        <DataGridTextColumn
+                                </Grid>
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Path=ObjectType}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn
                             Width="*"
-                            Binding="{Binding Path=ChangeState}"
                             IsReadOnly="True">
-                            <DataGridTextColumn.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Состояние" />
+                            <DataGridColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </DataGridColumn.HeaderStyle>
+                            <DataGridTemplateColumn.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition></ColumnDefinition>
+                                        <ColumnDefinition></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Состояние" Grid.Column="0" Width="Auto" />
                                     <Button 
+                                        Grid.Column="1"
                                         Name="btnStateFilter"
                                         Click="btnStateFilter_Click" 
-                                        Width="18"
+                                        Width="Auto"
                                         Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
                                                 <Image 
                                                     Source="/img/filter.png" 
                                                     Width="Auto" 
-                                                    Height="16" 
-                                                    HorizontalAlignment="Right"/>
+                                                    Height="8" 
+                                                    HorizontalAlignment="Right" 
+                                                    VerticalAlignment="Top"/>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-                                </StackPanel>
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
+                                </Grid>
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Path=ChangeState}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridCheckBoxColumn
                             Width="auto"
                             Binding="{Binding Path=Save, UpdateSourceTrigger=PropertyChanged}"
@@ -153,11 +182,11 @@
                     x:Name="popType" 
                     Width="auto"
                     Height="auto"
-                    Placement="Center" 
-                    MouseLeave="popType_MouseLeave"
+                    Placement="MousePoint" 
+                    PopupAnimation="Slide"
+                    StaysOpen="False"
                     Loaded="popType_Loaded"
-                    AllowsTransparency="True"
-                    StaysOpen="True">
+                    AllowsTransparency="True">
                     <Border Background="White" BorderBrush="Black">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -165,13 +194,13 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-                            <StackPanel x:Name="filterTypes" DockPanel.Dock="Top" >
+                            <StackPanel 
+                                x:Name="filterTypes" 
+                                DockPanel.Dock="Top" >
                                 <CheckBox
                                     x:Name="cbSelectAllTypes"
                                     Width="auto"
                                     IsChecked="True"
-                                    Checked="cb_CheckedType"    
-                                    Unchecked="cb_CheckedType"
                                     Click="cbSelectAllTypes_Click"
                                     Cursor="Hand">
                                     Выбрать все
@@ -180,11 +209,13 @@
                         </Grid>
                     </Border>
                 </Popup>
-                <Popup x:Name="popState"
+                <Popup 
+                    x:Name="popState"
                     Width="auto" 
                     Height="auto"
-                    Placement="Center" 
-                    MouseLeave="popState_MouseLeave" 
+                    Placement="MousePoint"
+                    PopupAnimation="Slide"
+                    StaysOpen="False"
                     Loaded="popState_Loaded"
                     AllowsTransparency="True">
                     <Border Background="White" BorderBrush="Gray">
@@ -199,8 +230,6 @@
                                     x:Name="cbSelectAllStates"
                                     Width="auto"
                                     IsChecked="True"
-                                    Checked="cb_CheckedState"
-                                    Unchecked="cb_CheckedState"
                                     Click="cbSelectAllStates_Click">
                                     Выбрать все
                                 </CheckBox>
