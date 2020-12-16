@@ -288,5 +288,14 @@ namespace DBScriptSaver
                 }
             }
         }
+        private void window1_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up || e.Key == Key.Down)
+            {
+                var u = e.OriginalSource as UIElement;
+                u.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                gcDBObjects.BeginEdit();
+            }
+        }
     }
 }

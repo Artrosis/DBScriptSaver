@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:DBScriptSaver"
         mc:Ignorable="d"  
         WindowStartupLocation="CenterScreen"
+        PreviewKeyDown="window1_PreviewKeyDown"
         Title="Изменения" Height="450" Width="800" x:Name="window1">
     <Grid
         Height="Auto"
