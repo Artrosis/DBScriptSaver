@@ -647,6 +647,8 @@ namespace DBScriptSaver.ViewModels
 
             File.WriteAllText(ChangesFolder + NewFileName, migration.Script, new UTF8Encoding(true));
 
+            CreateChangesXML();
+
             XDocument xdoc = XDocument.Load(ChangesXML);
 
             var LastVer = xdoc.Element("project").Elements("ver").Last();
@@ -669,25 +671,35 @@ namespace DBScriptSaver.ViewModels
                 return;
             }
 
-            if (!File.Exists(ChangesXML))
+            if (File.Exists(ChangesXML))
             {
-                XDocument EmptyChanges = new XDocument();
-                XElement project = new XElement("project");
-                project.Add(new XAttribute("name", Project.Name));
+                XDocument xdoc = XDocument.Load(ChangesXML);
 
-                XElement VersionElem = new XElement("ver");
-                VersionElem.Add(new XAttribute("id", "1.0.0.0"));
-                VersionElem.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
-                project.Add(VersionElem);
+                if (xdoc.Elements("project").Count() > 0)
+                {
+                    if (xdoc.Element("project").Elements("ver").Count() > 0)
+                    {
+                        HasChangesXML = true;
+                        return;
+                    }
+                }
 
-                EmptyChanges.Save(ChangesXML);
-
-                HasChangesXML = true;
+                File.Delete(ChangesXML);
             }
-            else
-            {
-                HasChangesXML = true;
-            }
+
+            XDocument EmptyChanges = new XDocument(
+                new XElement("project",
+                    new XAttribute("name", Project.Name),
+                    new XElement("ver",
+                        new XAttribute("id", "1.0.0.0"),
+                        new XAttribute("date", DateTime.Now.ToString("d"))
+                        )
+                    )
+                );
+
+            EmptyChanges.Save(ChangesXML);
+
+            HasChangesXML = true;
         }
 
         public string GetConnectionString()
