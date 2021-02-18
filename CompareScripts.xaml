@@ -98,10 +98,11 @@
                                         Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
-                                                <Image 
+                                                <Image
                                                     Source="/img/filter.png"
                                                     Width="Auto"
-                                                    Height="8"
+                                                    Height="10" 
+                                                    RenderOptions.BitmapScalingMode="Fant"
                                                     HorizontalAlignment="Right" 
                                                     VerticalAlignment="Top"/>
                                             </ControlTemplate>
@@ -138,10 +139,11 @@
                                         Cursor = "Hand">
                                         <Button.Template>
                                             <ControlTemplate>
-                                                <Image 
-                                                    Source="/img/filter.png" 
+                                                <Image
+                                                    Source="/img/filter.png"
                                                     Width="Auto" 
-                                                    Height="8" 
+                                                    Height="10" 
+                                                    RenderOptions.BitmapScalingMode="Fant"
                                                     HorizontalAlignment="Right" 
                                                     VerticalAlignment="Top"/>
                                             </ControlTemplate>
