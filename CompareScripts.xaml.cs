@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace DBScriptSaver
@@ -39,6 +40,9 @@ namespace DBScriptSaver
         {
             (gcDBObjects.ItemsSource as ListCollectionView).Filter = new Predicate<object>(Filter);
         }
+
+        TextBox tbFilter => VisualTreeHelper.GetChild(VisualTreeHelper.GetChild(tbFilterWrapper, 0) as Grid, 0) as TextBox;
+
         private bool Filter(object obj)
         {
             var o = obj as ScriptWrapper;
@@ -91,6 +95,11 @@ namespace DBScriptSaver
             {
                 Mouse.OverrideCursor = null;
             }
+        }
+
+        public void ClearFilter(object sender, RoutedEventArgs e)
+        {
+            tbFilter.Text = "";
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)

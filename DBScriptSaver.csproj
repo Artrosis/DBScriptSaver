@@ -297,22 +297,15 @@
     <Resource Include="img\edit.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="img\Settings.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="img\Refresh.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="img\add_script.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="img\save.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="img\chain.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="img\filter.png" />
+    <Resource Include="img\clear.png" />
+    <Resource Include="img\Settings.png" />
+    <Resource Include="img\chain.png" />
+    <Resource Include="img\add_script.png" />
+    <Resource Include="img\Refresh.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
