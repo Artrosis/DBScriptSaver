@@ -36,8 +36,6 @@ namespace DBScriptSaver
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            dB.CreateChangesXML();
-
             string NewFileName = tbFileName.Text;
             foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars())
             {
