@@ -275,6 +275,11 @@ namespace DBScriptSaver.ViewModels
         {
             UpdateFilterDataFromConfig();
 
+            if (!Directory.Exists(SourceFolder))
+            {
+                Directory.CreateDirectory(SourceFolder);
+            }
+
             DirectoryInfo d = new DirectoryInfo(SourceFolder);
 
             d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
@@ -335,18 +340,31 @@ namespace DBScriptSaver.ViewModels
                                 + @"            ON  o.[schema_id] = s.[schema_id]" + Environment.NewLine
                                 + $"WHERE" + Environment.NewLine;
 
-                var condition = $"sm.object_id IN ({@objects.GetObjectIdString()})";
+                string condition = "";
+
+                if (@objects.Count > 0)
+                {
+                    condition = $"sm.object_id IN ({@objects.GetObjectIdString()})";
+                }
 
                 if (ОтслеживаемыеСхемы != null && ОтслеживаемыеСхемы.Count > 0)
                 {
-                    condition += Environment.NewLine;
-                    condition += $" OR s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
+                    if (condition != "")
+                    {
+                        condition += Environment.NewLine;
+                        condition += " OR ";
+                    }
+                    condition += $"s.[name] IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
                 }
 
                 if (ИгнорируемыеОбъекты != null && ИгнорируемыеОбъекты.Count > 0)
                 {
-                    condition = $@"({condition})" +  Environment.NewLine;
-                    condition += $" AND sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
+                    if (condition != "")
+                    {
+                        condition = $@"({condition})" + Environment.NewLine;
+                        condition += " AND ";
+                    }
+                    condition += $"sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
                 }
 
                 cmd.CommandText += condition;
@@ -644,6 +662,11 @@ namespace DBScriptSaver.ViewModels
         public void AddMigration(Migration migration)
         {
             string NewFileName = migration.Name + ".sql";
+
+            if (!Directory.Exists(ChangesFolder))
+            {
+                Directory.CreateDirectory(ChangesFolder);
+            }
 
             File.WriteAllText(ChangesFolder + NewFileName, migration.Script, new UTF8Encoding(true));
 
