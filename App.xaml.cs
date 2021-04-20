@@ -26,8 +26,10 @@ namespace DBScriptSaver
         {
             try
             {
-                App app = new App();
-                app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                App app = new App
+                {
+                    ShutdownMode = ShutdownMode.OnExplicitShutdown
+                };
 
                 TaskbarIconHelper.CreateTaskbarIcon();
                 app.Run();

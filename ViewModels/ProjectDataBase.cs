@@ -1,8 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBScriptSaver.Helpers;
+using DBScriptSaver.Parse;
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Sdk.Sfc;
 using Microsoft.SqlServer.Management.Smo;
-using Microsoft.SqlServer.Management.SqlParser.Parser;
 using Newtonsoft.Json;
 using PropertyChanged;
 using System;
@@ -441,6 +441,7 @@ namespace DBScriptSaver.ViewModels
                         });
 
                         string tableFileName = TableFolder + fileName;
+
                         if (File.Exists(tableFileName) && script == File.ReadAllText(tableFileName))
                         {
                             continue;
@@ -460,10 +461,10 @@ namespace DBScriptSaver.ViewModels
                         switch (ChangeType)
                         {
                             case ViewModels.ChangeType.Новый:
-                                tblScript.Migration = MakeCreateTableMigration(server, tbl);
+                                tblScript.Migrations = MakeCreateTableMigration(server, tbl);
                                 break;
                             case ViewModels.ChangeType.Изменённый:
-                                tblScript.Migration = MakeAlterTableMigration(server, tbl);
+                                tblScript.Migrations = MakeAlterTableMigration(server, tbl, File.ReadAllText(tableFileName));
                                 break;
                         }
 
@@ -474,132 +475,46 @@ namespace DBScriptSaver.ViewModels
                 return UpdateScripts;
             }
         }
-
-        private Migration MakeAlterTableMigration(Server server, Table tbl)
+        private List<Migration> MakeAlterTableMigration(Server server, Table tbl, string sourceScript)
         {
-            StringBuilder sb = new StringBuilder();
-            Scripter createScrp = new Scripter(server);
-            createScrp.Options.ScriptSchema = true;
-            createScrp.Options.ScriptBatchTerminator = true;
-            createScrp.Options.DriAll = true;
-            createScrp.Options.IncludeIfNotExists = true;
-            createScrp.Options.ExtendedProperties = true;
-
-            foreach (string s in createScrp.EnumScript(new Urn[] { tbl.Urn }))
-            {
-                sb.AppendLine(s);
-            }
-
-            string sql = sb.ToString();
-
-            var scanner = new Scanner(new ParseOptions());
-            int scannerState = 0;
-            scanner.SetSource(sql, 0);
-            var allTokens = new List<MSSQL_Token_JS>();
-            MSSQL_Token_JS curToken = null;
-            do
-            {
-                curToken = MSSQL_Token_JS.GetNext(scanner, sql, ref scannerState);
-                allTokens.Add(curToken);
-            }
-            while (curToken.Value != Tokens.EOF);
-
-            return null;
+            return TableComparer.GetChanges(server.GetScript(tbl), sourceScript);
         }
-
-        public Migration MakeCreateTableMigration(Server myServer, Table tbl)
+        public List<Migration> MakeCreateTableMigration(Server myServer, Table tbl)
         {
-            StringBuilder sb = new StringBuilder();
-            Scripter createScrp = new Scripter(myServer);
-            createScrp.Options.ScriptSchema = true;
-            createScrp.Options.ScriptBatchTerminator = true;
-            createScrp.Options.DriAll = true;
-            createScrp.Options.IncludeIfNotExists = true;
-            createScrp.Options.ExtendedProperties = true;
+            return new List<Migration>()
+            { 
+                new Migration()
+                {
+                    Name = FileHelper.CreateMigrationName(tbl.Name),
+                    Script = myServer.GetScript(tbl) 
+                }
+            };
+        }        
 
-            foreach (string s in createScrp.EnumScript(new Urn[] { tbl.Urn }))
-            {
-                sb.AppendLine(s);
-            }
-
-            string MigrationName = $@"Create_{tbl.Name}";
-
-            int postIndex = 0;
-            string postFix = "";
-
-            while (File.Exists(MigrationName + postFix))
-            {
-                postIndex++;
-                postFix = $@"({postIndex})";
-            }
-
-            MigrationName += postFix;
-
-            return new Migration() { Name = MigrationName, Script = sb.ToString() };
-        }
+        private static readonly Dictionary<string, string> TypeDescriptions = new Dictionary<string, string>()
+        {
+            { "C ", @"Ограничение: проверка"},
+            { "D ", @"Ограничение: значение по умолчанию"},
+            { "F ", @"Внешний ключ"},
+            { "FN", @"Функция"},
+            { "IF", @"Встраиваемая табличная функция"},
+            { "IT", @"Внутренняя таблица"},
+            { "P ", @"Хранимая процедура"},
+            { "PK", @"Основной ключ"},
+            { "S ", @"Системная таблица"},
+            { "SN", @"Синоним"},
+            { "SQ", @"Служба очередей"},
+            { "TF", @"Табличная функция"},
+            { "TR", @"Триггер"},
+            { "TT", @"Табличный тип"},
+            { "U ", @"Таблица"},
+            { "UQ", @"Ограничение на уникальность"},
+            { "V ", @"Представление"}
+        };
 
         private static string objectTypeDescription(string type)
         {
-            string objectType;
-            switch (type)
-            {
-                case "C ":
-                    objectType = @"Ограничение: проверка";
-                    break;
-                case "D ":
-                    objectType = @"Ограничение: значение по умолчанию";
-                    break;
-                case "F ":
-                    objectType = @"Внешний ключ";
-                    break;
-                case "FN":
-                    objectType = @"Функция";
-                    break;
-                case "IF":
-                    objectType = @"Встраиваемая табличная функция";
-                    break;
-                case "IT":
-                    objectType = @"Внутренняя таблица";
-                    break;
-                case "P ":
-                    objectType = @"Хранимая процедура";
-                    break;
-                case "PK":
-                    objectType = @"Основной ключ";
-                    break;
-                case "S ":
-                    objectType = @"Системная таблица";
-                    break;
-                case "SN":
-                    objectType = @"Синоним";
-                    break;
-                case "SQ":
-                    objectType = @"Служба очередей";
-                    break;
-                case "TF":
-                    objectType = @"Табличная функция";
-                    break;
-                case "TR":
-                    objectType = @"Триггер";
-                    break;
-                case "TT":
-                    objectType = @"Табличный тип";
-                    break;
-                case "U ":
-                    objectType = @"Таблица";
-                    break;
-                case "UQ":
-                    objectType = @"Ограничение на уникальность";
-                    break;
-                case "V ":
-                    objectType = @"Представление";
-                    break;
-                default:
-                    objectType = type;
-                    break;
-            }
-
-            return objectType;
+            return TypeDescriptions[type] ?? type;
         }
 
         private (List<string> ОтслеживаемыеСхемы, List<string> ИгнорируемыеСхемы, List<string> ОтслеживаемыеОбъекты, List<string> ИгнорируемыеОбъекты) GetFilters()
@@ -689,10 +604,14 @@ namespace DBScriptSaver.ViewModels
                     continue;
                 }
 
-                if (script.Migration != null || ((script.Migration?.Script ?? "") != ""))
+                if (script.Migrations != null)
                 {
                     CreateChangesXML();
-                    AddMigration(script.Migration);
+                    script
+                        .Migrations
+                        .Where(m => m.Script != null)
+                        .ToList()
+                        .ForEach(m => AddMigration(m));
                 }
             }
         }

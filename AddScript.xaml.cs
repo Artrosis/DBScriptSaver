@@ -22,7 +22,7 @@ namespace DBScriptSaver
     /// </summary>
     public partial class AddScript : Window
     {
-        private ProjectDataBase dB;
+        private readonly ProjectDataBase dB;
 
         public AddScript()
         {

@@ -1,4 +1,6 @@
-﻿namespace DBScriptSaver.ViewModels
+﻿using System.Collections.Generic;
+
+namespace DBScriptSaver.ViewModels
 {
     public class Script
     {
@@ -7,6 +9,6 @@
         public string ScriptText;
         public string ObjectType;
         public ChangeType ChangeState;
-        public Migration Migration;
+        public List<Migration> Migrations;
     }
 }
