@@ -2,6 +2,7 @@
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Sdk.Sfc;
 using Microsoft.SqlServer.Management.Smo;
+using Microsoft.SqlServer.Management.SqlParser.Parser;
 using Newtonsoft.Json;
 using PropertyChanged;
 using System;
@@ -456,9 +457,14 @@ namespace DBScriptSaver.ViewModels
                             ChangeState = ChangeType
                         };
 
-                        if (ChangeType == ChangeType.Новый)
+                        switch (ChangeType)
                         {
-                            tblScript.Migration = MakeCreateTableMigration(server, tbl);
+                            case ViewModels.ChangeType.Новый:
+                                tblScript.Migration = MakeCreateTableMigration(server, tbl);
+                                break;
+                            case ViewModels.ChangeType.Изменённый:
+                                tblScript.Migration = MakeAlterTableMigration(server, tbl);
+                                break;
                         }
 
                         UpdateScripts.Add(tblScript);
@@ -467,6 +473,38 @@ namespace DBScriptSaver.ViewModels
 
                 return UpdateScripts;
             }
+        }
+
+        private Migration MakeAlterTableMigration(Server server, Table tbl)
+        {
+            StringBuilder sb = new StringBuilder();
+            Scripter createScrp = new Scripter(server);
+            createScrp.Options.ScriptSchema = true;
+            createScrp.Options.ScriptBatchTerminator = true;
+            createScrp.Options.DriAll = true;
+            createScrp.Options.IncludeIfNotExists = true;
+            createScrp.Options.ExtendedProperties = true;
+
+            foreach (string s in createScrp.EnumScript(new Urn[] { tbl.Urn }))
+            {
+                sb.AppendLine(s);
+            }
+
+            string sql = sb.ToString();
+
+            var scanner = new Scanner(new ParseOptions());
+            int scannerState = 0;
+            scanner.SetSource(sql, 0);
+            var allTokens = new List<MSSQL_Token_JS>();
+            MSSQL_Token_JS curToken = null;
+            do
+            {
+                curToken = MSSQL_Token_JS.GetNext(scanner, sql, ref scannerState);
+                allTokens.Add(curToken);
+            }
+            while (curToken.Value != Tokens.EOF);
+
+            return null;
         }
 
         public Migration MakeCreateTableMigration(Server myServer, Table tbl)
