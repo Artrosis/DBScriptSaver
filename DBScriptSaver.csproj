@@ -206,7 +206,7 @@
     <Compile Include="ViewModels\Dependence.cs" />
     <Compile Include="ViewModels\DependenceObject.cs" />
     <Compile Include="ViewModels\Migration.cs" />
-    <Compile Include="ViewModels\MSSQL_Token_JS.cs" />
+    <Compile Include="MSSQL_Token_JS.cs" />
     <Compile Include="ViewModels\Script.cs" />
     <Compile Include="ViewModels\ProjectServer.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
