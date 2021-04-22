@@ -1,8 +1,5 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -25,7 +21,7 @@ namespace DBScriptSaver
     {
         private readonly ProjectDataBase DB;
         readonly DispatcherTimer timer = new DispatcherTimer();
-        public CompareScripts()
+        private CompareScripts()
         {
             InitializeComponent();
             timer.Tick += ApplyTextFilter;
@@ -59,8 +55,8 @@ namespace DBScriptSaver
 
             if (!filteredTypes.Any(cb => (cb == cbSelectAllTypes) && cb.IsChecked == true))
             {
-                if (!filteredTypes.Any(cb => cb != cbSelectAllTypes 
-                                        && cb.IsChecked == true 
+                if (!filteredTypes.Any(cb => cb != cbSelectAllTypes
+                                        && cb.IsChecked == true
                                         && (cb.Content as string) == o.ObjectType))
                 {
                     return false;
@@ -78,7 +74,7 @@ namespace DBScriptSaver
                     return false;
                 }
             }
-                
+
             return true;
         }
         public CompareScripts(ProjectDataBase db) : this()

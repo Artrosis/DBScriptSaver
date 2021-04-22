@@ -19,7 +19,7 @@ namespace DBScriptSaver.Helpers
 
             MigrationName += postFix;
 
-            foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars())
+            foreach (char invalidChar in Path.GetInvalidFileNameChars())
             {
                 MigrationName = MigrationName.Replace(invalidChar, '_');
             }

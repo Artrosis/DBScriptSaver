@@ -211,6 +211,7 @@
     <Compile Include="ViewModels\Script.cs" />
     <Compile Include="ViewModels\ProjectServer.cs" />
     <Compile Include="Parse\TableComparer.cs" />
+    <Compile Include="Logic\ScriptWriter.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
     <Page Include="AddScript.xaml">
       <SubType>Designer</SubType>

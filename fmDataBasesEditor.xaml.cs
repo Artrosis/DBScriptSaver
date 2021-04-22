@@ -70,7 +70,7 @@ namespace DBScriptSaver
 
             try
             {
-                var fmCompare = new CompareScripts();
+                var fmCompare = new CompareScripts(DB);
                 fmCompare.ShowDialog();
             }
             catch (Exception ex)
