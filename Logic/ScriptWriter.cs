@@ -48,7 +48,6 @@ namespace DBScriptSaver.Logic
             return scripts;
         }
         private List<string> ОтслеживаемыеСхемы;
-        private List<string> ИгнорируемыеСхемы;
         private List<string> ОтслеживаемыеОбъекты;
         private List<string> ИгнорируемыеОбъекты;
 
@@ -58,7 +57,6 @@ namespace DBScriptSaver.Logic
             if (!File.Exists(FilterFile))
             {
                 ОтслеживаемыеСхемы = null;
-                ИгнорируемыеСхемы = null;
                 ОтслеживаемыеОбъекты = null;
                 ИгнорируемыеОбъекты = null;
                 return;
@@ -75,13 +73,6 @@ namespace DBScriptSaver.Logic
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
-
-            ИгнорируемыеСхемы = DBObjects
-                                        .Element("Schemas")
-                                        .Elements("Schema")
-                                        .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
-                                        .Select(e => e.Value)
-                                        .ToList();
 
             ОтслеживаемыеОбъекты = DBObjects
                                     .Element("Procedures")
@@ -326,9 +317,6 @@ namespace DBScriptSaver.Logic
 
                     string fileName = $@"{tbl.Schema}.{tbl.Name}.sql";
                     string script = "";
-
-                    var options = new ScriptingOptions();
-                    options.DriPrimaryKey = true;
 
                     tbl.Script().Cast<string>().ToList().ForEach(l =>
                     {
