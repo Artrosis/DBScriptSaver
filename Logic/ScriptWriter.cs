@@ -10,6 +10,8 @@ using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using DBScriptSaver.Parse;
 using DBScriptSaver.Helpers;
+using System.Text;
+using Ude;
 
 namespace DBScriptSaver.Logic
 {
@@ -158,7 +160,7 @@ namespace DBScriptSaver.Logic
 
             Dictionary<string, Tuple<string, DateTime>> SourcesData = d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
                                     .OrderBy(f => f.LastWriteTime)
-                                    .ToDictionary(f => f.Name, f => new Tuple<string, DateTime>(File.ReadAllText(f.FullName, ProjectDataBase.GetEncoding(f.FullName)), f.LastWriteTime));
+                                    .ToDictionary(f => f.Name, f => new Tuple<string, DateTime>(File.ReadAllText(f.FullName, GetEncoding(f.FullName)), f.LastWriteTime));
 
             foreach (var procedure in Procedures.Where(p => p.IsTrace))
             {
@@ -412,6 +414,21 @@ namespace DBScriptSaver.Logic
         public void Dispose()
         {
             connection.Dispose();
+        }
+
+        public static Encoding GetEncoding(string FullFileName)
+        {
+            var detector = new CharsetDetector();
+            byte[] bytes = File.ReadAllBytes(FullFileName);
+            detector.Feed(bytes, 0, bytes.Length);
+            detector.DataEnd();
+            string encoding = detector.Charset;
+            if (encoding == "windows-1255")
+            {
+                encoding = "windows-1251";
+            }
+            Encoding enc = Encoding.GetEncoding(encoding);
+            return enc;
         }
     }
 }

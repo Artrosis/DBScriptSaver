@@ -1,6 +1,4 @@
-﻿using DBScriptSaver.Helpers;
-using DBScriptSaver.Logic;
-using DBScriptSaver.Parse;
+﻿using DBScriptSaver.Logic;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
@@ -15,7 +13,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.Xml.Linq;
-using Ude;
 
 namespace DBScriptSaver.ViewModels
 {
@@ -107,7 +104,7 @@ namespace DBScriptSaver.ViewModels
             string objectFileName = obj.FileName;
             bool delete = !File.Exists(SourceFolder + objectFileName);
 
-            string Script = delete ? obj.ScriptText 
+            string Script = delete ? obj.ScriptText
                                     : File.ReadAllText(SourceFolder + objectFileName);
 
             using (SqlConnection conn = new SqlConnection(GetConnectionString()))
@@ -395,21 +392,6 @@ namespace DBScriptSaver.ViewModels
                 ConnectTimeout = 3
             };
             return builder.ConnectionString;
-        }
-
-        public static Encoding GetEncoding(string FullFileName)
-        {
-            var detector = new CharsetDetector();
-            byte[] bytes = File.ReadAllBytes(FullFileName);
-            detector.Feed(bytes, 0, bytes.Length);
-            detector.DataEnd();
-            string encoding = detector.Charset;
-            if (encoding == "windows-1255")
-            {
-                encoding = "windows-1251";
-            }
-            Encoding enc = Encoding.GetEncoding(encoding);
-            return enc;
         }
     }
 }
