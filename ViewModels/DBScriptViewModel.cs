@@ -81,8 +81,8 @@ namespace DBScriptSaver.ViewModels
         const string ProjectSettingsFileName = @"Settings.cfg";
         const string AppSettingsFileName = @"AppSettings.cfg";
 
-        private string Settings = string.Empty;
-        private string AppSettings = string.Empty;
+        private readonly string Settings = string.Empty;
+        private readonly string AppSettings = string.Empty;
 
         public DBScriptViewModel()
         {
@@ -184,9 +184,10 @@ namespace DBScriptSaver.ViewModels
         }
         public void SaveAppSettings()
         {
-            Dictionary<string, string> AppSet = new Dictionary<string, string>();
-
-            AppSet.Add("Comparer", Comparer);
+            Dictionary<string, string> AppSet = new Dictionary<string, string>
+            {
+                { "Comparer", Comparer }
+            };
 
             File.WriteAllText(AppSettings, JsonConvert.SerializeObject(AppSet, _settings));
         }

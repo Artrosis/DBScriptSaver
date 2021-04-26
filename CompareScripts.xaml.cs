@@ -1,10 +1,12 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -77,20 +79,31 @@ namespace DBScriptSaver
 
             return true;
         }
+
+        private readonly ObservableCollection<ScriptWrapper> scriptSource = new ObservableCollection<ScriptWrapper>(); 
+
         public CompareScripts(ProjectDataBase db) : this()
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-            try
-            {
-                var scripts = db.GetUpdateScripts();
-                DataContext = scripts;
-                gcDBObjects.ItemsSource = new ListCollectionView(scripts.Select(t => new ScriptWrapper(t)).ToList());
-                DB = db;
-            }
-            finally
-            {
-                Mouse.OverrideCursor = null;
-            }
+            DB = db;
+            DataContext = scriptSource;
+            gcDBObjects.ItemsSource = new ListCollectionView(scriptSource);
+        }
+
+        private int totalObjects = 0;
+        private int полученоОбъектов = 0;
+
+        private void SetTotal(int countObjects)
+        {
+            totalObjects = countObjects;
+            полученоОбъектов = 0;
+            Dispatcher.Invoke(UpdateProgress);
+        }
+
+        private void UpdateProgress()
+        {
+            pbLoadProgress.Maximum = totalObjects;
+            pbLoadProgress.Value = полученоОбъектов;
+            tbLoadProgress.Text = $@"{полученоОбъектов}/{totalObjects}";
         }
 
         public void ClearFilter(object sender, RoutedEventArgs e)
@@ -301,6 +314,22 @@ namespace DBScriptSaver
                 u.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 gcDBObjects.BeginEdit();
             }
+        }
+
+        private async void winLoaded(object sender, RoutedEventArgs e)
+        {
+            await Task.Factory.StartNew(() => DB.ObserveScripts(s => addSource(s), SetTotal));
+        }
+
+        private void addSource(Script s)
+        {
+            полученоОбъектов++;
+            Dispatcher.Invoke(UpdateProgress);
+            if (s == null)
+            {
+                return;
+            }
+            Dispatcher.Invoke(() => scriptSource.Add(new ScriptWrapper(s)));
         }
     }
 }

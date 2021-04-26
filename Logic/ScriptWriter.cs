@@ -38,16 +38,11 @@ namespace DBScriptSaver.Logic
             connection.Open();
             server = new Server(new ServerConnection(connection));
         }
-        public List<Script> Scripts()
+        public void ObserveScripts(Action<Script> observer)
         {
             UpdateFilters();
-            List<Script> scripts = new List<Script>();
-
-            scripts.AddRange(GetSourceScripts());
-
-            scripts.AddRange(GetChangesScripts());
-
-            return scripts;
+            GetSourceScripts().ForEach(s => observer(s));
+            GetChangesScripts(observer);
         }
         private List<string> ОтслеживаемыеСхемы;
         private List<string> ОтслеживаемыеОбъекты;
@@ -137,7 +132,6 @@ namespace DBScriptSaver.Logic
         private List<Script> GetSourceScripts()
         {
             var result = new List<Script>();
-
             if (!Directory.Exists(SourceFolder))
             {
                 Directory.CreateDirectory(SourceFolder);
@@ -274,9 +268,11 @@ namespace DBScriptSaver.Logic
                     }
                 }
             }
-
             return result;
         }
+
+        public Action<int> totalObjects;
+
         private List<Migration> MakeAlterTableMigration(Table tbl, string sourceScript)
         {
             return TableComparer.GetChanges(server.GetScript(tbl), sourceScript);
@@ -303,19 +299,22 @@ namespace DBScriptSaver.Logic
                 }
             };
         }
-        private IEnumerable<Script> GetChangesScripts()
+        private void GetChangesScripts(Action<Script> observer)
         {
-            var result = new List<Script>();
-            
             var dataBase = server.Databases.Cast<Database>().Single(b => b.Name.ToUpper() == db.Name.ToUpper());
 
             if (ОтслеживаемыеСхемы != null)
             {
                 var tbls = dataBase.Tables.Cast<Table>().Where(t => ОтслеживаемыеСхемы.Contains(t.Schema)).ToList();
 
+                var countIndexes = tbls.Sum(t => t.Indexes.Count);
+                var countObjects = tbls.Count + countIndexes;
+
+                totalObjects.Invoke(countObjects);
+
                 foreach (var tbl in tbls)
                 {
-                    result.AddRange(GetIndexesScripts(tbl));
+                    GetIndexesScripts(tbl, observer);
 
                     string fileName = $@"{tbl.Schema}.{tbl.Name}.sql";
                     string script = "";
@@ -333,6 +332,7 @@ namespace DBScriptSaver.Logic
 
                     if (File.Exists(tableFileName) && script == File.ReadAllText(tableFileName))
                     {
+                        observer(null);
                         continue;
                     }
 
@@ -357,16 +357,12 @@ namespace DBScriptSaver.Logic
                             break;
                     }
 
-                    result.Add(tblScript);
+                    observer(tblScript);
                 }
             }
-
-            return result;
         }
-        private List<Script> GetIndexesScripts(Table tbl)
+        private void GetIndexesScripts(Table tbl, Action<Script> observer)
         {
-            var result = new List<Script>();
-
             foreach (Index index in tbl.Indexes)
             {
                 string fileName = $@"{tbl.Schema}.{index.Name}.sql";
@@ -384,6 +380,7 @@ namespace DBScriptSaver.Logic
 
                 if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
                 {
+                    observer(null);
                     continue;
                 }
 
@@ -405,10 +402,8 @@ namespace DBScriptSaver.Logic
                         break;
                 }
 
-                result.Add(indexScript);
+                observer(indexScript);
             }
-
-            return result;
         }
 
         public void Dispose()

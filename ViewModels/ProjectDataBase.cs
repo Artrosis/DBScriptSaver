@@ -274,17 +274,13 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public List<Script> GetUpdateScripts()
+        public void ObserveScripts(Action<Script> observer, Action<int> totalObjects)
         {
             using (var sw = new ScriptWriter(this))
             {
-                return sw.Scripts();
+                sw.totalObjects += totalObjects;
+                sw.ObserveScripts(observer);
             }
-        }
-
-        public void UpdateScripts(bool UseMigrations)
-        {
-            UpdateScripts(GetUpdateScripts(), UseMigrations);
         }
 
         public void UpdateScripts(List<Script> scripts, bool UseMigrations)

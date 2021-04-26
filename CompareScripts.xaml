@@ -7,6 +7,7 @@
         mc:Ignorable="d"  
         WindowStartupLocation="CenterScreen"
         PreviewKeyDown="window1_PreviewKeyDown"
+        Loaded="winLoaded"
         Title="Изменения" Height="450" Width="800" x:Name="window1">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
@@ -272,13 +273,20 @@
                 </Popup>
             </StackPanel>
         </ScrollViewer>
-        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
+        <Grid VerticalAlignment="Bottom" Margin="3">
+            <StatusBar VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="25" Background="AliceBlue">
+                <TextBlock>Сравниваем:</TextBlock>
+                <Grid>
+                    <ProgressBar x:Name="pbLoadProgress" Minimum="0" Maximum="100" Value="0" Height="17" Width="200" />
+                    <TextBlock x:Name="tbLoadProgress" HorizontalAlignment="Center">0/0</TextBlock>
+                </Grid>
+            </StatusBar>
             <Button Width="75"
-                Height="23"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Click="btnOK_Click"
-                Content="OK"/>
-        </StackPanel>
+            Height="23"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Click="btnOK_Click"
+            Content="OK"/>
+        </Grid>
     </Grid>
 </Window>
