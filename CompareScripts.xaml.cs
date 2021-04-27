@@ -1,5 +1,6 @@
 ﻿using DBScriptSaver.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
@@ -111,21 +112,23 @@ namespace DBScriptSaver
             tbFilter.Text = "";
         }
 
+        IEnumerable<ScriptWrapper> scripts => ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>();
+
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
-            var Выбранные_скрипты = ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().Where(w => w.Save).Select(w => w.getScript).ToList();
+            var Выбранные_скрипты = scripts.Where(w => w.Save).Select(w => w.getScript).ToList();
             DB.UpdateScripts(Выбранные_скрипты, cbUseMigrations.IsChecked ?? false);
             DialogResult = true;
         }
 
         private void ВыбратьВсе_Click(object sender, RoutedEventArgs e)
         {
-            ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().ToList().ForEach(w => w.Save = true);
+            scripts.ToList().ForEach(w => w.Save = true);
         }
 
         private void ОтменитьВсе_Click(object sender, RoutedEventArgs e)
         {
-            ((ListCollectionView)gcDBObjects.ItemsSource).Cast<ScriptWrapper>().ToList().ForEach(w => w.Save = false);
+            scripts.ToList().ForEach(w => w.Save = false);
         }
 
         private void GcDBObjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)

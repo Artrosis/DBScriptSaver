@@ -73,34 +73,66 @@
                                     Binding="{Binding Path=FullName, Mode=OneWay}"
                                     Header="Название"
                                     IsReadOnly="True" />
-                                <DataGridCheckBoxColumn
-                                    Width="150"
-                                    Binding="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"
-                                    Header="Отслеживать">
-                                    <DataGridCheckBoxColumn.CellStyle>
-                                        <Style TargetType="DataGridCell">
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="IsEditing" Value="True" />
-                                                </Trigger>
-                                            </Style.Triggers>
+                                <DataGridTemplateColumn
+	                                Width="120">
+                                    <DataGridColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         </Style>
-                                    </DataGridCheckBoxColumn.CellStyle>
-                                </DataGridCheckBoxColumn>
-                                <DataGridCheckBoxColumn
-                                    Width="150"
-                                    Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
-                                    Header="Игнорировать">
-                                    <DataGridCheckBoxColumn.CellStyle>
-                                        <Style TargetType="DataGridCell">
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="IsEditing" Value="True" />
-                                                </Trigger>
-                                            </Style.Triggers>
+                                    </DataGridColumn.HeaderStyle>
+                                    <DataGridTemplateColumn.Header>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="90"></ColumnDefinition>
+                                                <ColumnDefinition Width="30" ></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Отслеживать" Width="Auto"  />
+                                            <CheckBox x:Name="chAllSchemasTrace" Grid.Column="1"
+                                                  Checked="CheckedAllSchemasTrace"
+                                                  Unchecked="UnCheckedAllSchemasTrace">
+                                            </CheckBox>
+                                        </Grid>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox 
+                                                ToolTip="Отметить все" 
+                                                HorizontalAlignment="Center" 
+                                                IsChecked="{Binding Path=IsTrace, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn
+	                                Width="120">
+                                    <DataGridColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         </Style>
-                                    </DataGridCheckBoxColumn.CellStyle>
-                                </DataGridCheckBoxColumn>
+                                    </DataGridColumn.HeaderStyle>
+                                    <DataGridTemplateColumn.Header>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="90"></ColumnDefinition>
+                                                <ColumnDefinition Width="30" ></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Игнорировать" Width="Auto"  />
+                                            <CheckBox 
+                                                x:Name="chAllSchemasIgnore"
+                                                Grid.Column="1"
+                                                Checked="CheckedAllSchemasIgnore"
+                                                Unchecked="UnCheckedAllSchemasIgnore">
+                                            </CheckBox>
+                                        </Grid>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox 
+                                                ToolTip="Отметить все" 
+                                                HorizontalAlignment="Center" 
+                                                IsChecked="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -138,7 +170,7 @@
                                 </DataGridCheckBoxColumn.CellStyle>
                             </DataGridCheckBoxColumn>
                             <DataGridCheckBoxColumn
-                                Width="150"
+                                Width="100"
                                 Binding="{Binding Path=IsIgnore, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Игнорировать">
                                 <DataGridCheckBoxColumn.CellStyle>

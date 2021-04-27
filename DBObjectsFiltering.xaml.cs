@@ -341,5 +341,45 @@ namespace DBScriptSaver
             timer.Stop();
             timer.Start();
         }
+
+        private void CheckedAllSchemasIgnore(object sender, RoutedEventArgs e)
+        {
+            db.Schemas.ToList().ForEach(s => s.IsIgnore = true);
+
+            chAllSchemasTrace.Unchecked -= UnCheckedAllSchemasTrace;
+            try
+            {
+                chAllSchemasTrace.IsChecked = false;
+            }
+            finally
+            {
+                chAllSchemasTrace.Unchecked += UnCheckedAllSchemasTrace;
+            }
+        }
+
+        private void UnCheckedAllSchemasIgnore(object sender, RoutedEventArgs e)
+        {
+            db.Schemas.ToList().ForEach(s => s.IsIgnore = false);          
+        }
+
+        private void CheckedAllSchemasTrace(object sender, RoutedEventArgs e)
+        {
+            db.Schemas.ToList().ForEach(s => s.IsTrace = true);
+
+            chAllSchemasIgnore.Unchecked -= UnCheckedAllSchemasIgnore;
+            try
+            {
+                chAllSchemasIgnore.IsChecked = false;
+            }
+            finally
+            {
+                chAllSchemasIgnore.Unchecked += UnCheckedAllSchemasIgnore;
+            }
+        }
+
+        private void UnCheckedAllSchemasTrace(object sender, RoutedEventArgs e)
+        {
+            db.Schemas.ToList().ForEach(s => s.IsTrace = false);
+        }
     }
 }
