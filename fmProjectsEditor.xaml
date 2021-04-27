@@ -47,11 +47,11 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn
                                 Width="200"
-                                Binding="{Binding Path=Name}"
+                                Binding="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Проект" />
                             <DataGridTextColumn
                                 Width="300"
-                                Binding="{Binding Path=Path}"
+                                Binding="{Binding Path=Path, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Путь" />
                             <DataGridTemplateColumn Header="Сервер" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
