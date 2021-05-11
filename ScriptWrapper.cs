@@ -20,7 +20,8 @@ namespace DBScriptSaver
                     ScriptText = t.ScriptText,
                     ChangeState = t.ChangeState,
                     ObjectType = t.ObjectType,
-                    Migrations = t.Migrations
+                    urn = t.urn,
+                    objName = t.objName
                 };
 
                 if (!string.IsNullOrWhiteSpace(EditedFilePath) && File.Exists(EditedFilePath))

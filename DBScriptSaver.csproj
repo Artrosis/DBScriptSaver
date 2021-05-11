@@ -202,6 +202,8 @@
     <Compile Include="FileComparer.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
+    <Compile Include="Logic\ColumnData.cs" />
+    <Compile Include="Logic\TableData.cs" />
     <Compile Include="ScriptWrapper.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="ViewModels\ChangeType.cs" />

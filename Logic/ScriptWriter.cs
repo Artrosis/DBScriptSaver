@@ -15,7 +15,7 @@ using Ude;
 
 namespace DBScriptSaver.Logic
 {
-    public class ScriptWriter: IDisposable
+    public class ScriptWriter : IDisposable
     {
         readonly ProjectDataBase db;
         readonly SqlConnection connection;
@@ -38,13 +38,18 @@ namespace DBScriptSaver.Logic
             connection.Open();
             server = new Server(new ServerConnection(connection));
         }
-        public void ObserveScripts(Action<Script> observer)
+        public void ObserveScripts()
         {
             UpdateFilters();
-            GetSourceScripts().ForEach(s => observer(s));
-            GetChangesScripts(observer);
+            changeProgress.Invoke(@"Сравниваем хранимки/функции", 3);
+            GetSourceScripts().ForEach(s => observer?.Invoke(s));
+            changeProgress.Invoke(@"Сравниваем таблицы", 30);
+            GetChangesScripts();
+            changeProgress.Invoke(@"", 0);
         }
         private List<string> ОтслеживаемыеСхемы;
+        private List<string> ОтслеживаемыеТаблицы;
+        private List<string> ИгнорируемыеТаблицы;
         private List<string> ОтслеживаемыеОбъекты;
         private List<string> ИгнорируемыеОбъекты;
 
@@ -70,6 +75,29 @@ namespace DBScriptSaver.Logic
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
                                     .ToList();
+
+            ОтслеживаемыеТаблицы = DBObjects
+                                    .Element("Tables")
+                                    ?.Elements("Table")
+                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
+                                    .Select(e => e.Value)
+                                    .ToList();
+            if (ОтслеживаемыеТаблицы == null)
+            {
+                ОтслеживаемыеТаблицы = new List<string>();
+            }
+
+            ИгнорируемыеТаблицы = DBObjects
+                                    .Element("Tables")
+                                    ?.Elements("Table")
+                                    .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
+                                    .Select(e => e.Value)
+                                    .ToList();
+
+            if (ИгнорируемыеТаблицы == null)
+            {
+                ИгнорируемыеТаблицы = new List<string>();
+            }
 
             ОтслеживаемыеОбъекты = DBObjects
                                     .Element("Procedures")
@@ -171,7 +199,7 @@ namespace DBScriptSaver.Logic
                     SourcesData.Add(function.FullName + ".sql", new Tuple<string, DateTime>("", DateTime.Now));
                 }
             }
-            
+
             var cmd = connection.CreateCommand();
 
             List<string> @objects = SourcesData.Keys.ToList();
@@ -271,97 +299,208 @@ namespace DBScriptSaver.Logic
             return result;
         }
 
-        public Action<int> totalObjects;
-
-        private List<Migration> MakeAlterTableMigration(Table tbl, string sourceScript)
-        {
-            return TableComparer.GetChanges(server.GetScript(tbl), sourceScript);
-        }
-        public List<Migration> MakeCreateTableMigration(Table tbl)
-        {
-            return new List<Migration>()
-            {
-                new Migration()
-                {
-                    Name = FileHelper.CreateMigrationName(tbl.Name),
-                    Script = server.GetScript(tbl)
-                }
-            };
-        }
-        public List<Migration> MakeCreateIndexMigration(Index index)
-        {
-            return new List<Migration>()
-            {
-                new Migration()
-                {
-                    Name = FileHelper.CreateMigrationName(index.Name),
-                    Script = server.GetScript(index)
-                }
-            };
-        }
-        private void GetChangesScripts(Action<Script> observer)
+        public Action<string, int> changeProgress;
+        public Action<Script> observer;
+        
+        private void GetChangesScripts()
         {
             var dataBase = server.Databases.Cast<Database>().Single(b => b.Name.ToUpper() == db.Name.ToUpper());
 
+            var cmd = connection.CreateCommand();
+
+            cmd.CommandText = GetCHengesObjectScript();
+
+            Dictionary<int, TableData> tables = new Dictionary<int, TableData>();
+            Dictionary<int, List<ColumnData>> columns = new Dictionary<int, List<ColumnData>>();
+
+            using (SqlDataReader r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    int id = (int)r["id"];
+                    tables.Add(id, new TableData()
+                    {
+                        id = id,
+                        Schema = (string)r["schemaName"],
+                        Name = (string)r["tableName"],
+                        UsesAnsiNulls = (bool)r["uses_ansi_nulls"]
+                    });
+
+                    columns.Add(id, new List<ColumnData>());
+                }
+
+                r.NextResult();
+
+                while (r.Read())
+                {
+                    bool is_identity = (bool)r["is_identity"];
+                    long? seed_value = null;
+                    long? increment_value = null;
+                    if (is_identity)
+                    {
+                        seed_value = (long)r["seed_value"];
+                        increment_value = (long)r["increment_value"];
+                    }
+                    string collation_name = null;
+                    if (r["collation_name"] != DBNull.Value)
+                    {
+                        collation_name = (string)r["collation_name"];
+                    }
+
+                    columns[(int)r["id"]].Add(new ColumnData()
+                    {
+                        Order = (int)r["column_id"],
+                        Name = (string)r["column"],
+                        Type = (string)r["TYPE"],
+                        MaxLength = (short)r["max_length"],
+                        Precision = (byte)r["precision"],
+                        Scale = (byte)r["scale"],
+                        IsIdentity = is_identity,
+                        SeedValue = seed_value,
+                        IncrementalValue = increment_value,
+                        Collation = collation_name,
+                        Nullable = (bool)r["is_nullable"]
+                    });
+                }
+            }
+
+            changeProgress.Invoke(@"Сравниваем таблицы", 50);
+
+            foreach (var p in tables)
+            {
+                var table = p.Value;
+                string script = table.MakeScript(columns[p.Key]);
+                    
+                string name = $@"{table.Schema}.{table.Name}";
+                string fileName = $@"{name}.sql";
+
+                string tableFileName = TableFolder + fileName;
+                string oldScript = "";
+
+                if (File.Exists(tableFileName))
+                {
+                    oldScript = File.ReadAllText(tableFileName);
+                    if (script == oldScript)
+                    {
+                        continue;
+                    }
+                }
+
+                ChangeType changeType = !File.Exists(tableFileName) ? ChangeType.Новый : ChangeType.Изменённый;
+
+                var tbl = dataBase.Tables.Cast<Table>().Single(t => t.Schema == table.Schema && t.Name == table.Name);
+
+                Script tblScript = new Script()
+                {
+                    FileName = fileName,
+                    FullPath = TableFolder + fileName,
+                    ScriptText = script,
+                    ObjectType = @"Таблица",
+                    ChangeState = changeType,
+                    urn = tbl.Urn,
+                    objName = tbl.Name
+                };
+
+                observer?.Invoke(tblScript);
+            }
+
+            changeProgress.Invoke(@"Сравниваем индексы", 55);
+
             if (ОтслеживаемыеСхемы != null)
             {
-                var tbls = dataBase.Tables.Cast<Table>().Where(t => ОтслеживаемыеСхемы.Contains(t.Schema)).ToList();
+                var tbls = dataBase.Tables.Cast<Table>().Where(t => ОтслеживаемыеСхемы.Contains(t.Schema) && !ИгнорируемыеТаблицы.Contains($@"{t.Schema}.{t.Name}")).ToList();
 
                 var countIndexes = tbls.Sum(t => t.Indexes.Count);
-                var countObjects = tbls.Count + countIndexes;
 
-                totalObjects.Invoke(countObjects);
+                changeProgress.Invoke(@"Сравниваем индексы", 60);
 
                 foreach (var tbl in tbls)
                 {
-                    GetIndexesScripts(tbl, observer);
-
-                    string fileName = $@"{tbl.Schema}.{tbl.Name}.sql";
-                    string script = "";
-
-                    tbl.Script().Cast<string>().ToList().ForEach(l =>
-                    {
-                        if (script != "")
-                        {
-                            script += "GO" + Environment.NewLine;
-                        }
-                        script += l + Environment.NewLine;
-                    });
-
-                    string tableFileName = TableFolder + fileName;
-
-                    if (File.Exists(tableFileName) && script == File.ReadAllText(tableFileName))
-                    {
-                        observer(null);
-                        continue;
-                    }
-
-                    ChangeType ChangeType = !File.Exists(tableFileName) ? ChangeType.Новый : ChangeType.Изменённый;
-
-                    Script tblScript = new Script()
-                    {
-                        FileName = fileName,
-                        FullPath = TableFolder + fileName,
-                        ScriptText = script,
-                        ObjectType = @"Таблица",
-                        ChangeState = ChangeType
-                    };
-
-                    switch (ChangeType)
-                    {
-                        case ViewModels.ChangeType.Новый:
-                            tblScript.Migrations = MakeCreateTableMigration(tbl);
-                            break;
-                        case ViewModels.ChangeType.Изменённый:
-                            tblScript.Migrations = MakeAlterTableMigration(tbl, File.ReadAllText(tableFileName));
-                            break;
-                    }
-
-                    observer(tblScript);
+                    GetIndexesScripts(tbl);
                 }
             }
         }
-        private void GetIndexesScripts(Table tbl, Action<Script> observer)
+
+        private string GetCHengesObjectScript()
+        {
+            string result = @"
+SELECT o.[object_id] AS id
+INTO   #ids
+FROM   sys.tables AS o
+       JOIN sys.schemas AS s
+            ON  s.[schema_id] = o.[schema_id]
+WHERE " + Environment.NewLine;
+
+            string condition = "";
+
+            if (ОтслеживаемыеТаблицы.Count > 0)
+            {
+                condition = $@"o.[object_id] IN ({ОтслеживаемыеТаблицы.GetObjectIdString()})";
+            }
+
+            if (ОтслеживаемыеСхемы.Count > 0)
+            {
+                var condition2 = $"s.name IN ({ОтслеживаемыеСхемы.GetObjectsList()})" + Environment.NewLine;
+
+                if (ИгнорируемыеТаблицы.Count > 0)
+                {
+                    condition2 += $" AND o.[object_id] NOT IN ({ИгнорируемыеТаблицы.GetObjectIdString()})";
+                }
+
+                if (condition.Length == 0)
+                {
+                    condition = condition2;
+                }
+                else
+                {
+                    condition = $@"({condition}) OR ({condition2})";
+                }
+            }
+
+            result += condition + Environment.NewLine;
+
+            result += @"
+SELECT o.uses_ansi_nulls,
+       s.name            AS schemaName,
+       o.name            AS tableName,
+       i.id
+FROM   #ids              AS i
+       JOIN sys.tables   AS o
+            ON  o.[object_id] = i.id
+       JOIN sys.schemas  AS s
+            ON  s.[schema_id] = o.[schema_id]
+WHERE  s.name IN (N'Sniffer')
+ORDER BY
+       i.id
+
+SELECT c.column_id,
+       c.name                          AS [column],
+       t.name                          AS TYPE,
+       c.max_length,
+       c.precision,
+       c.scale,
+       c.is_identity,
+       CAST(i.seed_value AS BIGINT) AS seed_value,
+       CAST(i.increment_value AS BIGINT) AS increment_value,
+       c.collation_name,
+       c.is_nullable,
+       o.id
+FROM   #ids                            AS o
+       JOIN sys.[columns]              AS c
+            ON  c.[object_id] = o.id
+       JOIN sys.types                  AS t
+            ON  t.user_type_id = c.user_type_id
+       LEFT JOIN sys.identity_columns  AS i
+            ON  i.[object_id] = o.id
+            AND i.column_id = c.column_id
+ORDER BY
+       o.id,
+       c.column_id";
+
+            return result;
+        }
+
+        private void GetIndexesScripts(Table tbl)
         {
             foreach (Index index in tbl.Indexes)
             {
@@ -380,7 +519,6 @@ namespace DBScriptSaver.Logic
 
                 if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
                 {
-                    observer(null);
                     continue;
                 }
 
@@ -392,17 +530,12 @@ namespace DBScriptSaver.Logic
                     FullPath = IndexFolder + fileName,
                     ScriptText = script,
                     ObjectType = @"Индекс",
-                    ChangeState = ChangeType
+                    ChangeState = ChangeType,
+                    urn = index.Urn,
+                    objName = index.Name
                 };
 
-                switch (ChangeType)
-                {
-                    case ChangeType.Новый:
-                        indexScript.Migrations = MakeCreateIndexMigration(index);
-                        break;
-                }
-
-                observer(indexScript);
+                observer?.Invoke(indexScript);
             }
         }
 

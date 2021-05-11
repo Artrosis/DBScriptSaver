@@ -90,21 +90,13 @@ namespace DBScriptSaver
             gcDBObjects.ItemsSource = new ListCollectionView(scriptSource);
         }
 
-        private int totalObjects = 0;
-        private int полученоОбъектов = 0;
-
-        private void SetTotal(int countObjects)
+        private void SetTotal(string pCaption, int pValue)
         {
-            totalObjects = countObjects;
-            полученоОбъектов = 0;
-            Dispatcher.Invoke(UpdateProgress);
-        }
-
-        private void UpdateProgress()
-        {
-            pbLoadProgress.Maximum = totalObjects;
-            pbLoadProgress.Value = полученоОбъектов;
-            tbLoadProgress.Text = $@"{полученоОбъектов}/{totalObjects}";
+            Dispatcher.Invoke(() =>
+                {
+                    tbLoadProgress.Text = pCaption;
+                    pbLoadProgress.Value = pValue;
+                });
         }
 
         public void ClearFilter(object sender, RoutedEventArgs e)
@@ -326,12 +318,6 @@ namespace DBScriptSaver
 
         private void addSource(Script s)
         {
-            полученоОбъектов++;
-            Dispatcher.Invoke(UpdateProgress);
-            if (s == null)
-            {
-                return;
-            }
             Dispatcher.Invoke(() => scriptSource.Add(new ScriptWrapper(s)));
         }
     }

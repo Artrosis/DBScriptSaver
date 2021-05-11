@@ -10,18 +10,6 @@ namespace DBScriptSaver.Helpers
 {
     public static class ServerHelper
     {
-        public static string GetScript(this Server server, Table tbl)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (string s in scripter(server).EnumScript(new Urn[] { tbl.Urn }))
-            {
-                sb.AppendLine(s);
-            }
-
-            return sb.ToString();
-        }
-
         private static Scripter scripter(Server server)
         {
             var result = new Scripter(server);
@@ -35,11 +23,11 @@ namespace DBScriptSaver.Helpers
             return result;
         }
 
-        public static string GetScript(this Server server, Index index)
+        public static string GetScript(this Server server, Urn urn)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (string s in scripter(server).EnumScript(new Urn[] { index.Urn }))
+            foreach (string s in scripter(server).EnumScript(new Urn[] { urn }))
             {
                 sb.AppendLine(s);
             }

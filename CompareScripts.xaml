@@ -275,7 +275,6 @@
         </ScrollViewer>
         <Grid VerticalAlignment="Bottom" Margin="3">
             <StatusBar VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="25" Background="AliceBlue">
-                <TextBlock>Сравниваем:</TextBlock>
                 <Grid>
                     <ProgressBar x:Name="pbLoadProgress" Minimum="0" Maximum="100" Value="0" Height="17" Width="200" />
                     <TextBlock x:Name="tbLoadProgress" HorizontalAlignment="Center">0/0</TextBlock>

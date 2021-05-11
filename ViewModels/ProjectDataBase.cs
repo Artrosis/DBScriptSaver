@@ -274,12 +274,13 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public void ObserveScripts(Action<Script> observer, Action<int> totalObjects)
+        public void ObserveScripts(Action<Script> observer, Action<string, int> changeProgress)
         {
             using (var sw = new ScriptWriter(this))
             {
-                sw.totalObjects += totalObjects;
-                sw.ObserveScripts(observer);
+                sw.changeProgress += changeProgress;
+                sw.observer += observer;
+                sw.ObserveScripts();
             }
         }
 
@@ -298,12 +299,12 @@ namespace DBScriptSaver.ViewModels
                 {
                     continue;
                 }
-
-                if (script.Migrations != null)
+                
+                CreateChangesXML();
+                using (var con = new SqlConnection(GetConnectionString()))
                 {
-                    CreateChangesXML();
                     script
-                        .Migrations
+                        .MakeMigrations(new Server(new ServerConnection(con)))
                         .Where(m => m.Script != null)
                         .ToList()
                         .ForEach(m => AddMigration(m));
@@ -385,7 +386,8 @@ namespace DBScriptSaver.ViewModels
                 InitialCatalog = Name ?? @"master",
                 UserID = Project.Server.DBLogin,
                 Password = Cryptography.Decrypt(Project.Server.DBPassword, fmProjectsEditor.GetSalt()),
-                ConnectTimeout = 3
+                ConnectTimeout = 3,
+                MultipleActiveResultSets = true
             };
             return builder.ConnectionString;
         }
