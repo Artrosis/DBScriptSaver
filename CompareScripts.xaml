@@ -219,7 +219,6 @@
                     Placement="MousePoint" 
                     PopupAnimation="Slide"
                     StaysOpen="False"
-                    Loaded="popType_Loaded"
                     AllowsTransparency="True">
                     <Border Background="White" BorderBrush="Black">
                         <Grid>

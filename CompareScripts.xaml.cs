@@ -199,15 +199,22 @@ namespace DBScriptSaver
         }
         private void btnTypeFilter_Click(object sender, RoutedEventArgs e)
         {
+            UpdateTypes();
             popType.IsOpen = true;
         }
-        private void popType_Loaded(object sender, RoutedEventArgs e)
+
+        private void UpdateTypes()
         {
             var rows = gcDBObjects.ItemsSource.OfType<ScriptWrapper>();
             var types = rows.Select(t => t.ObjectType).Distinct();
-
+            
             foreach (var type in types)
             {
+                if (filterTypes.Children.Cast<CheckBox>().Any(c => (string)c.Content == type))
+                {
+                    continue;
+                }
+
                 var cb = new CheckBox
                 {
                     IsChecked = false,
@@ -278,6 +285,9 @@ namespace DBScriptSaver
                     cb.Unchecked += cb_CheckedType;
                 }
             }
+
+            timer.Stop();
+            timer.Start();
         }
         private void cbSelectAllStates_Click(object sender, RoutedEventArgs e)
         {
@@ -300,6 +310,9 @@ namespace DBScriptSaver
                     cb.Unchecked += cb_CheckedState;
                 }
             }
+
+            timer.Stop();
+            timer.Start();
         }
         private void window1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
