@@ -301,20 +301,24 @@ namespace DBScriptSaver.Logic
 
         public Action<string, int> changeProgress;
         public Action<Script> observer;
-        
-        private void GetChangesScripts()
+
+        private Dictionary<int, TableData> tables = new Dictionary<int, TableData>();
+        private Dictionary<int, List<ColumnData>> columns = new Dictionary<int, List<ColumnData>>();
+        private Dictionary<(int tableId, int indexId), IndexData> indexes = new Dictionary<(int tableId, int indexId), IndexData>();
+        private Dictionary<(int tableId, int indexId), List<IndexColumnData>> indColumns = new Dictionary<(int, int), List<IndexColumnData>>();
+        private Database dataBase;
+
+        private void LoadChanges()
         {
-            var dataBase = server.Databases.Cast<Database>().Single(b => b.Name.ToUpper() == db.Name.ToUpper());
+            dataBase = server.Databases.Cast<Database>().Single(b => b.Name.ToUpper() == db.Name.ToUpper());
 
             var cmd = connection.CreateCommand();
 
             cmd.CommandText = GetCHengesObjectScript();
 
-            Dictionary<int, TableData> tables = new Dictionary<int, TableData>();
-            Dictionary<int, List<ColumnData>> columns = new Dictionary<int, List<ColumnData>>();
-
             using (SqlDataReader r = cmd.ExecuteReader())
             {
+                //Таблицы
                 while (r.Read())
                 {
                     int id = (int)r["id"];
@@ -330,7 +334,7 @@ namespace DBScriptSaver.Logic
                 }
 
                 r.NextResult();
-
+                //Столбцы таблиц
                 while (r.Read())
                 {
                     bool is_identity = (bool)r["is_identity"];
@@ -362,7 +366,53 @@ namespace DBScriptSaver.Logic
                         Nullable = (bool)r["is_nullable"]
                     });
                 }
+
+                r.NextResult();
+                //Индексы
+                while (r.Read())
+                {
+                    int tableId = (int)r["id"];
+                    int indexId = (int)r["index_id"];
+                    indexes.Add((tableId, indexId), new IndexData()
+                    {
+                        TableId = tableId,
+                        IndexId = indexId,
+                        isPrimaryKey = (bool)r["is_primary_key"],
+                        isUniqueConstraint = (bool)r["is_unique_constraint"],
+                        isUnique = (bool)r["is_unique"],
+                        typeDesc = (string)r["type_desc"],
+                        Name = (string)r["IndexName"],
+                        isPadded = (bool)r["is_padded"],
+                        noRecompute = (bool)r["no_recompute"],
+                        ignoreDupKey = (bool)r["ignore_dup_key"],
+                        allowRowLocks = (bool)r["allow_row_locks"],
+                        allowPageLocks = (bool)r["allow_page_locks"]
+                    });
+
+                    indColumns.Add((tableId, indexId), new List<IndexColumnData>());
+                }
+
+                r.NextResult();
+                //Столбы индексов
+                while (r.Read())
+                {
+                    int tableId = (int)r["id"];
+                    int indexId = (int)r["index_id"];
+
+                    indColumns[(tableId, indexId)].Add(new IndexColumnData
+                    {
+                        Name = (string)r["name"],
+                        Order = (byte)r["key_ordinal"],
+                        IsDesc = (bool)r["is_descending_key"],
+                        IsIncluded = (bool)r["is_included_column"]
+                    });
+                }
             }
+        }
+
+        private void GetChangesScripts()
+        {
+            LoadChanges();
 
             changeProgress.Invoke(@"Сравниваем таблицы", 50);
 
@@ -406,18 +456,37 @@ namespace DBScriptSaver.Logic
 
             changeProgress.Invoke(@"Сравниваем индексы", 55);
 
-            if (ОтслеживаемыеСхемы != null)
+            foreach (var p in indexes)
             {
-                var tbls = dataBase.Tables.Cast<Table>().Where(t => ОтслеживаемыеСхемы.Contains(t.Schema) && !ИгнорируемыеТаблицы.Contains($@"{t.Schema}.{t.Name}")).ToList();
+                var index = p.Value;
+                var table = tables[p.Key.tableId];
+                string fileName = $@"{table.Schema}.{index.Name}.sql";
+                string indexFileName = IndexFolder + fileName;
+                string script = index.MakeScript(table.FullName, indColumns[p.Key]);
 
-                var countIndexes = tbls.Sum(t => t.Indexes.Count);
-
-                changeProgress.Invoke(@"Сравниваем индексы", 60);
-
-                foreach (var tbl in tbls)
+                if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
                 {
-                    GetIndexesScripts(tbl);
+                    continue;
                 }
+
+                ChangeType ChangeType = !File.Exists(indexFileName) ? ChangeType.Новый : ChangeType.Изменённый;
+
+                var dbInd = dataBase
+                            .Tables.Cast<Table>().Single(t => t.Schema == table.Schema && t.Name == table.Name)
+                            .Indexes.Cast<Index>().Single(i => i.Name == index.Name);
+
+                Script indexScript = new Script()
+                {
+                    FileName = fileName,
+                    FullPath = IndexFolder + fileName,
+                    ScriptText = script,
+                    ObjectType = @"Индекс",
+                    ChangeState = ChangeType,
+                    urn = dbInd.Urn,
+                    objName = index.Name
+                };
+
+                observer?.Invoke(indexScript);
             }
         }
 
@@ -495,7 +564,48 @@ FROM   #ids                            AS o
             AND i.column_id = c.column_id
 ORDER BY
        o.id,
-       c.column_id";
+       c.column_id
+
+SELECT o.id,
+       i.index_id,
+       i.is_primary_key,
+       i.is_unique_constraint,
+       i.is_unique,
+       i.type_desc,
+       i.name                  AS IndexName,
+       i.is_padded,
+       s.no_recompute,
+       i.[ignore_dup_key],
+       i.[allow_row_locks],
+       i.[allow_page_locks]
+FROM   #ids                    AS o
+       JOIN sys.indexes        AS i
+            ON  i.[object_id] = o.id
+       JOIN sys.[stats]        AS s
+            ON  s.[object_id] = i.[object_id]
+            AND s.stats_id = i.index_id
+WHERE  i.is_primary_key = 0
+
+SELECT o.id,
+       i.index_id,
+       ic.key_ordinal,
+       c.name,
+       ic.is_descending_key,
+       ic.is_included_column
+FROM   #ids                    AS o
+       JOIN sys.indexes        AS i
+            ON  i.[object_id] = o.id
+       JOIN sys.index_columns  AS ic
+            ON  ic.[object_id] = i.[object_id]
+            AND ic.index_id = i.index_id
+       JOIN sys.[columns]      AS c
+            ON  c.[object_id] = ic.[object_id]
+            AND c.column_id = ic.column_id
+WHERE  i.is_primary_key = 0
+ORDER BY
+       o.id,
+       i.index_id,
+       ic.key_ordinal";
 
             return result;
         }
@@ -538,12 +648,10 @@ ORDER BY
                 observer?.Invoke(indexScript);
             }
         }
-
         public void Dispose()
         {
             connection.Dispose();
         }
-
         public static Encoding GetEncoding(string FullFileName)
         {
             var detector = new CharsetDetector();

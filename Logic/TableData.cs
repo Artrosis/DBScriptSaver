@@ -10,6 +10,8 @@ namespace DBScriptSaver.Logic
         public string Name;
         public bool UsesAnsiNulls;
 
+        public string FullName => $@"[{Schema}].[{Name}]";
+
         public string MakeScript(List<ColumnData> columnDatas)
         {
             string script = string.Empty;
@@ -31,7 +33,7 @@ namespace DBScriptSaver.Logic
             script += @"SET QUOTED_IDENTIFIER ON" + Environment.NewLine;
             script += @"GO" + Environment.NewLine;
 
-            script += $@"CREATE TABLE [{Schema}].[{Name}](" + Environment.NewLine;
+            script += $@"CREATE TABLE {FullName}(" + Environment.NewLine;
 
             string columnsDef = "";
             bool NeedTextImageOn = false;
@@ -64,7 +66,7 @@ namespace DBScriptSaver.Logic
 
         public override string ToString()
         {
-            return $@"{Schema}.{Name}";
+            return FullName;
         }
     }
 }
