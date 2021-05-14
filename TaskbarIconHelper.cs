@@ -187,7 +187,6 @@ namespace DBScriptSaver
             catch (Exception ex)
             {
                 MessageBox.Show($@"Ошибка обновления скриптов: {ex.Message}", @"Изменения по скриптам");
-                MessageBox.Show($@"Ошибка обновления скриптов: {ex.Message}", @"Изменения по скриптам");
             }
         }
 

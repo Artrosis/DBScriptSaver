@@ -538,7 +538,6 @@ FROM   #ids              AS i
             ON  o.[object_id] = i.id
        JOIN sys.schemas  AS s
             ON  s.[schema_id] = o.[schema_id]
-WHERE  s.name IN (N'Sniffer')
 ORDER BY
        i.id
 
