@@ -314,7 +314,7 @@ namespace DBScriptSaver.Logic
 
             var cmd = connection.CreateCommand();
 
-            cmd.CommandText = GetCHengesObjectScript();
+            cmd.CommandText = GetChangesObjectScript();
 
             using (SqlDataReader r = cmd.ExecuteReader())
             {
@@ -490,7 +490,7 @@ namespace DBScriptSaver.Logic
             }
         }
 
-        private string GetCHengesObjectScript()
+        private string GetChangesObjectScript()
         {
             string result = @"
 SELECT o.[object_id] AS id
