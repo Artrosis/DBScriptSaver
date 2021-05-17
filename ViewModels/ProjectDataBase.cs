@@ -127,6 +127,11 @@ namespace DBScriptSaver.ViewModels
                     DelCmd.CommandText = $@"DROP TRIGGER [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
                 }
 
+                if (Script.ToUpper().Contains("CREATE TABLE".ToUpper()))
+                {
+                    DelCmd.CommandText = $@"DROP TABLE [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
+                }
+
                 DelCmd.ExecuteNonQuery();
 
                 if (!delete)

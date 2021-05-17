@@ -32,6 +32,10 @@ namespace DBScriptSaver
             }
             return result;
         }
+        public static string GetObjectIdStringSql(this List<string> lst)
+        {
+            return lst.Select(o => o + ".sql").ToList().GetObjectIdString();
+        }
         public static string GetObjectsList(this List<string> lst)
         {
             string result = "";

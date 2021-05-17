@@ -504,7 +504,7 @@ WHERE " + Environment.NewLine;
 
             if (ОтслеживаемыеТаблицы.Count > 0)
             {
-                condition = $@"o.[object_id] IN ({ОтслеживаемыеТаблицы.GetObjectIdString()})";
+                condition = $@"o.[object_id] IN ({ОтслеживаемыеТаблицы.GetObjectIdStringSql()})";
             }
 
             if (ОтслеживаемыеСхемы.Count > 0)
@@ -513,7 +513,7 @@ WHERE " + Environment.NewLine;
 
                 if (ИгнорируемыеТаблицы.Count > 0)
                 {
-                    condition2 += $" AND o.[object_id] NOT IN ({ИгнорируемыеТаблицы.GetObjectIdString()})";
+                    condition2 += $" AND o.[object_id] NOT IN ({ИгнорируемыеТаблицы.GetObjectIdStringSql()})";
                 }
 
                 if (condition.Length == 0)
