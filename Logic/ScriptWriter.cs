@@ -43,7 +43,7 @@ namespace DBScriptSaver.Logic
             UpdateFilters();
             changeProgress.Invoke(@"Сравниваем хранимки/функции", 3);
             GetSourceScripts().ForEach(s => observer?.Invoke(s));
-            changeProgress.Invoke(@"Сравниваем таблицы", 30);
+            changeProgress.Invoke(@"Сравниваем таблицы", 50);
             GetChangesScripts();
             changeProgress.Invoke(@"", 0);
         }
@@ -414,8 +414,6 @@ namespace DBScriptSaver.Logic
         {
             LoadChanges();
 
-            changeProgress.Invoke(@"Сравниваем таблицы", 50);
-
             foreach (var p in tables)
             {
                 var table = p.Value;
@@ -454,13 +452,13 @@ namespace DBScriptSaver.Logic
                 observer?.Invoke(tblScript);
             }
 
-            changeProgress.Invoke(@"Сравниваем индексы", 55);
+            changeProgress.Invoke(@"Сравниваем индексы", 80);
 
             foreach (var p in indexes)
             {
                 var index = p.Value;
                 var table = tables[p.Key.tableId];
-                string fileName = $@"{table.Schema}.{index.Name}.sql";
+                string fileName = $@"{table.Schema}.{table.Name}.{index.Name}.sql";
                 string indexFileName = IndexFolder + fileName;
                 string script = index.MakeScript(table.FullName, indColumns[p.Key]);
 
@@ -607,45 +605,6 @@ ORDER BY
        ic.key_ordinal";
 
             return result;
-        }
-
-        private void GetIndexesScripts(Table tbl)
-        {
-            foreach (Index index in tbl.Indexes)
-            {
-                string fileName = $@"{tbl.Schema}.{index.Name}.sql";
-                string indexFileName = IndexFolder + fileName;
-                string script = "";
-
-                index.Script().Cast<string>().ToList().ForEach(l =>
-                {
-                    if (script != "")
-                    {
-                        script += "GO" + Environment.NewLine;
-                    }
-                    script += l + Environment.NewLine;
-                });
-
-                if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
-                {
-                    continue;
-                }
-
-                ChangeType ChangeType = !File.Exists(indexFileName) ? ChangeType.Новый : ChangeType.Изменённый;
-
-                Script indexScript = new Script()
-                {
-                    FileName = fileName,
-                    FullPath = IndexFolder + fileName,
-                    ScriptText = script,
-                    ObjectType = @"Индекс",
-                    ChangeState = ChangeType,
-                    urn = index.Urn,
-                    objName = index.Name
-                };
-
-                observer?.Invoke(indexScript);
-            }
         }
         public void Dispose()
         {
