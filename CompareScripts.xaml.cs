@@ -118,7 +118,7 @@ namespace DBScriptSaver
             finally
             {
                 Mouse.OverrideCursor = null;
-            }`
+            }
         }
 
         private void ВыбратьВсе_Click(object sender, RoutedEventArgs e)
@@ -340,6 +340,12 @@ namespace DBScriptSaver
         private void addSource(Script s)
         {
             Dispatcher.Invoke(() => scriptSource.Add(new ScriptWrapper(s)));
+        }
+
+        private async void Update(object sender, RoutedEventArgs e)
+        {
+            scriptSource.Clear();
+            await Task.Factory.StartNew(() => DB.ObserveScripts(s => addSource(s), SetTotal));
         }
     }
 }
