@@ -298,22 +298,21 @@ namespace DBScriptSaver.ViewModels
                 {
                     Directory.CreateDirectory(dir);
                 }
-                File.WriteAllText(script.FullPath, script.ScriptText, new UTF8Encoding(true));
 
-                if (!UseMigrations)
+                if (UseMigrations)
                 {
-                    continue;
+                    CreateChangesXML();
+                    using (var con = new SqlConnection(GetConnectionString()))
+                    {
+                        script
+                            .MakeMigrations(new Server(new ServerConnection(con)))
+                            .Where(m => m.Script != null)
+                            .ToList()
+                            .ForEach(m => AddMigration(m));
+                    }
                 }
-                
-                CreateChangesXML();
-                using (var con = new SqlConnection(GetConnectionString()))
-                {
-                    script
-                        .MakeMigrations(new Server(new ServerConnection(con)))
-                        .Where(m => m.Script != null)
-                        .ToList()
-                        .ForEach(m => AddMigration(m));
-                }
+
+                File.WriteAllText(script.FullPath, script.ScriptText, new UTF8Encoding(true));
             }
         }
 
