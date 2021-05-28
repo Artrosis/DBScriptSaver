@@ -351,6 +351,11 @@ namespace DBScriptSaver.ViewModels
                 return;
             }
 
+            if (!Directory.Exists(ChangesFolder))
+            {
+                Directory.CreateDirectory(ChangesFolder);
+            }
+
             if (File.Exists(ChangesXML))
             {
                 XDocument xdoc = XDocument.Load(ChangesXML);
