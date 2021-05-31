@@ -112,25 +112,7 @@ namespace DBScriptSaver.ViewModels
                 conn.Open();
                 var DelCmd = conn.CreateCommand();
 
-                if (Script.ToUpper().Contains("CREATE PROCEDURE".ToUpper()))
-                {
-                    DelCmd.CommandText = $@"DROP PROCEDURE [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
-                }
-
-                if (Script.ToUpper().Contains("CREATE FUNCTION".ToUpper()))
-                {
-                    DelCmd.CommandText = $@"DROP FUNCTION [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
-                }
-
-                if (Script.ToUpper().Contains("CREATE TRIGGER".ToUpper()))
-                {
-                    DelCmd.CommandText = $@"DROP TRIGGER [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
-                }
-
-                if (Script.ToUpper().Contains("CREATE TABLE".ToUpper()))
-                {
-                    DelCmd.CommandText = $@"DROP TABLE [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";
-                }
+                DelCmd.CommandText = $@"{DropCommand(Script)} [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";                
 
                 DelCmd.ExecuteNonQuery();
 
@@ -140,6 +122,31 @@ namespace DBScriptSaver.ViewModels
                     server.ConnectionContext.ExecuteNonQuery(Script);
                 }
             }
+        }
+
+        private object DropCommand(string script)
+        {
+            if (script.ToUpper().Contains("CREATE PROCEDURE".ToUpper()))
+            {
+                return $@"DROP PROCEDURE";
+            }
+
+            if (script.ToUpper().Contains("CREATE FUNCTION".ToUpper()))
+            {
+                return $@"DROP FUNCTION";
+            }
+
+            if (script.ToUpper().Contains("CREATE TRIGGER".ToUpper()))
+            {
+                return $@"DROP TRIGGER";
+            }
+
+            if (script.ToUpper().Contains("CREATE TABLE".ToUpper()))
+            {
+                return $@"DROP TABLE";
+            }
+
+            throw new Exception(@"Неизвестный тип скрипта");
         }
 
         public List<DependenceObject> GetChanges()
