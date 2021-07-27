@@ -119,7 +119,15 @@ namespace DBScriptSaver.ViewModels
                 if (!delete)
                 {
                     Server server = new Server(new ServerConnection(conn));
-                    server.ConnectionContext.ExecuteNonQuery(Script);
+
+                    try
+                    {
+                        server.ConnectionContext.ExecuteNonQuery(Script);
+                    }
+                    catch (SqlException e)
+                    {
+                        MessageBox.Show($@"Не удалось восстановить предыдущую версию объекта, обект удалён из базы но не восстановлен.{Environment.NewLine} Ошибка: {e.Message}", @"Изменения по скриптам");
+                    }
                 }
             }
         }
