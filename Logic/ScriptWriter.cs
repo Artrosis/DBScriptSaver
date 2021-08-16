@@ -47,20 +47,22 @@ namespace DBScriptSaver.Logic
             GetChangesScripts();
             changeProgress.Invoke(@"", 0);
         }
-        private List<string> ОтслеживаемыеСхемы;
-        private List<string> ОтслеживаемыеТаблицы;
-        private List<string> ИгнорируемыеТаблицы;
-        private List<string> ОтслеживаемыеОбъекты;
-        private List<string> ИгнорируемыеОбъекты;
+        private List<string> ОтслеживаемыеСхемы = new List<string>();
+        private List<string> ОтслеживаемыеТаблицы = new List<string>();
+        private List<string> ИгнорируемыеТаблицы = new List<string>();
+        private List<string> ОтслеживаемыеОбъекты = new List<string>();
+        private List<string> ИгнорируемыеОбъекты = new List<string>();
 
 
         private void UpdateFilters()
         {
             if (!File.Exists(FilterFile))
             {
-                ОтслеживаемыеСхемы = null;
-                ОтслеживаемыеОбъекты = null;
-                ИгнорируемыеОбъекты = null;
+                ОтслеживаемыеСхемы = new List<string>();
+                ОтслеживаемыеТаблицы = new List<string>();
+                ИгнорируемыеТаблицы = new List<string>();
+                ОтслеживаемыеОбъекты = new List<string>();
+                ИгнорируемыеОбъекты = new List<string>();
                 return;
             }
 
@@ -74,44 +76,35 @@ namespace DBScriptSaver.Logic
                                     .Elements("Schema")
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
-                                    .ToList();
+                                    .ToList() ?? new List<string>();
 
             ОтслеживаемыеТаблицы = DBObjects
                                     .Element("Tables")
                                     ?.Elements("Table")
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
-                                    .ToList();
-            if (ОтслеживаемыеТаблицы == null)
-            {
-                ОтслеживаемыеТаблицы = new List<string>();
-            }
+                                    .ToList() ?? new List<string>();
 
             ИгнорируемыеТаблицы = DBObjects
                                     .Element("Tables")
                                     ?.Elements("Table")
                                     .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
                                     .Select(e => e.Value)
-                                    .ToList();
-
-            if (ИгнорируемыеТаблицы == null)
-            {
-                ИгнорируемыеТаблицы = new List<string>();
-            }
+                                    .ToList() ?? new List<string>();
 
             ОтслеживаемыеОбъекты = DBObjects
                                     .Element("Procedures")
                                     .Elements("Procedure")
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
-                                    .ToList();
+                                    .ToList() ?? new List<string>();
 
             List<string> functions = DBObjects
                                     .Element("Functions")
                                     .Elements("Function")
                                     .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
                                     .Select(e => e.Value)
-                                    .ToList();
+                                    .ToList() ?? new List<string>();
 
             ОтслеживаемыеОбъекты.AddRange(functions);
 
@@ -120,14 +113,14 @@ namespace DBScriptSaver.Logic
                                         .Elements("Procedure")
                                         .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
                                         .Select(e => e.Value)
-                                        .ToList();
+                                        .ToList() ?? new List<string>();
 
             List<string> ignoreFunctions = DBObjects
                                             .Element("Functions")
                                             .Elements("Function")
                                             .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
                                             .Select(e => e.Value)
-                                            .ToList();
+                                            .ToList() ?? new List<string>();
 
             ИгнорируемыеОбъекты.AddRange(ignoreFunctions);
         }
@@ -310,6 +303,8 @@ namespace DBScriptSaver.Logic
 
         private void LoadChanges()
         {
+            if (ОтслеживаемыеТаблицы.Count == 0 && ОтслеживаемыеСхемы.Count == 0) return;
+
             dataBase = server.Databases.Cast<Database>().Single(b => b.Name.ToUpper() == db.Name.ToUpper());
 
             var cmd = connection.CreateCommand();
