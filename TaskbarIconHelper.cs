@@ -1,16 +1,11 @@
 ﻿using DBScriptSaver.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
 using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Linq;
 
 namespace DBScriptSaver
 {
@@ -46,9 +41,7 @@ namespace DBScriptSaver
 
                     try
                     {
-                        SqlConnection conn = new SqlConnection(db.GetConnectionString());
-                        conn.Open();
-                        HasConnect = true;
+                        HasConnect = db.Project.Server.GetDBQueryHelper().CheckConnection();
                     }
                     catch (Exception){}
 

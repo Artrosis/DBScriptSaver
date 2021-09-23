@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
 using PropertyChanged;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using Microsoft.Data.SqlClient;
-using System.Windows.Data;
 using System.Collections.Generic;
 using System.Data;
+using DBScriptSaver.Core;
+using System.Data.Common;
 
 namespace DBScriptSaver.ViewModels
 {
@@ -18,48 +16,55 @@ namespace DBScriptSaver.ViewModels
         public string Path { get; set; }
         public string DBLogin { get; set; }
         public string DBPassword { get; set; }
+        public DBType Type { get; set; }
         public ProjectServer(DBScriptViewModel vm) : base()
         {
             this.vm = vm;
-        }  
+        }
 
         public override string ToString()
         {
             return Name;
         }
-
-        public string GetConnectionString()
-        {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
-            {
-                DataSource = Path,
-                InitialCatalog = @"master",
-                UserID = DBLogin,
-                Password = Cryptography.Decrypt(DBPassword, fmProjectsEditor.GetSalt()),
-                ConnectTimeout = 3
-            };
-            return builder.ConnectionString;
-        }
         [JsonIgnore]
         public List<string> DBNames => GetNamesOfDB();
+
+        private IDBQueryHelper helper;
+        public IDBQueryHelper GetDBQueryHelper()
+        {
+            if (helper == null)
+            {
+                helper = DBQueryHelperFactory.Create(Type, Path, DBLogin, GetPassword());
+            }
+            return helper;
+        }
         private List<string> GetNamesOfDB()
         {
             List<string> list = new List<string>();
 
-            using (SqlConnection con = new SqlConnection(GetConnectionString()))
+            using (DbConnection con = GetDBQueryHelper().GetConnection())
             {
                 con.Open();
 
-                using (SqlCommand cmd = new SqlCommand("SELECT name FROM master.sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con))
-                using (IDataReader dr = cmd.ExecuteReader())
+                using (DbCommand cmd = con.CreateCommand())
                 {
-                    while (dr.Read())
+                    cmd.CommandText = GetDBQueryHelper().GetDataBaseQuery();
+
+                    using (IDataReader dr = cmd.ExecuteReader())
                     {
-                        list.Add(dr[0].ToString());
+                        while (dr.Read())
+                        {
+                            list.Add(dr[0].ToString());
+                        }
                     }
                 }
             }
             return list;
+        }
+
+        private string GetPassword()
+        {
+            return Cryptography.Decrypt(DBPassword, fmProjectsEditor.GetSalt());
         }
     }
 }

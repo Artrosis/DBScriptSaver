@@ -8,15 +8,15 @@
     Width="800"
     Height="614.106"
     mc:Ignorable="d"
+    Background="AliceBlue"
     Title="Настройка объектов базы данных" WindowStartupLocation="CenterScreen">
-    <Grid>
+    <Grid Margin="10,0,0,0" >
         <ScrollViewer
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
-            Background="AliceBlue"
-            VerticalScrollBarVisibility="Auto">
+            VerticalScrollBarVisibility="Auto" Margin="0,0,0,30">
             <StackPanel Background="AliceBlue" x:Name="DataPanel">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox

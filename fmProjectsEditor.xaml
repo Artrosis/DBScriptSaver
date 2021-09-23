@@ -5,13 +5,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DBScriptSaver"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:ns="clr-namespace:DBScriptSaver"
     mc:Ignorable="d"
     d:DesignWidth="1010"
     Icon="ico/main.ico"
     Title="Проекты"
     Background="BurlyWood"
     WindowStartupLocation="CenterScreen">
-    
     <Window.Resources>
         <ControlTemplate x:Key="validationFailed">
             <StackPanel Orientation="Horizontal">
@@ -21,6 +22,12 @@
                 <TextBlock Foreground="Red" FontSize="24" FontWeight="Bold">!</TextBlock>
             </StackPanel>
         </ControlTemplate>
+        <ObjectDataProvider x:Key="DBTypes" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="ns:DBType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </Window.Resources>
     <TabControl Background="Beige">
         <TabItem Header="Проекты">
@@ -121,6 +128,15 @@
                                 Width="200"
                                 Binding="{Binding Path=Path}"
                                 Header="Адрес" />
+                            <DataGridTemplateColumn Header="Тип" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox
+                                            ItemsSource="{Binding Source={StaticResource DBTypes}}"
+                                            SelectedItem="{Binding Path=Type}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn
                                 Width="150"
                                 Binding="{Binding Path=DBLogin}"
