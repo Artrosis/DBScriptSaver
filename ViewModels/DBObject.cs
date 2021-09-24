@@ -12,6 +12,13 @@ namespace DBScriptSaver.ViewModels
 
         public ObjectState State;
 
+        public DBObject(string SchemaName, string ProcedureName)
+        {
+            Schema = SchemaName;
+            Name = ProcedureName;
+            State = ObjectState.Не_указан;
+        }
+
         public DBObject(XElement f)
         {
             Schema = GetSchema(f.Value);

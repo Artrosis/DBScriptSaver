@@ -27,7 +27,7 @@ namespace DBScriptSaver.ViewModels
             return Name;
         }
         [JsonIgnore]
-        public List<string> DBNames => GetNamesOfDB();
+        public List<string> DBNames => GetDataBases();
 
         private IDBQueryHelper helper;
         public IDBQueryHelper GetDBQueryHelper()
@@ -38,7 +38,7 @@ namespace DBScriptSaver.ViewModels
             }
             return helper;
         }
-        private List<string> GetNamesOfDB()
+        private List<string> GetDataBases()
         {
             List<string> list = new List<string>();
 

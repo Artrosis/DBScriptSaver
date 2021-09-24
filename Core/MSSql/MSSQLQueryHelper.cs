@@ -46,5 +46,43 @@ namespace DBScriptSaver.Core
                 return true;
             }
         }
+
+        public string GetSchemasQuery()
+        {
+            return @"SELECT s.name
+                    FROM   sys.schemas        AS s
+                            JOIN sys.sysusers  AS u
+                                ON  s.principal_id = u.uid
+                    WHERE  u.hasdbaccess = 1";
+        }
+
+        public string GetStoredProceduresQuery()
+        {
+            return @"SELECT s.name            AS SchemaName,
+                           p.name            AS ProcedureName
+                    FROM   sys.procedures    AS p
+                           JOIN sys.schemas  AS s
+                                ON  p.[schema_id] = s.[schema_id]";
+        }
+
+        public string GetFunctionsQuery()
+        {
+            return @"SELECT s.name            AS SchemaName,
+                           f.name            AS FunctionName
+                    FROM   sys.objects       AS f
+                           JOIN sys.schemas  AS s
+                                ON  f.[schema_id] = s.[schema_id]
+                    WHERE  f.[type] IN ('FN', 'IF', 'TF')";
+        }
+
+        public string GetTablesQuery()
+        {
+            return @"SELECT s.name            AS SchemaName,
+                           o.name            AS TableName
+                    FROM   sys.objects       AS o
+                           JOIN sys.schemas  AS s
+                                ON  o.[schema_id] = s.[schema_id]
+                    WHERE  o.[type] = 'U'";
+        }
     }
 }

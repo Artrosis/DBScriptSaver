@@ -8,5 +8,6 @@ namespace DBScriptSaver.ViewModels
     {
         public Tbl(XElement f) : base(f) { }
         public Tbl(string Name) : base(Name) { }
+        public Tbl(string SchemaName, string ProcedureName) : base(SchemaName, ProcedureName) { }
     }
 }

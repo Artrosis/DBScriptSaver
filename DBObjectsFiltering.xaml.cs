@@ -1,14 +1,10 @@
-﻿using DBScriptSaver.ViewModels;
-using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
+﻿using DBScriptSaver.Core;
+using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Security;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,7 +16,7 @@ namespace DBScriptSaver
     /// <summary>
     /// Логика взаимодействия для DBObjectsFiltering.xaml
     /// </summary>
-    
+
     public partial class DBObjectsFiltering : Window
     {
         private ProjectDataBase db => ((ProjectDataBase)DataContext);
@@ -32,7 +28,7 @@ namespace DBScriptSaver
             timer.Interval = new TimeSpan(0, 0, 0, 0, 400);
 
             DataContext = dB;
-            
+
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
@@ -40,82 +36,55 @@ namespace DBScriptSaver
 
                 InitializeComponent();
 
-                SqlConnection conn = new SqlConnection(dB.GetConnectionString());
-
-                Server server = new Server(new ServerConnection(conn));
-
-                if (!HasConnection(dB.GetConnectionString()))
+                if (!HasConnection(db.Project.Server.GetDBQueryHelper()))
                 {
                     throw new Exception($@"Не удалось подключиться к серверу: {dB.Project.Server}");
                 }
 
-                Database dataBase = server.Databases.Cast<Database>().ToList().SingleOrDefault(d => d.Name == dB.Name);
-
-                if (dataBase == null)
+                if (!db.Project.Server.DBNames.Any(b => b == dB.Name))
                 {
                     MessageBox.Show($@"На сервере {dB.Project.Server} не найдена база данных: {dB.Name}");
                     return;
                 }
 
-                dataBase.Schemas.Cast<Schema>().ToList()
-                    .Where(s => !s.IsSystemObject || s.Name == "dbo").ToList()
-                    .ForEach(s =>
+                foreach (string s in dB.GetSchemasFromDB())
+                {
+                    if (!dB.Schemas.Any(sh => sh.ToString() == s))
                     {
-                        string sName = $@"{s.Name}";
-                        Sch sch = dB.Schemas.SingleOrDefault(sh => sh.ToString() == sName);
-
-                        if (sch == null)
-                        {
-                            var NewSchema = new Sch(sName);
-                            dB.Schemas.Add(NewSchema);
-                        }
+                        var NewSchema = new Sch(s);
+                        dB.Schemas.Add(NewSchema);
                     }
-                    );
+                }
 
-                dataBase.StoredProcedures.Cast<StoredProcedure>().ToList()
-                    .Where(sp => sp.Schema != "sys").ToList()
-                    .ForEach(sp =>
+                foreach (Procedure sp in dB.GetStoredProceduresFromDB())
+                {
+                    string spName = $@"{sp.Schema}.{sp.Name}";
+
+                    if (!dB.Procedures.Any(s => s.ToString() == spName))
                     {
-                        string spName = $@"{sp.Schema}.{sp.Name}";
-                        Procedure proc = dB.Procedures.SingleOrDefault(s => s.ToString() == spName);
-
-                        if (proc == null)
-                        {
-                            var NewProc = new Procedure(spName);
-                            dB.Procedures.Add(NewProc);
-                        }
+                        dB.Procedures.Add(sp);
                     }
-                    );
+                }
 
-                dataBase.UserDefinedFunctions.Cast<UserDefinedFunction>().ToList()
-                    .Where(f => f.Schema != "sys").ToList()
-                    .ForEach(f =>
+                foreach (Function f in dB.GetFunctionsFromDB())
+                {
+                    string fnName = $@"{f.Schema}.{f.Name}";
+
+                    if (!dB.Functions.Any(fun => fun.ToString() == fnName))
                     {
-                        string fnName = $@"{f.Schema}.{f.Name}";
-                        Function fn = dB.Functions.SingleOrDefault(fun => fun.ToString() == fnName);
-
-                        if (fn == null)
-                        {
-                            var NewFn = new Function(fnName);
-                            dB.Functions.Add(NewFn);
-                        }
+                        dB.Functions.Add(f);
                     }
-                    );
+                }
 
-                dataBase.Tables.Cast<Table>().ToList()
-                    .Where(t => t.Schema != "sys").ToList()
-                    .ForEach(t =>
+                foreach (Tbl t in dB.GetTablesFromDB())
+                {
+                    string tblName = $@"{t.Schema}.{t.Name}";
+
+                    if (!dB.Tables.Any(tab => tab.ToString() == tblName))
                     {
-                        string tblName = $@"{t.Schema}.{t.Name}";
-                        Tbl tbl = dB.Tables.SingleOrDefault(tab => tab.ToString() == tblName);
-
-                        if (tbl == null)
-                        {
-                            var NewTable = new Tbl(tblName);
-                            dB.Tables.Add(NewTable);
-                        }
+                        dB.Tables.Add(t);
                     }
-                    );
+                }
 
                 Filtering();
             }
@@ -171,26 +140,15 @@ namespace DBScriptSaver
             }
         }
 
-        private bool HasConnection(string connectionString)
+        private bool HasConnection(IDBQueryHelper helper)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                try
-                {
-                    con.Open();
-                    using (DbCommand cmd = con.CreateCommand())
-                    {
-                        cmd.CommandTimeout = 3;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandText = "select 1";
-                        cmd.ExecuteNonQuery();
-                    }
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
+                return helper.CheckConnection();
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -359,7 +317,7 @@ namespace DBScriptSaver
 
         private void UnCheckedAllSchemasIgnore(object sender, RoutedEventArgs e)
         {
-            db.Schemas.ToList().ForEach(s => s.IsIgnore = false);          
+            db.Schemas.ToList().ForEach(s => s.IsIgnore = false);
         }
 
         private void CheckedAllSchemasTrace(object sender, RoutedEventArgs e)

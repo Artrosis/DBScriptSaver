@@ -1,4 +1,5 @@
-﻿using DBScriptSaver.Logic;
+﻿using DBScriptSaver.Core;
+using DBScriptSaver.Logic;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
@@ -7,6 +8,8 @@ using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -64,6 +67,107 @@ namespace DBScriptSaver.ViewModels
             {
                 return new ListCollectionView(Schemas);
             }
+        }
+
+        public IDBQueryHelper GetDBQueryHelper()
+        {
+            return Project.Server.GetDBQueryHelper();
+        }
+
+        internal List<string> GetSchemasFromDB()
+        {
+            List<string> result = new List<string>();
+            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            {
+                con.Open();
+
+                using (DbCommand cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = GetDBQueryHelper().GetSchemasQuery();
+
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            result.Add(dr[0].ToString());
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal List<Function> GetFunctionsFromDB()
+        {
+            List<Function> result = new List<Function>();
+            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            {
+                con.Open();
+
+                using (DbCommand cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = GetDBQueryHelper().GetFunctionsQuery();
+
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            result.Add(new Function(dr[0].ToString(), dr[1].ToString()));
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal List<Tbl> GetTablesFromDB()
+        {
+            List<Tbl> result = new List<Tbl>();
+            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            {
+                con.Open();
+
+                using (DbCommand cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = GetDBQueryHelper().GetTablesQuery();
+
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            result.Add(new Tbl(dr[0].ToString(), dr[1].ToString()));
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal List<Procedure> GetStoredProceduresFromDB()
+        {
+            List<Procedure> result = new List<Procedure>();
+            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            {
+                con.Open();
+
+                using (DbCommand cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = GetDBQueryHelper().GetStoredProceduresQuery();
+
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            result.Add(new Procedure(dr[0].ToString(), dr[1].ToString()));
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         [JsonIgnore]

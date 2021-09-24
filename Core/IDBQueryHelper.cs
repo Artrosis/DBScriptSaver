@@ -10,6 +10,10 @@ namespace DBScriptSaver.Core
     {
         DbConnection GetConnection(string dBName = null);
         string GetDataBaseQuery();
+        string GetSchemasQuery();
         bool CheckConnection();
+        string GetStoredProceduresQuery();
+        string GetFunctionsQuery();
+        string GetTablesQuery();
     }
 }

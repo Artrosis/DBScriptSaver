@@ -45,5 +45,39 @@ namespace DBScriptSaver.Core
                 return true;
             }
         }
+
+        public string GetSchemasQuery()
+        {
+            return @"SELECT ""schema_name"" 
+                        FROM information_schema.schemata
+                        WHERE  ""schema_name"" NOT LIKE 'pg_%'
+                               AND ""schema_name"" <> 'information_schema'";
+        }
+
+        public string GetStoredProceduresQuery()
+        {
+            //Т.к. хранимок в PostGre нет, никаких строк не должно возвращаться
+            return @"SELECT *
+                FROM   pg_catalog.pg_namespace  AS s
+                WHERE s.nspowner <> s.nspowner";
+        }
+
+        public string GetFunctionsQuery()
+        {
+            return @"SELECT ""routine_schema"",
+                           ""routine_name""
+                    FROM information_schema.routines
+                    WHERE  ""routine_schema"" NOT LIKE 'pg_%'
+                           AND ""routine_schema"" != 'information_schema'";
+        }
+
+        public string GetTablesQuery()
+        {
+            return @"SELECT ""table_schema"",
+                           ""table_name""
+                    FROM information_schema.tables
+                    WHERE  ""table_schema"" NOT LIKE 'pg_%'
+                           AND ""table_schema"" != 'information_schema'";
+        }
     }
 }
