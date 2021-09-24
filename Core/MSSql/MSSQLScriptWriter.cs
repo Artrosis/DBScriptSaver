@@ -1,21 +1,20 @@
-﻿using DBScriptSaver.ViewModels;
+﻿using DBScriptSaver.Logic;
+using DBScriptSaver.ViewModels;
+using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Microsoft.Data.SqlClient;
-using System.Xml.Linq;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
-using DBScriptSaver.Parse;
-using DBScriptSaver.Helpers;
 using System.Text;
+using System.Xml.Linq;
 using Ude;
 
-namespace DBScriptSaver.Logic
+namespace DBScriptSaver.Core
 {
-    public class ScriptWriter : IDisposable
+    public class MSSQLScriptWriter : IScriptWriter
     {
         readonly ProjectDataBase db;
         readonly SqlConnection connection;
@@ -29,12 +28,24 @@ namespace DBScriptSaver.Logic
 
         public string FilterFile => db.FilterFile;
 
-        public string ConnectionString => db.GetConnectionString();
+        private Action<string, int> _changeProgress;
+        public Action<string, int> changeProgress 
+        { 
+            get => _changeProgress; 
+            set => _changeProgress = value; 
+        }
 
-        public ScriptWriter(ProjectDataBase projectDataBase)
+        private Action<Script> _observer;
+        public Action<Script> observer 
+        { 
+            get => _observer; 
+            set => _observer = value; 
+        }
+
+        public MSSQLScriptWriter(ProjectDataBase projectDataBase)
         {
             db = projectDataBase;
-            connection = new SqlConnection(ConnectionString);
+            connection = (SqlConnection)db.GetConnection();
             connection.Open();
             server = new Server(new ServerConnection(connection));
         }
@@ -292,9 +303,6 @@ namespace DBScriptSaver.Logic
             return result;
         }
 
-        public Action<string, int> changeProgress;
-        public Action<Script> observer;
-
         private Dictionary<int, TableData> tables = new Dictionary<int, TableData>();
         private Dictionary<int, List<ColumnData>> columns = new Dictionary<int, List<ColumnData>>();
         private Dictionary<(int tableId, int indexId), IndexData> indexes = new Dictionary<(int tableId, int indexId), IndexData>();
@@ -413,7 +421,7 @@ namespace DBScriptSaver.Logic
             {
                 var table = p.Value;
                 string script = table.MakeScript(columns[p.Key]);
-                    
+
                 string name = $@"{table.Schema}.{table.Name}";
                 string fileName = $@"{name}.sql";
 

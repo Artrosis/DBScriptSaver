@@ -237,8 +237,13 @@
     </Compile>
     <Compile Include="Core\DBQueryHelperFactory.cs" />
     <Compile Include="Core\IDBQueryHelper.cs" />
+    <Compile Include="Core\IMigrationMaker.cs" />
+    <Compile Include="Core\IScriptWriter.cs" />
+    <Compile Include="Core\MSSql\MSSQLMigrationMaker.cs" />
     <Compile Include="Core\MSSql\MSSQLQueryHelper.cs" />
+    <Compile Include="Core\Postgre\PGMigrationMaker.cs" />
     <Compile Include="Core\Postgre\PGQueryHelper.cs" />
+    <Compile Include="Core\Postgre\PGScriptWriter.cs" />
     <Compile Include="Cryptography.cs" />
     <Compile Include="DBType.cs" />
     <Compile Include="DependenciesSettings.xaml.cs">
@@ -260,7 +265,7 @@
     <Compile Include="ViewModels\Script.cs" />
     <Compile Include="ViewModels\ProjectServer.cs" />
     <Compile Include="Parse\TableComparer.cs" />
-    <Compile Include="Logic\ScriptWriter.cs" />
+    <Compile Include="Core\MSSql\MSSQLScriptWriter.cs" />
     <Compile Include="ViewModels\Tbl.cs" />
     <Page Include="AddScript.xaml">
       <SubType>Designer</SubType>

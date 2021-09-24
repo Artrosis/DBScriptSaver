@@ -1,4 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBScriptSaver.ViewModels;
+using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
+using System;
 using System.Data.Common;
 
 namespace DBScriptSaver.Core
@@ -15,7 +19,6 @@ namespace DBScriptSaver.Core
             this.login = login;
             this.pass = pass;
         }
-
         public DbConnection GetConnection(string dBName = null)
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
@@ -25,11 +28,11 @@ namespace DBScriptSaver.Core
                 UserID = login,
                 Password = pass,
                 ConnectTimeout = 3,
-                ApplicationName = "DBScriptSaver"
+                ApplicationName = "DBScriptSaver",
+                MultipleActiveResultSets = true
             };
             return new SqlConnection(builder.ConnectionString);
         }
-
         public string GetDataBaseQuery()
         {
             return @"SELECT d.name
@@ -46,7 +49,6 @@ namespace DBScriptSaver.Core
                 return true;
             }
         }
-
         public string GetSchemasQuery()
         {
             return @"SELECT s.name
@@ -55,7 +57,6 @@ namespace DBScriptSaver.Core
                                 ON  s.principal_id = u.uid
                     WHERE  u.hasdbaccess = 1";
         }
-
         public string GetStoredProceduresQuery()
         {
             return @"SELECT s.name            AS SchemaName,
@@ -64,7 +65,6 @@ namespace DBScriptSaver.Core
                            JOIN sys.schemas  AS s
                                 ON  p.[schema_id] = s.[schema_id]";
         }
-
         public string GetFunctionsQuery()
         {
             return @"SELECT s.name            AS SchemaName,
@@ -74,7 +74,6 @@ namespace DBScriptSaver.Core
                                 ON  f.[schema_id] = s.[schema_id]
                     WHERE  f.[type] IN ('FN', 'IF', 'TF')";
         }
-
         public string GetTablesQuery()
         {
             return @"SELECT s.name            AS SchemaName,
@@ -83,6 +82,59 @@ namespace DBScriptSaver.Core
                            JOIN sys.schemas  AS s
                                 ON  o.[schema_id] = s.[schema_id]
                     WHERE  o.[type] = 'U'";
+        }
+        public string GetDropQuery(string script, string SchemaName, string ObjectName)
+        {
+            return $@"{DropCommand(script)} [{SchemaName}].[{ObjectName}]";
+        }
+        private string DropCommand(string script)
+        {
+            if (script.ToUpper().Contains("CREATE PROCEDURE".ToUpper()))
+            {
+                return $@"DROP PROCEDURE";
+            }
+
+            if (script.ToUpper().Contains("CREATE FUNCTION".ToUpper()))
+            {
+                return $@"DROP FUNCTION";
+            }
+
+            if (script.ToUpper().Contains("CREATE TRIGGER".ToUpper()))
+            {
+                return $@"DROP TRIGGER";
+            }
+
+            if (script.ToUpper().Contains("CREATE TABLE".ToUpper()))
+            {
+                return $@"DROP TABLE";
+            }
+
+            if (script.ToUpper().Contains("CREATE NONCLUSTERED INDEX".ToUpper()))
+            {
+                return $@"DROP INDEX";
+            }
+
+            throw new Exception(@"Неизвестный тип скрипта");
+        }
+        public void ExecuteNonQuery(DbConnection conn, string Script)
+        {
+            if (!(conn is SqlConnection))
+            {
+                throw new Exception($@"Не верный тип подключения: {conn.GetType().FullName}");
+            }
+            Server server = new Server(new ServerConnection((SqlConnection)conn));
+            server.ConnectionContext.StatementTimeout = 30 * 60; //30 минут на выполнение скрипта
+            server.ConnectionContext.ExecuteNonQuery(Script);
+        }
+
+        public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, Script script)
+        {
+            return new MSSQLMigrationMaker(dbConnection, script);
+        }
+
+        public IScriptWriter GetScriptWriter(ProjectDataBase projectDataBase)
+        {
+            return new MSSQLScriptWriter(projectDataBase);
         }
     }
 }

@@ -1,8 +1,4 @@
 ﻿using DBScriptSaver.Core;
-using DBScriptSaver.Logic;
-using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using PropertyChanged;
 using System;
@@ -74,10 +70,15 @@ namespace DBScriptSaver.ViewModels
             return Project.Server.GetDBQueryHelper();
         }
 
+        public DbConnection GetConnection()
+        {
+            return GetDBQueryHelper().GetConnection(Name);
+        }
+
         internal List<string> GetSchemasFromDB()
         {
             List<string> result = new List<string>();
-            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            using (DbConnection con = GetConnection())
             {
                 con.Open();
 
@@ -101,7 +102,7 @@ namespace DBScriptSaver.ViewModels
         internal List<Function> GetFunctionsFromDB()
         {
             List<Function> result = new List<Function>();
-            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            using (DbConnection con = GetConnection())
             {
                 con.Open();
 
@@ -125,7 +126,7 @@ namespace DBScriptSaver.ViewModels
         internal List<Tbl> GetTablesFromDB()
         {
             List<Tbl> result = new List<Tbl>();
-            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            using (DbConnection con = GetConnection())
             {
                 con.Open();
 
@@ -149,7 +150,7 @@ namespace DBScriptSaver.ViewModels
         internal List<Procedure> GetStoredProceduresFromDB()
         {
             List<Procedure> result = new List<Procedure>();
-            using (DbConnection con = GetDBQueryHelper().GetConnection(Name))
+            using (DbConnection con = GetConnection())
             {
                 con.Open();
 
@@ -211,54 +212,27 @@ namespace DBScriptSaver.ViewModels
             string Script = delete ? obj.ScriptText
                                     : File.ReadAllText(SourceFolder + objectFileName);
 
-            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
+            using (DbConnection conn = GetConnection())
             {
                 conn.Open();
                 var DelCmd = conn.CreateCommand();
 
-                DelCmd.CommandText = $@"{DropCommand(Script)} [{objectFileName.GetSchema()}].[{objectFileName.GetName()}]";                
+                DelCmd.CommandText = GetDBQueryHelper().GetDropQuery(Script, objectFileName.GetSchema(), objectFileName.GetName());
 
                 DelCmd.ExecuteNonQuery();
 
                 if (!delete)
                 {
-                    Server server = new Server(new ServerConnection(conn));
-
                     try
                     {
-                        server.ConnectionContext.ExecuteNonQuery(Script);
+                        GetDBQueryHelper().ExecuteNonQuery(conn, Script);
                     }
-                    catch (SqlException e)
+                    catch (Exception e)
                     {
                         MessageBox.Show($@"Не удалось восстановить предыдущую версию объекта, обект удалён из базы но не восстановлен.{Environment.NewLine} Ошибка: {e.Message}", @"Изменения по скриптам");
                     }
                 }
             }
-        }
-
-        private object DropCommand(string script)
-        {
-            if (script.ToUpper().Contains("CREATE PROCEDURE".ToUpper()))
-            {
-                return $@"DROP PROCEDURE";
-            }
-
-            if (script.ToUpper().Contains("CREATE FUNCTION".ToUpper()))
-            {
-                return $@"DROP FUNCTION";
-            }
-
-            if (script.ToUpper().Contains("CREATE TRIGGER".ToUpper()))
-            {
-                return $@"DROP TRIGGER";
-            }
-
-            if (script.ToUpper().Contains("CREATE TABLE".ToUpper()))
-            {
-                return $@"DROP TABLE";
-            }
-
-            throw new Exception(@"Неизвестный тип скрипта");
         }
 
         public List<DependenceObject> GetChanges()
@@ -400,7 +374,7 @@ namespace DBScriptSaver.ViewModels
 
         public void ObserveScripts(Action<Script> observer, Action<string, int> changeProgress)
         {
-            using (var sw = new ScriptWriter(this))
+            using (var sw = GetDBQueryHelper().GetScriptWriter(this))
             {
                 sw.changeProgress += changeProgress;
                 sw.observer += observer;
@@ -421,10 +395,11 @@ namespace DBScriptSaver.ViewModels
                 if (UseMigrations)
                 {
                     CreateChangesXML();
-                    using (var con = new SqlConnection(GetConnectionString()))
+                    using (var con = GetConnection())
                     {
-                        script
-                            .MakeMigrations(new Server(new ServerConnection(con)))
+                        GetDBQueryHelper()
+                            .GetMigrationMaker(con, script)
+                            .Make()
                             .Where(m => m.Script != null)
                             .ToList()
                             .ForEach(m => AddMigration(m));
@@ -504,20 +479,6 @@ namespace DBScriptSaver.ViewModels
             EmptyChanges.Save(ChangesXML);
 
             HasChangesXML = true;
-        }
-
-        public string GetConnectionString()
-        {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder()
-            {
-                DataSource = Project.Server.Path,
-                InitialCatalog = Name ?? @"master",
-                UserID = Project.Server.DBLogin,
-                Password = Cryptography.Decrypt(Project.Server.DBPassword, fmProjectsEditor.GetSalt()),
-                ConnectTimeout = 3,
-                MultipleActiveResultSets = true
-            };
-            return builder.ConnectionString;
         }
     }
 }
