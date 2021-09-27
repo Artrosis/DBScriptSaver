@@ -6,6 +6,7 @@ using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,126 +15,13 @@ using Ude;
 
 namespace DBScriptSaver.Core
 {
-    public class MSSQLScriptWriter : IScriptWriter
-    {
-        readonly ProjectDataBase db;
-        readonly SqlConnection connection;
+    internal class MSSQLScriptWriter : BaseScriptWriter
+    {   
         readonly Server server;
 
-        public string SourceFolder => db.SourceFolder;
-        public string TableFolder => db.TableFolder;
-        public string IndexFolder => db.IndexFolder;
-        public ObservableCollection<Procedure> Procedures => db.Procedures;
-        public ObservableCollection<Function> Functions => db.Functions;
-
-        public string FilterFile => db.FilterFile;
-
-        private Action<string, int> _changeProgress;
-        public Action<string, int> changeProgress 
-        { 
-            get => _changeProgress; 
-            set => _changeProgress = value; 
-        }
-
-        private Action<Script> _observer;
-        public Action<Script> observer 
-        { 
-            get => _observer; 
-            set => _observer = value; 
-        }
-
-        public MSSQLScriptWriter(ProjectDataBase projectDataBase)
-        {
-            db = projectDataBase;
-            connection = (SqlConnection)db.GetConnection();
-            connection.Open();
-            server = new Server(new ServerConnection(connection));
-        }
-        public void ObserveScripts()
-        {
-            UpdateFilters();
-            changeProgress.Invoke(@"Сравниваем хранимки/функции", 3);
-            GetSourceScripts().ForEach(s => observer?.Invoke(s));
-            changeProgress.Invoke(@"Сравниваем таблицы", 50);
-            GetChangesScripts();
-            changeProgress.Invoke(@"", 0);
-        }
-        private List<string> ОтслеживаемыеСхемы = new List<string>();
-        private List<string> ОтслеживаемыеТаблицы = new List<string>();
-        private List<string> ИгнорируемыеТаблицы = new List<string>();
-        private List<string> ОтслеживаемыеОбъекты = new List<string>();
-        private List<string> ИгнорируемыеОбъекты = new List<string>();
-
-
-        private void UpdateFilters()
-        {
-            if (!File.Exists(FilterFile))
-            {
-                ОтслеживаемыеСхемы = new List<string>();
-                ОтслеживаемыеТаблицы = new List<string>();
-                ИгнорируемыеТаблицы = new List<string>();
-                ОтслеживаемыеОбъекты = new List<string>();
-                ИгнорируемыеОбъекты = new List<string>();
-                return;
-            }
-
-            db.UpdateFilterDataFromConfig();
-
-            XElement DBObjects = XDocument.Load(FilterFile)
-                                            .Element("DBObjects");
-
-            ОтслеживаемыеСхемы = DBObjects
-                                    .Element("Schemas")
-                                    .Elements("Schema")
-                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
-                                    .Select(e => e.Value)
-                                    .ToList() ?? new List<string>();
-
-            ОтслеживаемыеТаблицы = DBObjects
-                                    .Element("Tables")
-                                    ?.Elements("Table")
-                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
-                                    .Select(e => e.Value)
-                                    .ToList() ?? new List<string>();
-
-            ИгнорируемыеТаблицы = DBObjects
-                                    .Element("Tables")
-                                    ?.Elements("Table")
-                                    .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
-                                    .Select(e => e.Value)
-                                    .ToList() ?? new List<string>();
-
-            ОтслеживаемыеОбъекты = DBObjects
-                                    .Element("Procedures")
-                                    .Elements("Procedure")
-                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
-                                    .Select(e => e.Value)
-                                    .ToList() ?? new List<string>();
-
-            List<string> functions = DBObjects
-                                    .Element("Functions")
-                                    .Elements("Function")
-                                    .Where(e => e.Attribute("State").Value == ObjectState.Отслеживаемый.ToString())
-                                    .Select(e => e.Value)
-                                    .ToList() ?? new List<string>();
-
-            ОтслеживаемыеОбъекты.AddRange(functions);
-
-            ИгнорируемыеОбъекты = DBObjects
-                                        .Element("Procedures")
-                                        .Elements("Procedure")
-                                        .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
-                                        .Select(e => e.Value)
-                                        .ToList() ?? new List<string>();
-
-            List<string> ignoreFunctions = DBObjects
-                                            .Element("Functions")
-                                            .Elements("Function")
-                                            .Where(e => e.Attribute("State").Value == ObjectState.Игнорируемый.ToString())
-                                            .Select(e => e.Value)
-                                            .ToList() ?? new List<string>();
-
-            ИгнорируемыеОбъекты.AddRange(ignoreFunctions);
+        public MSSQLScriptWriter(ProjectDataBase projectDataBase) : base(projectDataBase)
+        {   
+            server = new Server(new ServerConnection((SqlConnection)connection));
         }
 
         private static readonly Dictionary<string, string> TypeDescriptions = new Dictionary<string, string>()
@@ -157,64 +45,20 @@ namespace DBScriptSaver.Core
             { "V ", @"Представление"}
         };
 
-        private static string objectTypeDescription(string type)
+        public override string objectTypeDescription(DbDataReader reader)
         {
+            string type = (string)reader["TYPE"];
             return TypeDescriptions[type] ?? type;
         }
-        private List<Script> GetSourceScripts()
+
+        public override string FileNameForObject(DbDataReader reader)
         {
-            var result = new List<Script>();
-            if (!Directory.Exists(SourceFolder))
-            {
-                Directory.CreateDirectory(SourceFolder);
-            }
+            return (string)reader["ObjectName"];
+        }
 
-            DirectoryInfo d = new DirectoryInfo(SourceFolder);
-
-            d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
-                .ToList().ForEach(f =>
-                {
-                    if (f.Name.Contains(@".UserDefinedFunction"))
-                    {
-                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".UserDefinedFunction", ""));
-                    }
-                    if (f.Name.Contains(@".StoredProcedure"))
-                    {
-                        File.Move(f.FullName, f.DirectoryName + System.IO.Path.DirectorySeparatorChar + f.Name.Replace(@".StoredProcedure", ""));
-                    }
-                });
-
-            Dictionary<string, Tuple<string, DateTime>> SourcesData = d.GetFiles(@"*.sql", SearchOption.TopDirectoryOnly)
-                                    .OrderBy(f => f.LastWriteTime)
-                                    .ToDictionary(f => f.Name, f => new Tuple<string, DateTime>(File.ReadAllText(f.FullName, GetEncoding(f.FullName)), f.LastWriteTime));
-
-            foreach (var procedure in Procedures.Where(p => p.IsTrace))
-            {
-                if (!SourcesData.Keys.Contains(procedure.FullName + ".sql"))
-                {
-                    SourcesData.Add(procedure.FullName + ".sql", new Tuple<string, DateTime>("", DateTime.Now));
-                }
-            }
-
-            foreach (var function in Functions.Where(f => f.IsTrace))
-            {
-                if (!SourcesData.Keys.Contains(function.FullName + ".sql"))
-                {
-                    SourcesData.Add(function.FullName + ".sql", new Tuple<string, DateTime>("", DateTime.Now));
-                }
-            }
-
-            var cmd = connection.CreateCommand();
-
-            List<string> @objects = SourcesData.Keys.ToList();
-
-            if (ОтслеживаемыеОбъекты != null && ОтслеживаемыеОбъекты.Count > 0)
-            {
-                @objects.AddRange(ОтслеживаемыеОбъекты.Select(o => o + ".sql").ToList());
-                @objects = @objects.Distinct().ToList();
-            }
-
-            cmd.CommandText = @"SELECT s.[name] + N'.' + o.[name] AS ObjectName, sm.[definition], o.[TYPE]," + Environment.NewLine
+        public override string GetSourceDefinitionQuery()
+        {
+            string result = @"SELECT s.[name] + N'.' + o.[name] AS ObjectName, sm.[definition], o.[TYPE]," + Environment.NewLine
                             + @"ISNULL(sm.uses_ansi_nulls, 0) AS uses_ansi_nulls," + Environment.NewLine
                             + @"ISNULL(sm.uses_quoted_identifier, 0) AS uses_quoted_identifier" + Environment.NewLine
                             + @"FROM   sys.sql_modules   AS sm" + Environment.NewLine
@@ -251,55 +95,28 @@ namespace DBScriptSaver.Core
                 condition += $"sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
             }
 
-            cmd.CommandText += condition;
+            result += condition;
 
-            using (SqlDataReader r = cmd.ExecuteReader())
+            return result;
+        }
+
+        public override string GetScriptFromReader(DbDataReader r)
+        {
+            string result = string.Empty;
+
+            if ((bool)r["uses_ansi_nulls"])
             {
-                while (r.Read())
-                {
-                    string FileName = ((string)r["ObjectName"]) + ".sql";
-
-                    string objectType = objectTypeDescription((string)r["TYPE"]);
-
-                    string TextFromDB = string.Empty;
-
-                    if ((bool)r["uses_ansi_nulls"])
-                    {
-                        TextFromDB += @"SET ANSI_NULLS ON" + Environment.NewLine;
-                        TextFromDB += @"GO" + Environment.NewLine;
-                    }
-
-                    if ((bool)r["uses_quoted_identifier"])
-                    {
-                        TextFromDB += @"SET QUOTED_IDENTIFIER ON" + Environment.NewLine;
-                        TextFromDB += @"GO" + Environment.NewLine;
-                    }
-
-                    TextFromDB += (string)r["definition"];
-
-                    string SourcesKey = SourcesData
-                                        .Keys
-                                        .Select(k => new { Value = k, Upper = k.ToUpper() })
-                                        .SingleOrDefault(k => k.Upper == FileName.ToUpper())
-                                        ?.Value;
-                    string TextFromFile = (SourcesKey != null) ? SourcesData[SourcesKey].Item1 : null;
-
-                    if ((TextFromFile == null) || (TextFromFile != TextFromDB))
-                    {
-                        ChangeType ChangeType = (TextFromFile == null) ? ChangeType.Новый : ChangeType.Изменённый;
-
-                        result.Add(
-                            new Script()
-                            {
-                                FileName = FileName,
-                                FullPath = SourceFolder + FileName,
-                                ScriptText = TextFromDB,
-                                ObjectType = objectType,
-                                ChangeState = ChangeType
-                            });
-                    }
-                }
+                result += @"SET ANSI_NULLS ON" + Environment.NewLine;
+                result += @"GO" + Environment.NewLine;
             }
+
+            if ((bool)r["uses_quoted_identifier"])
+            {
+                result += @"SET QUOTED_IDENTIFIER ON" + Environment.NewLine;
+                result += @"GO" + Environment.NewLine;
+            }
+
+            result += (string)r["definition"];
             return result;
         }
 
@@ -319,7 +136,7 @@ namespace DBScriptSaver.Core
 
             cmd.CommandText = GetChangesObjectScript();
 
-            using (SqlDataReader r = cmd.ExecuteReader())
+            using (DbDataReader r = cmd.ExecuteReader())
             {
                 //Таблицы
                 while (r.Read())
@@ -608,24 +425,6 @@ ORDER BY
        ic.key_ordinal";
 
             return result;
-        }
-        public void Dispose()
-        {
-            connection.Dispose();
-        }
-        public static Encoding GetEncoding(string FullFileName)
-        {
-            var detector = new CharsetDetector();
-            byte[] bytes = File.ReadAllBytes(FullFileName);
-            detector.Feed(bytes, 0, bytes.Length);
-            detector.DataEnd();
-            string encoding = detector.Charset;
-            if (encoding == "windows-1255")
-            {
-                encoding = "windows-1251";
-            }
-            Encoding enc = Encoding.GetEncoding(encoding);
-            return enc;
         }
     }
 }

@@ -241,6 +241,7 @@
     <Compile Include="Core\IScriptWriter.cs" />
     <Compile Include="Core\MSSql\MSSQLMigrationMaker.cs" />
     <Compile Include="Core\MSSql\MSSQLQueryHelper.cs" />
+    <Compile Include="Core\BaseScriptWriter.cs" />
     <Compile Include="Core\Postgre\PGMigrationMaker.cs" />
     <Compile Include="Core\Postgre\PGQueryHelper.cs" />
     <Compile Include="Core\Postgre\PGScriptWriter.cs" />
