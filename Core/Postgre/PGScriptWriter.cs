@@ -11,17 +11,17 @@ namespace DBScriptSaver.Core
     {
         public PGScriptWriter(ProjectDataBase projectDataBase) : base(projectDataBase) 
         {
-            volatiles.Add("v", "VOLATILE");
-
             FillNameSpaces();
             FillTypes();
             FillLanguages();
         }
 
-        private Dictionary<int, string> pgLanguages = new Dictionary<int, string>();
+        private static Dictionary<uint, string> pgLanguages = new Dictionary<uint, string>();
 
         private void FillLanguages()
         {
+            if (pgLanguages.Count > 0) return;
+
             var cmd = connection.CreateCommand();
             cmd.CommandText = @"SELECT l.oid,
                                        l.lanname
@@ -31,15 +31,17 @@ namespace DBScriptSaver.Core
             {
                 while (r.Read())
                 {
-                    pgLanguages.Add((int)r["oid"], (string)r["lanname"]);
+                    pgLanguages.Add((uint)r["oid"], (string)r["lanname"]);
                 }
             }
         }
 
-        private Dictionary<int, string> nameSpaces = new Dictionary<int, string>();
+        private static Dictionary<uint, string> nameSpaces = new Dictionary<uint, string>();
 
         private void FillNameSpaces()
         {
+            if (nameSpaces.Count > 0) return;
+
             var cmd = connection.CreateCommand();
             cmd.CommandText = @"SELECT n.oid,
 	                                   n.nspname
@@ -49,13 +51,15 @@ namespace DBScriptSaver.Core
             {
                 while (r.Read())
                 {
-                    nameSpaces.Add((int)r["oid"], (string)r["nspname"]);
+                    nameSpaces.Add((uint)r["oid"], (string)r["nspname"]);
                 }
             }
         }
 
         private void FillTypes()
         {
+            if (typesDescriptions.Count > 0) return;
+
             var cmd = connection.CreateCommand();
             cmd.CommandText = @"SELECT t.oid,
                                        t.typname,
@@ -66,7 +70,7 @@ namespace DBScriptSaver.Core
             {
                 while (r.Read())
                 {
-                    typesDescriptions.Add((int)r["oid"], ((string)r["typname"], (int)r["typnamespace"]));
+                    typesDescriptions.Add((uint)r["oid"], ((string)r["typname"], (uint)r["typnamespace"]));
                 }
             }
         }
@@ -76,7 +80,10 @@ namespace DBScriptSaver.Core
             return (string)reader["proname"];
         }
 
-        private Dictionary<string, string> volatiles = new Dictionary<string, string>();
+        private static Dictionary<string, string> volatiles = new Dictionary<string, string>
+        {
+            { "v", "VOLATILE" }
+        };
 
         public override string GetScriptFromReader(DbDataReader reader)
         {
@@ -90,8 +97,8 @@ namespace DBScriptSaver.Core
                 result += $@"SETOF ";
             }
 
-            int typeId = (int)reader["prorettype"];
-            int nsId = typesDescriptions[typeId].nsId;
+            uint typeId = (uint)reader["prorettype"];
+            uint nsId = typesDescriptions[typeId].nsId;
 
             result += $@"""{nameSpaces[nsId]}"".""{typesDescriptions[typeId].name}"" {Environment.NewLine}";
 
@@ -102,13 +109,13 @@ namespace DBScriptSaver.Core
             result += (string)reader["prosrc"] + ";" + Environment.NewLine;
 
             result += $@"$BODY${Environment.NewLine}";
-            result += $@"LANGUAGE {pgLanguages[(int)reader["prolang"]]} {volatiles[(string)reader["provolatile"]]} {Environment.NewLine}";
+            result += $@"LANGUAGE {pgLanguages[(uint)reader["prolang"]]} {volatiles[(string)reader["provolatile"]]} {Environment.NewLine}";
             result += $@"COST {(float)reader["procost"]}{Environment.NewLine}";
             result += $@"ROWS {(float)reader["prolang"]}";
             return result;
         }
 
-        private Dictionary<int, (string name, int nsId)> typesDescriptions = new Dictionary<int, (string name, int nsId)>();
+        private static Dictionary<uint, (string name, uint nsId)> typesDescriptions = new Dictionary<uint, (string name, uint nsId)>();
 
         private string MakeArgs(string namesStr, string typesStr)
         {
@@ -117,7 +124,7 @@ namespace DBScriptSaver.Core
             var names = namesStr.Split(',');
 
             typesStr = typesStr.Substring(1, typesStr.Length - 2);
-            var types = typesStr.Split(' ').Select(t => int.Parse(t)).ToArray();
+            var types = typesStr.Split(' ').Select(t => uint.Parse(t)).ToArray();
 
             string result = "";
 
@@ -140,8 +147,7 @@ namespace DBScriptSaver.Core
                                        JOIN pg_catalog.pg_namespace AS n
                                             ON  n.oid = p.pronamespace
                                 WHERE  n.nspname NOT LIKE 'pg_%'
-                                       AND n.nspname != 'information_schema'
-                                WHERE ";
+                                       AND n.nspname != 'information_schema'";
 
             string condition = "";
 
@@ -177,7 +183,7 @@ namespace DBScriptSaver.Core
 
         public override string objectTypeDescription(DbDataReader reader)
         {
-            throw new NotImplementedException();
+            return @"Функция";
         }
     }
 }
