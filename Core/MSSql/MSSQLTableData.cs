@@ -1,18 +1,61 @@
-﻿using System;
+﻿using DBScriptSaver.ViewModels;
+using Microsoft.SqlServer.Management.Smo;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-namespace DBScriptSaver.Logic
+namespace DBScriptSaver.Core
 {
-    public class TableData
+    public class MSSQLTableData: ITableData
     {
         public int id;
+        public string TableFolder;
         public string Schema;
         public string Name;
         public bool UsesAnsiNulls;
+        public Database dataBase;
+
+        public List<MSSQLColumnData> Columns = new List<MSSQLColumnData>();
 
         public string FullName => $@"[{Schema}].[{Name}]";
 
-        public string MakeScript(List<ColumnData> columnDatas)
+        public IScript GetScript()
+        {
+            string script = MakeScript();
+
+            string name = $@"{Schema}.{Name}";
+            string fileName = $@"{name}.sql";
+
+            string tableFileName = TableFolder + fileName;
+            string oldScript = "";
+
+            if (File.Exists(tableFileName))
+            {
+                oldScript = File.ReadAllText(tableFileName);
+                if (script == oldScript)
+                {
+                    return null;
+                }
+            }
+
+            ChangeType changeType = !File.Exists(tableFileName) ? ChangeType.Новый : ChangeType.Изменённый;
+
+            var tbl = dataBase.Tables.Cast<Table>().Single(t => t.Schema == Schema && t.Name == Name);
+
+            return new MSSQLScript()
+            {
+                FileName = fileName,
+                FullPath = TableFolder + fileName,
+                ScriptText = script,
+                ObjectType = @"Таблица",
+                ChangeState = changeType,
+                urn = tbl.Urn,
+                ObjName = tbl.Name
+            };
+        }
+
+        public string MakeScript()
         {
             string script = string.Empty;
 
@@ -38,7 +81,7 @@ namespace DBScriptSaver.Logic
             string columnsDef = "";
             bool NeedTextImageOn = false;
 
-            foreach (var column in columnDatas)
+            foreach (var column in Columns)
             {
                 if (columnsDef.Length > 0)
                 {

@@ -16,7 +16,7 @@ namespace DBScriptSaver.Core
             FillLanguages();
         }
 
-        private static Dictionary<uint, string> pgLanguages = new Dictionary<uint, string>();
+        private static readonly Dictionary<uint, string> pgLanguages = new Dictionary<uint, string>();
 
         private void FillLanguages()
         {
@@ -36,7 +36,7 @@ namespace DBScriptSaver.Core
             }
         }
 
-        private static Dictionary<uint, string> nameSpaces = new Dictionary<uint, string>();
+        private static readonly Dictionary<uint, string> nameSpaces = new Dictionary<uint, string>();
 
         private void FillNameSpaces()
         {
@@ -80,16 +80,16 @@ namespace DBScriptSaver.Core
             return (string)reader["proname"];
         }
 
-        private static Dictionary<string, string> volatiles = new Dictionary<string, string>
+        private static readonly Dictionary<char, string> volatiles = new Dictionary<char, string>
         {
-            { "v", "VOLATILE" }
+            { 'v', "VOLATILE" }
         };
 
         public override string GetScriptFromReader(DbDataReader reader)
         {
             string result = "CREATE OR REPLACE FUNCTION ";
 
-            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs((string)reader["proargnames"], (string)reader["proargtypes"])}){Environment.NewLine}";
+            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs((string[])reader["proargnames"], (uint[])reader["proargtypes"])}){Environment.NewLine}";
             result += $@"RETURNS ";
 
             if ((bool)reader["proretset"])
@@ -109,23 +109,16 @@ namespace DBScriptSaver.Core
             result += (string)reader["prosrc"] + ";" + Environment.NewLine;
 
             result += $@"$BODY${Environment.NewLine}";
-            result += $@"LANGUAGE {pgLanguages[(uint)reader["prolang"]]} {volatiles[(string)reader["provolatile"]]} {Environment.NewLine}";
+            result += $@"LANGUAGE {pgLanguages[(uint)reader["prolang"]]} {volatiles[(char)reader["provolatile"]]} {Environment.NewLine}";
             result += $@"COST {(float)reader["procost"]}{Environment.NewLine}";
-            result += $@"ROWS {(float)reader["prolang"]}";
+            result += $@"ROWS {(uint)reader["prolang"]}";
             return result;
         }
 
-        private static Dictionary<uint, (string name, uint nsId)> typesDescriptions = new Dictionary<uint, (string name, uint nsId)>();
+        private static readonly Dictionary<uint, (string name, uint nsId)> typesDescriptions = new Dictionary<uint, (string name, uint nsId)>();
 
-        private string MakeArgs(string namesStr, string typesStr)
+        private string MakeArgs(string[] names, uint[] types)
         {
-            namesStr = namesStr.Substring(1, namesStr.Length - 2);
-
-            var names = namesStr.Split(',');
-
-            typesStr = typesStr.Substring(1, typesStr.Length - 2);
-            var types = typesStr.Split(' ').Select(t => uint.Parse(t)).ToArray();
-
             string result = "";
 
             for (int paramIndex = 0; paramIndex < names.Length; paramIndex++)
@@ -142,48 +135,375 @@ namespace DBScriptSaver.Core
 
         public override string GetSourceDefinitionQuery()
         {
-            string result = @"SELECT *
+            string result = @"SELECT n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile
                                 FROM   pg_catalog.pg_proc p
                                        JOIN pg_catalog.pg_namespace AS n
                                             ON  n.oid = p.pronamespace
                                 WHERE  n.nspname NOT LIKE 'pg_%'
                                        AND n.nspname != 'information_schema'";
-
-            string condition = "";
+            string objCondition = "";
 
             if (@objects.Count > 0)
             {
-                condition = $"sm.object_id IN ({@objects.GetObjectIdString()})";
+                foreach (var obj in @objects)
+                {
+                    if (objCondition != "")
+                    {
+                        objCondition += Environment.NewLine;
+                        objCondition += " OR ";
+                    }
+                    objCondition += $@"(n.nspname = '{obj.GetSchema()}' AND p.proname = '{obj.GetName()}')";
+                }
+
+                objCondition = $@"({objCondition})";
             }
+
+            string schemaCondition = "";
 
             if (ОтслеживаемыеСхемы != null && ОтслеживаемыеСхемы.Count > 0)
             {
-                if (condition != "")
-                {
-                    condition += Environment.NewLine;
-                    condition += " OR ";
-                }
-                condition += $"n.nspname IN ({ОтслеживаемыеСхемы.GetObjectsList()})";
+                schemaCondition += $"(n.nspname IN ({GetObjectsList(ОтслеживаемыеСхемы)}))";
             }
 
-            if (ИгнорируемыеОбъекты != null && ИгнорируемыеОбъекты.Count > 0)
+            string hideCondition = "";
+
+            if (ИгнорируемыеОбъекты.Count > 0)
             {
-                if (condition != "")
+                foreach (var obj in ИгнорируемыеОбъекты)
                 {
-                    condition = $@"({condition})" + Environment.NewLine;
-                    condition += " AND ";
+                    if (hideCondition != "")
+                    {
+                        hideCondition += Environment.NewLine;
+                        hideCondition += " AND ";
+                    }
+                    hideCondition += $@" NOT (n.nspname = '{obj.GetSchema()}' AND p.proname = '{obj.GetName()}')";
                 }
-                condition += $"sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
+
+                hideCondition = $@"({hideCondition})";
             }
 
-            result += condition;
+            string condition = "";
 
+            if (schemaCondition.Length > 0)
+            {
+                condition = schemaCondition;
+            }
+
+            if (objCondition.Length > 0)
+            {
+                if (condition.Length > 0)
+                {
+                    condition = $@"({condition} OR {objCondition})";
+                }
+                else
+                {
+                    condition = objCondition;
+                }
+            }
+
+            if (hideCondition.Length > 0)
+            {
+                if (condition.Length > 0)
+                {
+                    condition = $@"({condition} AND {hideCondition})";
+                }
+                else
+                {
+                    condition = hideCondition;
+                }
+            }
+
+            if (condition.Length > 0)
+            {
+                result += Environment.NewLine + $@"AND ({condition})";
+            }
+
+            return result;
+        }
+
+        private static string GetObjectsList(List<string> lst)
+        {
+            string result = "";
+            foreach (string ObjectName in lst)
+            {
+                if (result != "")
+                {
+                    result += ", ";
+                }
+                result += $@"'{ObjectName}'";
+            }
             return result;
         }
 
         public override string objectTypeDescription(DbDataReader reader)
         {
             return @"Функция";
+        }
+        string GetChangesObjectScript()
+        {
+            string result = @"
+CREATE TEMP TABLE tbls ON COMMIT DROP
+AS
+SELECT c.oid                AS id
+FROM   pg_catalog.pg_class  AS c
+       JOIN pg_catalog.pg_namespace n
+            ON  n.oid = c.relnamespace" + Environment.NewLine;
+
+            string schemaCondition = "";
+
+            if (ОтслеживаемыеСхемы.Count > 0)
+            {
+                schemaCondition += $"(n.nspname IN ({GetObjectsList(ОтслеживаемыеСхемы)}))";
+            }
+
+            string tblCondition = "";
+
+            if (ОтслеживаемыеТаблицы.Count > 0)
+            {
+                foreach (var tbl in ОтслеживаемыеТаблицы)
+                {
+                    if (tblCondition != "")
+                    {
+                        tblCondition += Environment.NewLine;
+                        tblCondition += " OR ";
+                    }
+                    tblCondition += $@"(n.nspname = '{tbl.GetSchema()}' AND c.relname = '{tbl.GetName()}')";
+                }
+
+                tblCondition = $@"({tblCondition})";
+            }
+
+            string hideTblsCondition = "";
+
+            if (ИгнорируемыеТаблицы.Count > 0)
+            {
+                foreach (var obj in ИгнорируемыеОбъекты)
+                {
+                    if (hideTblsCondition != "")
+                    {
+                        hideTblsCondition += Environment.NewLine;
+                        hideTblsCondition += " AND ";
+                    }
+                    hideTblsCondition += $@" NOT (n.nspname = '{obj.GetSchema()}' AND c.relname = '{obj.GetName()}')";
+                }
+
+                hideTblsCondition = $@"({hideTblsCondition})";
+            }
+
+            string condition = "";
+
+            if (schemaCondition.Length > 0)
+            {
+                condition = schemaCondition;
+            }
+
+            if (tblCondition.Length > 0)
+            {
+                if (condition.Length > 0)
+                {
+                    condition += $@"({condition} OR {tblCondition})";
+                }
+                else
+                {
+                    condition = tblCondition;
+                }                
+            }
+
+            if (hideTblsCondition.Length > 0)
+            {
+                if (condition.Length > 0)
+                {
+                    condition += $@"({condition} AND {hideTblsCondition})";
+                }
+                else
+                {
+                    condition = tblCondition;
+                }
+            }
+
+            if (condition.Length > 0)
+            {
+                result += $@"WHERE {condition};" + Environment.NewLine;
+            }
+
+            result += @"
+SELECT t.id,
+       t.id::regclass::TEXT AS ""TableName"",
+       n.nspname AS ""SchemaName""
+FROM tbls                      AS t
+       JOIN pg_catalog.pg_class AS c
+           ON  t.id = c.oid
+       JOIN pg_catalog.pg_namespace n
+            ON n.oid = c.relnamespace;
+
+SELECT '""' || a.attname || '"" ' || pg_catalog.format_type (a.atttypid, a.atttypmod) || ' ' 
+        || CASE WHEN n.nspname IS NOT NULL THEN 'COLLATE ' || '""' || n.nspname || '"".""' || c.collname || '"" '  ELSE '' END
+        || CASE WHEN a.attnotnull = TRUE THEN 'NOT NULL ' ELSE '' END
+        || CASE WHEN a.atthasdef = TRUE THEN 'DEFAULT ' || d.adsrc ELSE '' END AS coldef,
+		t.id
+FROM   tbls AS t
+JOIN pg_catalog.pg_attribute AS a
+ON  t.id = a.attrelid
+       JOIN pg_catalog.pg_type AS pt
+ ON  pt.oid = a.atttypid
+       LEFT JOIN pg_catalog.pg_collation AS c
+           ON  a.attcollation = c.oid
+       LEFT JOIN pg_catalog.pg_namespace AS n
+           ON  n.oid = c.collnamespace
+       LEFT JOIN pg_catalog.pg_attrdef AS d
+         ON  d.adrelid = t.id
+            AND d.adnum = a.attnum
+WHERE a.attnum > 0
+       AND NOT a.attisdropped
+ORDER BY
+       a.attnum;
+
+SELECT 'CONSTRAINT ' || '""' || conname || '"" ' || pg_get_constraintdef (c.oid) AS condef,
+		t.id
+FROM tbls AS t
+       JOIN pg_catalog.pg_constraint c
+            ON t.id = c.conrelid
+ORDER BY
+       c.oid;
+
+SELECT i.indexdef || ';'             AS ""IndexDef"",
+       i.indexname AS ""IndexName"",
+       t.id,
+       ind.oid AS index_id
+FROM tbls                          AS t
+       JOIN pg_catalog.pg_index AS ix
+       ON  ix.indrelid = t.id
+       JOIN pg_catalog.pg_class AS tbl
+       ON  t.id = tbl.oid
+       JOIN pg_catalog.pg_class AS ind
+       ON  ind.oid = ix.indexrelid
+       JOIN pg_catalog.pg_namespace AS n
+           ON  n.oid = ind.relnamespace
+       JOIN pg_catalog.pg_indexes AS i
+         ON  i.tablename = tbl.relname
+            AND i.schemaname = n.nspname
+            AND i.indexname = ind.relname
+WHERE ix.indisprimary = FALSE
+ORDER BY
+       ind.oid;
+
+SELECT 'COMMENT ON COLUMN ""' || n.nspname || '"".""' || tbl.relname || '"".""' || a.attname || '"" IS ''' ||
+       d.description || ''';' AS ""Comment"", d.objsubid, t.id
+FROM   tbls AS t
+       JOIN pg_catalog.pg_class AS tbl
+            ON  t.id = tbl.oid
+
+       JOIN pg_catalog.pg_namespace AS n
+            ON  n.oid = tbl.relnamespace
+
+       JOIN pg_catalog.pg_attribute AS a
+            ON  t.id = a.attrelid
+
+       JOIN pg_catalog.pg_description AS d
+            ON  t.id = d.objoid
+
+            AND d.objsubid = a.attnum
+UNION
+SELECT 'COMMENT ON TABLE ""' || n.nspname || '"".""' || tbl.relname || '"" IS ''' ||
+       d.description || ''';', d.objsubid, t.id
+FROM   tbls AS t
+       JOIN pg_catalog.pg_class AS tbl
+            ON  t.id = tbl.oid
+
+       JOIN pg_catalog.pg_namespace AS n
+            ON  n.oid = tbl.relnamespace
+
+       JOIN pg_catalog.pg_description AS d
+            ON  t.id = d.objoid AND d.objsubid = 0
+ORDER BY 2;
+
+COMMIT;";
+
+            return result;
+        }
+        protected override void LoadChanges()
+        {
+            if (ОтслеживаемыеТаблицы.Count == 0 && ОтслеживаемыеСхемы.Count == 0) return;
+
+            Begin();
+
+            var cmd = connection.CreateCommand();
+
+            cmd.CommandText = GetChangesObjectScript();
+
+            using (DbDataReader r = cmd.ExecuteReader())
+            {
+                //Таблицы
+                while (r.Read())
+                {
+                    int id = (int)(uint)r["id"];
+                    tables.Add(id, new PGTableData()
+                    {
+                        id = id,
+                        Name = (string)r["TableName"],
+                        Schema = (string)r["SchemaName"],
+                        TableFolder = TableFolder
+                    });
+                }
+
+                r.NextResult();
+                //Столбцы таблиц
+                while (r.Read())
+                {
+                    ((PGTableData)tables[(int)(uint)r["id"]]).Columns.Add(new PGColumnData()
+                    {
+                        Script = (string)r["coldef"]
+                    });
+                }
+
+                r.NextResult();
+                //Ограницения
+                while (r.Read())
+                {
+                    ((PGTableData)tables[(int)(uint)r["id"]]).Constrains.Add(new PGConstrainsData()
+                    {
+                        Script = (string)r["condef"]
+                    });
+                }
+
+                r.NextResult();
+                //Индексы
+                while (r.Read())
+                {
+                    int tableId = (int)(uint)r["id"];
+                    int indexId = (int)(uint)r["index_id"];
+
+                    var index = new PGIndexData()
+                    {
+                        Script = (string)r["IndexDef"],
+                        IndexFolder = IndexFolder,
+                        Name = (string)r["IndexName"],
+                        table = (PGTableData)tables[tableId]
+                    };
+
+                    index.table.Indexes.Add(index);
+                    indexes.Add((tableId, indexId), index);
+                }
+
+                r.NextResult();
+                //Комментарии
+                while (r.Read())
+                {
+                    ((PGTableData)tables[(int)(uint)r["id"]]).Comments.Add(new PGCommentData()
+                    {
+                        Script = (string)r["Comment"]
+                    });
+                }
+            }
+        }
+
+        private void Begin()
+        {
+            var cmd = connection.CreateCommand();
+
+            cmd.CommandText = "BEGIN;";
+
+            cmd.ExecuteNonQuery();
         }
     }
 }

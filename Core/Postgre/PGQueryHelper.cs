@@ -7,9 +7,9 @@ namespace DBScriptSaver.Core
 {
     internal class PGQueryHelper : IDBQueryHelper
     {
-        private string path;
-        private string login;
-        private string pass;
+        private readonly string path;
+        private readonly string login;
+        private readonly string pass;
 
         public PGQueryHelper(string path, string login, string pass)
         {
@@ -113,9 +113,9 @@ namespace DBScriptSaver.Core
             }
         }
 
-        public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, Script script)
+        public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, IScript script)
         {
-            return new PGMigrationMaker(dbConnection, script);
+            return new PGMigrationMaker(dbConnection, (PGScript)script);
         }
 
         public IScriptWriter GetScriptWriter(ProjectDataBase projectDataBase)

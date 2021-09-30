@@ -372,7 +372,7 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public void ObserveScripts(Action<Script> observer, Action<string, int> changeProgress)
+        public void ObserveScripts(Action<IScript> observer, Action<string, int> changeProgress)
         {
             using (var sw = GetDBQueryHelper().GetScriptWriter(this))
             {
@@ -382,7 +382,7 @@ namespace DBScriptSaver.ViewModels
             }
         }
 
-        public void UpdateScripts(List<Script> scripts, bool UseMigrations)
+        public void UpdateScripts(List<IScript> scripts, bool UseMigrations)
         {
             foreach (var script in scripts)
             {

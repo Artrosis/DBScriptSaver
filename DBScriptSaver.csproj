@@ -235,16 +235,26 @@
     <Compile Include="CompareScripts.xaml.cs">
       <DependentUpon>CompareScripts.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Core\BaseScript.cs" />
     <Compile Include="Core\DBQueryHelperFactory.cs" />
     <Compile Include="Core\IDBQueryHelper.cs" />
+    <Compile Include="Core\IIndexData.cs" />
     <Compile Include="Core\IMigrationMaker.cs" />
     <Compile Include="Core\IScriptWriter.cs" />
+    <Compile Include="Core\ITableData.cs" />
     <Compile Include="Core\MSSql\MSSQLMigrationMaker.cs" />
     <Compile Include="Core\MSSql\MSSQLQueryHelper.cs" />
     <Compile Include="Core\BaseScriptWriter.cs" />
+    <Compile Include="Core\MSSql\MSSQLScript.cs" />
+    <Compile Include="Core\Postgre\PGColumnData.cs" />
+    <Compile Include="Core\Postgre\PGCommentData.cs" />
+    <Compile Include="Core\Postgre\PGConstrainsData.cs" />
+    <Compile Include="Core\Postgre\PGIndexData.cs" />
+    <Compile Include="Core\Postgre\PGScript.cs" />
     <Compile Include="Core\Postgre\PGMigrationMaker.cs" />
     <Compile Include="Core\Postgre\PGQueryHelper.cs" />
     <Compile Include="Core\Postgre\PGScriptWriter.cs" />
+    <Compile Include="Core\Postgre\PGTableData.cs" />
     <Compile Include="Cryptography.cs" />
     <Compile Include="DBType.cs" />
     <Compile Include="DependenciesSettings.xaml.cs">
@@ -253,10 +263,10 @@
     <Compile Include="FileComparer.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
-    <Compile Include="Logic\ColumnData.cs" />
-    <Compile Include="Logic\IndexColumnData.cs" />
-    <Compile Include="Logic\IndexData.cs" />
-    <Compile Include="Logic\TableData.cs" />
+    <Compile Include="Core\MSSql\MSSQLColumnData.cs" />
+    <Compile Include="Core\MSSql\MSSQLIndexColumnData.cs" />
+    <Compile Include="Core\MSSql\MSSQLIndexData.cs" />
+    <Compile Include="Core\MSSql\MSSQLTableData.cs" />
     <Compile Include="ScriptWrapper.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="ViewModels\ChangeType.cs" />

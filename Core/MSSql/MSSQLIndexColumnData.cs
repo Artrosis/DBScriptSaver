@@ -1,6 +1,6 @@
-﻿namespace DBScriptSaver.Logic
+﻿namespace DBScriptSaver.Core
 {
-    internal class IndexColumnData
+    internal class MSSQLIndexColumnData
     {
         public string Name;
         public int Order;

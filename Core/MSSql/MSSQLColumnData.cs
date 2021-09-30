@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DBScriptSaver.Logic
+namespace DBScriptSaver.Core
 {
-    public class ColumnData
+    public class MSSQLColumnData
     {
         public int Order;
         public string Name;

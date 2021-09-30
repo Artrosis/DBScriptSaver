@@ -12,11 +12,11 @@ namespace DBScriptSaver.Core
 {
     internal class MSSQLMigrationMaker : IMigrationMaker
     {
-        private DbConnection connection;
-        private Server server;
-        private Script script;
+        private readonly DbConnection connection;
+        private readonly Server server;
+        private readonly MSSQLScript script;
 
-        public MSSQLMigrationMaker(DbConnection dbConnection, Script script)
+        public MSSQLMigrationMaker(DbConnection dbConnection, MSSQLScript script)
         {
             this.script = script;
             connection = dbConnection;
@@ -64,7 +64,7 @@ namespace DBScriptSaver.Core
         {
             return new Migration()
             {
-                Name = FileHelper.CreateMigrationName(script.objName),
+                Name = FileHelper.CreateMigrationName(script.ObjName),
                 Script = server.GetScript(script.urn)
             };
         }
@@ -73,7 +73,7 @@ namespace DBScriptSaver.Core
         {
             return new Migration()
             {
-                Name = FileHelper.CreateMigrationName(script.objName),
+                Name = FileHelper.CreateMigrationName(script.ObjName),
                 Script = server.GetScript(script.urn)
             };
         }

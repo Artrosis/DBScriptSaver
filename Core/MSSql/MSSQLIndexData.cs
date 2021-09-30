@@ -1,13 +1,14 @@
-﻿using System;
+﻿using DBScriptSaver.ViewModels;
+using Microsoft.SqlServer.Management.Smo;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
-namespace DBScriptSaver.Logic
+namespace DBScriptSaver.Core
 {
-    internal class IndexData
+    internal class MSSQLIndexData: IIndexData
     {
-        public int TableId;
-        public int IndexId;
         public string Name;
         public bool isPrimaryKey;
         public bool isUniqueConstraint;
@@ -18,13 +19,47 @@ namespace DBScriptSaver.Logic
         public bool ignoreDupKey;
         public bool allowRowLocks;
         public bool allowPageLocks;
+        public string IndexFolder;
+        public Database dataBase;
+        public MSSQLTableData table;
+
+        public List<MSSQLIndexColumnData> Columns = new List<MSSQLIndexColumnData>();
+
+        public IScript GetScript()
+        {
+            string fileName = $@"{table.Schema}.{table.Name}.{Name}.sql";
+            string indexFileName = IndexFolder + fileName;
+            string script = MakeScript(table.FullName);
+
+            if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
+            {
+                return null;
+            }
+
+            ChangeType ChangeType = !File.Exists(indexFileName) ? ChangeType.Новый : ChangeType.Изменённый;
+
+            var dbInd = dataBase
+                        .Tables.Cast<Table>().Single(t => t.Schema == table.Schema && t.Name == table.Name)
+                        .Indexes.Cast<Index>().Single(i => i.Name == Name);
+
+            return new MSSQLScript()
+            {
+                FileName = fileName,
+                FullPath = IndexFolder + fileName,
+                ScriptText = script,
+                ObjectType = @"Индекс",
+                ChangeState = ChangeType,
+                urn = dbInd.Urn,
+                ObjName = Name
+            };
+        }
 
         public override string ToString()
         {
             return Name;
         }
 
-        internal string MakeScript(string tableName, List<IndexColumnData> columns)
+        internal string MakeScript(string tableName)
         {
             string script = string.Empty;
 
@@ -41,7 +76,7 @@ namespace DBScriptSaver.Logic
             script += "(" + Environment.NewLine;
 
             string columnsDef = "";
-            foreach (var column in columns.Where(c => !c.IsIncluded).OrderBy(c => c.Order))
+            foreach (var column in Columns.Where(c => !c.IsIncluded).OrderBy(c => c.Order))
             {
                 if (columnsDef.Length > 0)
                 {
@@ -54,7 +89,7 @@ namespace DBScriptSaver.Logic
             script += ")" + Environment.NewLine;
 
             string include = "";
-            foreach (var column in columns.Where(c => c.IsIncluded).OrderBy(c => c.Name))
+            foreach (var column in Columns.Where(c => c.IsIncluded).OrderBy(c => c.Name))
             {
                 if (include != "")
                 {

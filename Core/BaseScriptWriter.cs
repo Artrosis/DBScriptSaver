@@ -37,8 +37,8 @@ namespace DBScriptSaver.Core
             set => _changeProgress = value;
         }
 
-        private Action<Script> _observer;
-        public Action<Script> observer
+        private Action<IScript> _observer;
+        public Action<IScript> observer
         {
             get => _observer;
             set => _observer = value;
@@ -49,20 +49,42 @@ namespace DBScriptSaver.Core
             changeProgress.Invoke(@"Сравниваем хранимки/функции", 3);
             GetSourceScripts().ForEach(s => observer?.Invoke(s));
             changeProgress.Invoke(@"Сравниваем таблицы", 50);
+            LoadChanges();
             GetChangesScripts();
             changeProgress.Invoke(@"", 0);
         }
 
-        private void GetChangesScripts()
+        protected Dictionary<int, ITableData> tables = new Dictionary<int, ITableData>();
+        protected Dictionary<(int tableId, int indexId), IIndexData> indexes = new Dictionary<(int tableId, int indexId), IIndexData>();
+
+        protected abstract void LoadChanges();
+        void GetChangesScripts()
         {
-            throw new NotImplementedException();
+            foreach (var p in tables)
+            {
+                IScript tblScript = p.Value.GetScript();
+
+                if (tblScript == null) continue;
+
+                observer?.Invoke(tblScript);
+            }
+
+            changeProgress.Invoke(@"Сравниваем индексы", 80);
+
+            foreach (var p in indexes)
+            {
+                IScript indexScript = p.Value.GetScript();
+
+                if (indexScript == null) continue;
+
+                observer?.Invoke(indexScript);
+            }
         }
 
         protected List<string> @objects;
-
-        private List<Script> GetSourceScripts()
+        private List<IScript> GetSourceScripts()
         {
-            var result = new List<Script>();
+            var result = new List<IScript>();
             if (!Directory.Exists(SourceFolder))
             {
                 Directory.CreateDirectory(SourceFolder);
@@ -137,7 +159,7 @@ namespace DBScriptSaver.Core
                         ChangeType ChangeType = (TextFromFile == null) ? ChangeType.Новый : ChangeType.Изменённый;
 
                         result.Add(
-                            new Script()
+                            new BaseScript()
                             {
                                 FileName = FileName,
                                 FullPath = SourceFolder + FileName,

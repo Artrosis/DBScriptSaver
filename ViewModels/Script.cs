@@ -8,14 +8,16 @@ using System.IO;
 
 namespace DBScriptSaver.ViewModels
 {
-    public class Script
+    public interface IScript
     {
-        public string FileName;
-        public string FullPath;
-        public string ScriptText;
-        public string ObjectType;
-        public ChangeType ChangeState;
-        public Urn urn;
-        public string objName;
+        string FileName { get; }
+
+        IScript Copy();
+
+        string FullPath { get; }
+        string ScriptText { get; set; }
+        string ObjectType { get; }
+        ChangeType ChangeState { get; }
+        string ObjName { get; }
     }
 }

@@ -6,10 +6,10 @@ namespace DBScriptSaver.Core
 {
     internal class PGMigrationMaker : IMigrationMaker
     {
-        private DbConnection dbConnection;
-        private Script script;
+        private readonly DbConnection dbConnection;
+        private readonly PGScript script;
 
-        public PGMigrationMaker(DbConnection dbConnection, Script script)
+        public PGMigrationMaker(DbConnection dbConnection, PGScript script)
         {
             this.dbConnection = dbConnection;
             this.script = script;

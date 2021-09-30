@@ -19,7 +19,7 @@ namespace DBScriptSaver.Core
         string GetTablesQuery();
         string GetDropQuery(string script, string SchemaName, string ObjectName);
         void ExecuteNonQuery(DbConnection conn, string Script);
-        IMigrationMaker GetMigrationMaker(DbConnection dbConnection, Script script);
+        IMigrationMaker GetMigrationMaker(DbConnection dbConnection, IScript script);
         IScriptWriter GetScriptWriter(ProjectDataBase projectDataBase);
     }
 }

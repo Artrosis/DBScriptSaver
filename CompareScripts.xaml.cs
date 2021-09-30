@@ -337,7 +337,7 @@ namespace DBScriptSaver
             await Task.Factory.StartNew(() => DB.ObserveScripts(s => addSource(s), SetTotal));
         }
 
-        private void addSource(Script s)
+        private void addSource(IScript s)
         {
             Dispatcher.Invoke(() => scriptSource.Add(new ScriptWrapper(s)));
         }

@@ -8,21 +8,12 @@ namespace DBScriptSaver
     [AddINotifyPropertyChangedInterface]
     internal class ScriptWrapper
     {
-        private readonly Script t;
-        public Script getScript
+        private readonly IScript t;
+        public IScript getScript
         {
             get
             {
-                Script result = new Script()
-                {
-                    FileName = t.FileName,
-                    FullPath = t.FullPath,
-                    ScriptText = t.ScriptText,
-                    ChangeState = t.ChangeState,
-                    ObjectType = t.ObjectType,
-                    urn = t.urn,
-                    objName = t.objName
-                };
+                IScript result = t.Copy();
 
                 if (!string.IsNullOrWhiteSpace(EditedFilePath) && File.Exists(EditedFilePath))
                 {
@@ -31,7 +22,7 @@ namespace DBScriptSaver
                 return result;
             }
         }
-        public ScriptWrapper(Script t)
+        public ScriptWrapper(IScript t)
         {
             this.t = t;
         }

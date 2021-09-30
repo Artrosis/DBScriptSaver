@@ -1,26 +1,20 @@
-﻿using DBScriptSaver.Logic;
-using DBScriptSaver.ViewModels;
+﻿using DBScriptSaver.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data.Common;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Linq;
-using Ude;
 
 namespace DBScriptSaver.Core
 {
     internal class MSSQLScriptWriter : BaseScriptWriter
-    {   
+    {
         readonly Server server;
 
         public MSSQLScriptWriter(ProjectDataBase projectDataBase) : base(projectDataBase)
-        {   
+        {
             server = new Server(new ServerConnection((SqlConnection)connection));
         }
 
@@ -120,13 +114,8 @@ namespace DBScriptSaver.Core
             return result;
         }
 
-        private Dictionary<int, TableData> tables = new Dictionary<int, TableData>();
-        private Dictionary<int, List<ColumnData>> columns = new Dictionary<int, List<ColumnData>>();
-        private Dictionary<(int tableId, int indexId), IndexData> indexes = new Dictionary<(int tableId, int indexId), IndexData>();
-        private Dictionary<(int tableId, int indexId), List<IndexColumnData>> indColumns = new Dictionary<(int, int), List<IndexColumnData>>();
-        private Database dataBase;
-
-        private void LoadChanges()
+        Database dataBase;
+        protected override void LoadChanges()
         {
             if (ОтслеживаемыеТаблицы.Count == 0 && ОтслеживаемыеСхемы.Count == 0) return;
 
@@ -142,15 +131,15 @@ namespace DBScriptSaver.Core
                 while (r.Read())
                 {
                     int id = (int)r["id"];
-                    tables.Add(id, new TableData()
+                    tables.Add(id, new MSSQLTableData()
                     {
                         id = id,
                         Schema = (string)r["schemaName"],
                         Name = (string)r["tableName"],
-                        UsesAnsiNulls = (bool)r["uses_ansi_nulls"]
+                        UsesAnsiNulls = (bool)r["uses_ansi_nulls"],
+                        dataBase = dataBase,
+                        TableFolder = TableFolder
                     });
-
-                    columns.Add(id, new List<ColumnData>());
                 }
 
                 r.NextResult();
@@ -171,7 +160,7 @@ namespace DBScriptSaver.Core
                         collation_name = (string)r["collation_name"];
                     }
 
-                    columns[(int)r["id"]].Add(new ColumnData()
+                    ((MSSQLTableData)tables[(int)r["id"]]).Columns.Add(new MSSQLColumnData()
                     {
                         Order = (int)r["column_id"],
                         Name = (string)r["column"],
@@ -193,10 +182,8 @@ namespace DBScriptSaver.Core
                 {
                     int tableId = (int)r["id"];
                     int indexId = (int)r["index_id"];
-                    indexes.Add((tableId, indexId), new IndexData()
+                    indexes.Add((tableId, indexId), new MSSQLIndexData()
                     {
-                        TableId = tableId,
-                        IndexId = indexId,
                         isPrimaryKey = (bool)r["is_primary_key"],
                         isUniqueConstraint = (bool)r["is_unique_constraint"],
                         isUnique = (bool)r["is_unique"],
@@ -206,10 +193,11 @@ namespace DBScriptSaver.Core
                         noRecompute = (bool)r["no_recompute"],
                         ignoreDupKey = (bool)r["ignore_dup_key"],
                         allowRowLocks = (bool)r["allow_row_locks"],
-                        allowPageLocks = (bool)r["allow_page_locks"]
+                        allowPageLocks = (bool)r["allow_page_locks"],
+                        IndexFolder = IndexFolder,
+                        dataBase = dataBase,
+                        table = (MSSQLTableData)tables[tableId]
                     });
-
-                    indColumns.Add((tableId, indexId), new List<IndexColumnData>());
                 }
 
                 r.NextResult();
@@ -219,7 +207,7 @@ namespace DBScriptSaver.Core
                     int tableId = (int)r["id"];
                     int indexId = (int)r["index_id"];
 
-                    indColumns[(tableId, indexId)].Add(new IndexColumnData
+                    ((MSSQLIndexData)indexes[((int)r["id"], (int)r["index_id"])]).Columns.Add(new MSSQLIndexColumnData
                     {
                         Name = (string)r["name"],
                         Order = (byte)r["key_ordinal"],
@@ -230,85 +218,7 @@ namespace DBScriptSaver.Core
             }
         }
 
-        private void GetChangesScripts()
-        {
-            LoadChanges();
-
-            foreach (var p in tables)
-            {
-                var table = p.Value;
-                string script = table.MakeScript(columns[p.Key]);
-
-                string name = $@"{table.Schema}.{table.Name}";
-                string fileName = $@"{name}.sql";
-
-                string tableFileName = TableFolder + fileName;
-                string oldScript = "";
-
-                if (File.Exists(tableFileName))
-                {
-                    oldScript = File.ReadAllText(tableFileName);
-                    if (script == oldScript)
-                    {
-                        continue;
-                    }
-                }
-
-                ChangeType changeType = !File.Exists(tableFileName) ? ChangeType.Новый : ChangeType.Изменённый;
-
-                var tbl = dataBase.Tables.Cast<Table>().Single(t => t.Schema == table.Schema && t.Name == table.Name);
-
-                Script tblScript = new Script()
-                {
-                    FileName = fileName,
-                    FullPath = TableFolder + fileName,
-                    ScriptText = script,
-                    ObjectType = @"Таблица",
-                    ChangeState = changeType,
-                    urn = tbl.Urn,
-                    objName = tbl.Name
-                };
-
-                observer?.Invoke(tblScript);
-            }
-
-            changeProgress.Invoke(@"Сравниваем индексы", 80);
-
-            foreach (var p in indexes)
-            {
-                var index = p.Value;
-                var table = tables[p.Key.tableId];
-                string fileName = $@"{table.Schema}.{table.Name}.{index.Name}.sql";
-                string indexFileName = IndexFolder + fileName;
-                string script = index.MakeScript(table.FullName, indColumns[p.Key]);
-
-                if (File.Exists(indexFileName) && script == File.ReadAllText(indexFileName))
-                {
-                    continue;
-                }
-
-                ChangeType ChangeType = !File.Exists(indexFileName) ? ChangeType.Новый : ChangeType.Изменённый;
-
-                var dbInd = dataBase
-                            .Tables.Cast<Table>().Single(t => t.Schema == table.Schema && t.Name == table.Name)
-                            .Indexes.Cast<Index>().Single(i => i.Name == index.Name);
-
-                Script indexScript = new Script()
-                {
-                    FileName = fileName,
-                    FullPath = IndexFolder + fileName,
-                    ScriptText = script,
-                    ObjectType = @"Индекс",
-                    ChangeState = ChangeType,
-                    urn = dbInd.Urn,
-                    objName = index.Name
-                };
-
-                observer?.Invoke(indexScript);
-            }
-        }
-
-        private string GetChangesObjectScript()
+        string GetChangesObjectScript()
         {
             string result = @"
 SELECT o.[object_id] AS id

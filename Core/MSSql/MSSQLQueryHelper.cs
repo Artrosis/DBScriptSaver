@@ -9,9 +9,9 @@ namespace DBScriptSaver.Core
 {
     internal class MSSQLQueryHelper : IDBQueryHelper
     {
-        private string path;
-        private string login;
-        private string pass;
+        private readonly string path;
+        private readonly string login;
+        private readonly string pass;
 
         public MSSQLQueryHelper(string path, string login, string pass)
         {
@@ -127,9 +127,9 @@ namespace DBScriptSaver.Core
             server.ConnectionContext.ExecuteNonQuery(Script);
         }
 
-        public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, Script script)
+        public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, IScript script)
         {
-            return new MSSQLMigrationMaker(dbConnection, script);
+            return new MSSQLMigrationMaker(dbConnection, (MSSQLScript)script);
         }
 
         public IScriptWriter GetScriptWriter(ProjectDataBase projectDataBase)
