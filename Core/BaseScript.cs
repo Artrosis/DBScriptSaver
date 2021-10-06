@@ -10,7 +10,7 @@ namespace DBScriptSaver.Core
         public string ObjectType { get; set; }
         public ChangeType ChangeState { get; set; }
         public string ObjName { get; set; }
-        public IScript Copy()
+        public virtual IScript Copy()
         {
             BaseScript result = new BaseScript()
             {

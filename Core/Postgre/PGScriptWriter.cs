@@ -339,10 +339,11 @@ FROM   tbls                      AS t
        JOIN pg_catalog.pg_namespace n
             ON  n.oid = c.relnamespace;
 
-SELECT '""' || a.attname || '"" ' || pg_catalog.format_type (a.atttypid, a.atttypmod) || ' ' 
-        || CASE WHEN n.nspname IS NOT NULL THEN 'COLLATE ' || '""' || n.nspname || '"".""' || c.collname || '"" '  ELSE '' END
-        || CASE WHEN a.attnotnull = TRUE THEN 'NOT NULL ' ELSE '' END
-        || CASE WHEN a.atthasdef = TRUE THEN 'DEFAULT ' || d.adsrc ELSE '' END AS coldef,
+SELECT '""' || a.attname || '"" ' || pg_catalog.format_type (a.atttypid, a.atttypmod)
+        || CASE WHEN n.nspname IS NOT NULL THEN ' COLLATE ' || '""' || n.nspname || '"".""' || c.collname || '""'  ELSE '' END
+        || CASE WHEN a.attnotnull = TRUE THEN ' NOT NULL' ELSE '' END
+        || CASE WHEN a.atthasdef = TRUE THEN ' DEFAULT ' || d.adsrc ELSE '' END AS coldef, 
+        a.attname AS colname,
 		t.id
 FROM   tbls AS t
 JOIN pg_catalog.pg_attribute AS a
@@ -455,7 +456,8 @@ COMMIT;";
                 {
                     ((PGTableData)tables[(int)(uint)r["id"]]).Columns.Add(new PGColumnData()
                     {
-                        Script = (string)r["coldef"]
+                        Script = (string)r["coldef"],
+                        Name = (string)r["colname"]
                     });
                 }
 

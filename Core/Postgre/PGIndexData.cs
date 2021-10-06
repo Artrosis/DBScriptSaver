@@ -11,6 +11,11 @@ namespace DBScriptSaver.Core
         public string Name;
         public PGTableData table;
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public List<Migration> CreateAlterMirgrations(string oldScript)
         {
             return new List<Migration>();

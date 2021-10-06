@@ -1,7 +1,9 @@
-﻿using DBScriptSaver.ViewModels;
+﻿using DBScriptSaver.Helpers;
+using DBScriptSaver.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DBScriptSaver.Core
 {
@@ -11,6 +13,10 @@ namespace DBScriptSaver.Core
         public string Name;
         public string Schema;
         public string TableFolder;
+        public override string ToString()
+        {
+            return $@"{Schema}.{Name}";
+        }
 
         public List<PGColumnData> Columns = new List<PGColumnData>();
         public List<PGConstrainsData> Constrains = new List<PGConstrainsData>();
@@ -89,7 +95,24 @@ namespace DBScriptSaver.Core
 
         public List<Migration> CreateAlterMirgrations(string oldScript)
         {
-            throw new NotImplementedException();
+            List<Migration> result = new List<Migration>();
+
+            PGTableData oldTable = PostgreParser.ParseTable(oldScript);
+
+            foreach (var col in Columns)
+            {
+                if (!oldTable.Columns.Any(c => c.Script == col.Script))
+                {
+                    var fileName = $@"Add_{Schema}_{Name}_{col.Name}";
+                    result.Add(new Migration()
+                    {
+                        Name = FileHelper.CreateMigrationName(col.Name),
+                        Script = $@"ALTER TABLE ""{Schema}"".""{Name}"" ADD COLUMN IF NOT EXISTS {col.Script};"
+                    });
+                }
+            }
+
+            return result;
         }
     }
 }

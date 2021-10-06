@@ -257,6 +257,7 @@
     <Compile Include="Core\Postgre\PGQueryHelper.cs" />
     <Compile Include="Core\Postgre\PGScriptWriter.cs" />
     <Compile Include="Core\Postgre\PGTableData.cs" />
+    <Compile Include="Core\Postgre\PostgreParser.cs" />
     <Compile Include="Cryptography.cs" />
     <Compile Include="DBType.cs" />
     <Compile Include="DependenciesSettings.xaml.cs">

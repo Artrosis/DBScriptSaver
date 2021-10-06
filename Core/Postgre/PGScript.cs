@@ -10,7 +10,7 @@ namespace DBScriptSaver.Core
             PGObject = obj;
         }
 
-        public new IScript Copy()
+        public override IScript Copy()
         {
             PGScript result = new PGScript(PGObject)
             {
