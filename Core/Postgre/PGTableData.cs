@@ -79,17 +79,6 @@ namespace DBScriptSaver.Core
 
             script += @");";
 
-            if (Constrains.Count > 0)
-            {
-                script += Environment.NewLine;
-            }
-
-            foreach (var constr in Constrains)
-            {
-                script += Environment.NewLine;
-                script += constr.Script;
-            }
-
             return script;
         }
 
