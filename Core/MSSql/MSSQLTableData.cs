@@ -28,11 +28,10 @@ namespace DBScriptSaver.Core
             string fileName = $@"{name}.sql";
 
             string tableFileName = TableFolder + fileName;
-            string oldScript = "";
 
             if (File.Exists(tableFileName))
             {
-                oldScript = File.ReadAllText(tableFileName);
+                string oldScript = File.ReadAllText(tableFileName);
                 if (script == oldScript)
                 {
                     return null;

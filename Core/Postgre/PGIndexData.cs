@@ -1,14 +1,25 @@
 ﻿using DBScriptSaver.ViewModels;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DBScriptSaver.Core
 {
-    internal class PGIndexData : IIndexData
+    public class PGIndexData : IIndexData, IPGObject
     {
         public string Script;
         public string IndexFolder;
         public string Name;
         public PGTableData table;
+
+        public List<Migration> CreateAlterMirgrations(string oldScript)
+        {
+            return new List<Migration>();
+        }
+
+        public string CreateMirgration()
+        {
+            return Script.Replace("CREATE INDEX", "CREATE INDEX IF NOT EXISTS");
+        }
 
         public IScript GetScript()
         {
@@ -20,7 +31,7 @@ namespace DBScriptSaver.Core
                 return null;
             }
             ChangeType ChangeType = !File.Exists(indexFileName) ? ChangeType.Новый : ChangeType.Изменённый;
-            return new PGScript()
+            return new PGScript(this)
             {
                 FileName = fileName,
                 FullPath = IndexFolder + fileName,

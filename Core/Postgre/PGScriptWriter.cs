@@ -247,7 +247,10 @@ AS
 SELECT c.oid                AS id
 FROM   pg_catalog.pg_class  AS c
        JOIN pg_catalog.pg_namespace n
-            ON  n.oid = c.relnamespace" + Environment.NewLine;
+            ON  n.oid = c.relnamespace
+       JOIN pg_catalog.pg_tables AS pt
+       		ON pt.schemaname = n.nspname
+       		AND pt.tablename = c.relname" + Environment.NewLine;
 
             string schemaCondition = "";
 
@@ -328,13 +331,13 @@ FROM   pg_catalog.pg_class  AS c
 
             result += @"
 SELECT t.id,
-       t.id::regclass::TEXT AS ""TableName"",
+       c.relname AS ""TableName"",
        n.nspname AS ""SchemaName""
-FROM tbls                      AS t
-       JOIN pg_catalog.pg_class AS c
-           ON  t.id = c.oid
+FROM   tbls                      AS t
+       JOIN pg_catalog.pg_class  AS c
+            ON  t.id = c.oid
        JOIN pg_catalog.pg_namespace n
-            ON n.oid = c.relnamespace;
+            ON  n.oid = c.relnamespace;
 
 SELECT '""' || a.attname || '"" ' || pg_catalog.format_type (a.atttypid, a.atttypmod) || ' ' 
         || CASE WHEN n.nspname IS NOT NULL THEN 'COLLATE ' || '""' || n.nspname || '"".""' || c.collname || '"" '  ELSE '' END
@@ -473,16 +476,13 @@ COMMIT;";
                     int tableId = (int)(uint)r["id"];
                     int indexId = (int)(uint)r["index_id"];
 
-                    var index = new PGIndexData()
+                    indexes.Add((tableId, indexId), new PGIndexData()
                     {
                         Script = (string)r["IndexDef"],
                         IndexFolder = IndexFolder,
                         Name = (string)r["IndexName"],
                         table = (PGTableData)tables[tableId]
-                    };
-
-                    index.table.Indexes.Add(index);
-                    indexes.Add((tableId, indexId), index);
+                    });
                 }
 
                 r.NextResult();

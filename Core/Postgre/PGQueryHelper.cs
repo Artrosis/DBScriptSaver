@@ -115,6 +115,12 @@ namespace DBScriptSaver.Core
 
         public IMigrationMaker GetMigrationMaker(DbConnection dbConnection, IScript script)
         {
+            var pgscript = script as PGScript;
+            if (pgscript == null)
+            {
+                return new EmptyMigrationMaker();
+            }
+
             return new PGMigrationMaker(dbConnection, (PGScript)script);
         }
 

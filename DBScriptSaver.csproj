@@ -246,6 +246,8 @@
     <Compile Include="Core\MSSql\MSSQLQueryHelper.cs" />
     <Compile Include="Core\BaseScriptWriter.cs" />
     <Compile Include="Core\MSSql\MSSQLScript.cs" />
+    <Compile Include="Core\EmptyMigrationMaker.cs" />
+    <Compile Include="Core\Postgre\IPGObject.cs" />
     <Compile Include="Core\Postgre\PGColumnData.cs" />
     <Compile Include="Core\Postgre\PGCommentData.cs" />
     <Compile Include="Core\Postgre\PGConstrainsData.cs" />

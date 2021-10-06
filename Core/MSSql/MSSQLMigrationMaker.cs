@@ -28,7 +28,7 @@ namespace DBScriptSaver.Core
         {
             List<Migration> Migrations = new List<Migration>();
 
-            if (script.ObjectType == @"Индекс")
+            if (script.ObjectType == @"Индекс" && script.ChangeState == ChangeType.Новый)
             {
                 Migrations.Add(MakeCreateIndexMigration());
             }
