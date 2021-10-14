@@ -16,7 +16,7 @@ namespace DBScriptSaver
         {
             Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/DBScriptSaver;component/ico/main.ico")).Stream;
             tbi.Icon = new System.Drawing.Icon(iconStream);
-            tbi.ToolTipText = "Помошник сохранения скриптов";
+            tbi.ToolTipText = "Помощник сохранения скриптов";
             UpdateContextMenu();
         }
 
