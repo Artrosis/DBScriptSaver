@@ -12,6 +12,7 @@ namespace DBScriptSaver
     public class TaskbarIconHelper
     {
         static readonly TaskbarIcon tbi = new TaskbarIcon();
+
         internal static void CreateTaskbarIcon()
         {
             Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/DBScriptSaver;component/ico/main.ico")).Stream;
@@ -129,6 +130,11 @@ namespace DBScriptSaver
             tbi.ContextMenu = menu;
         }
 
+        internal static void ClosingSettings()
+        {
+            settings = null;
+        }
+
         private static void DBDependenciesItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!(((MenuItem)sender).Tag is ProjectDataBase DB))
@@ -193,9 +199,21 @@ namespace DBScriptSaver
             new fmDataBasesEditor(proj).ShowDialog();
         }
 
+        private static fmProjectsEditor settings;
+
         private static void SettingsItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            new fmProjectsEditor(new DBScriptViewModel()).ShowDialog();
+            if (settings == null)
+            {
+                settings = new fmProjectsEditor(new DBScriptViewModel());
+                settings.ShowDialog();
+            }
+            else
+            {
+                settings.WindowState = WindowState.Minimized;
+                settings.WindowState = WindowState.Normal;
+                settings.Activate();
+            }
         }
 
         private static void CloseItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)

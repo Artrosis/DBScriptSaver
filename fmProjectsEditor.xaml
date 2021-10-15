@@ -12,7 +12,7 @@
     Icon="ico/main.ico"
     Title="Проекты"
     Background="BurlyWood"
-    WindowStartupLocation="CenterScreen">
+    WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <Window.Resources>
         <ControlTemplate x:Key="validationFailed">
             <StackPanel Orientation="Horizontal">

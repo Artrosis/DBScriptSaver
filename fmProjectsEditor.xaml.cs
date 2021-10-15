@@ -76,5 +76,10 @@ namespace DBScriptSaver
         {
             Vm.Servers.Add(new ProjectServer(Vm));
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            TaskbarIconHelper.ClosingSettings();
+        }
     }
 }
