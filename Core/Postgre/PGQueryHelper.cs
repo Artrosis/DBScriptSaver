@@ -121,7 +121,7 @@ namespace DBScriptSaver.Core
                 return new EmptyMigrationMaker();
             }
 
-            return new PGMigrationMaker(dbConnection, (PGScript)script);
+            return new PGMigrationMaker((PGScript)script);
         }
 
         public IScriptWriter GetScriptWriter(ProjectDataBase projectDataBase)
