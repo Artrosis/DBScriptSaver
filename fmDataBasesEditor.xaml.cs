@@ -113,5 +113,10 @@ namespace DBScriptSaver
                 ((ProjectDataBase)(gcDataBases.SelectedItem)).Path = s;
             }
         }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            project.vm.SaveProjects();
+        }
     }
 }

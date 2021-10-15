@@ -81,5 +81,10 @@ namespace DBScriptSaver
         {
             TaskbarIconHelper.ClosingSettings();
         }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            Vm.SaveProjects();
+        }
     }
 }

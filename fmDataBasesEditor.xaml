@@ -97,13 +97,27 @@
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>
-        <Button
-            Width="75"
-            Height="23"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Click="btnOK_Click"
-            Content="OK" />
+        <Grid Margin="5" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Column="0"
+                Width="75"
+                Height="23"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Content="Сохранить" Margin="0,0,10,0" Click="Save_Click" />
+            <Button
+                Grid.Column="1"
+                Width="75"
+                Height="23"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Click="btnOK_Click"
+                Content="OK" />
+        </Grid>
     </Grid>
 
 </Window>
