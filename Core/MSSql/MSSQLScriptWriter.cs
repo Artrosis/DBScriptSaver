@@ -90,7 +90,7 @@ namespace DBScriptSaver.Core
 
             if (condition.Length > 0)
             {
-                result += $@"WHERE {condition}" ;
+                result += $@"WHERE {condition}";
             }
 
             return result;

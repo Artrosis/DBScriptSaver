@@ -43,7 +43,7 @@ namespace DBScriptSaver
                     {
                         HasConnect = db.Project.Server.GetDBQueryHelper().CheckConnection();
                     }
-                    catch (Exception){}
+                    catch (Exception) { }
 
                     var DBItem = new MenuItem
                     {

@@ -81,7 +81,7 @@ namespace DBScriptSaver
             return true;
         }
 
-        private readonly ObservableCollection<ScriptWrapper> scriptSource = new ObservableCollection<ScriptWrapper>(); 
+        private readonly ObservableCollection<ScriptWrapper> scriptSource = new ObservableCollection<ScriptWrapper>();
 
         public CompareScripts(ProjectDataBase db) : this()
         {
@@ -215,7 +215,7 @@ namespace DBScriptSaver
         {
             var rows = gcDBObjects.ItemsSource.OfType<ScriptWrapper>();
             var types = rows.Select(t => t.ObjectType).Distinct();
-            
+
             foreach (var type in types)
             {
                 if (filterTypes.Children.Cast<CheckBox>().Any(c => (string)c.Content == type))

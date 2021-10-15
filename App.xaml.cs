@@ -1,18 +1,6 @@
-﻿using DBScriptSaver.ViewModels;
-using Hardcodet.Wpf.TaskbarNotification;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 
 namespace DBScriptSaver
 {
@@ -21,18 +9,26 @@ namespace DBScriptSaver
     /// </summary>
     public partial class App : Application
     {
+        private const string AppMutexName = "ScriptSaver";
         [STAThread]
         public static void Main()
         {
             try
             {
-                App app = new App
+                using (Mutex mutex = new Mutex(false, AppMutexName))
                 {
-                    ShutdownMode = ShutdownMode.OnExplicitShutdown
-                };
+                    bool Running = !mutex.WaitOne(0, false);
+                    if (!Running)
+                    {
+                        App app = new App
+                        {
+                            ShutdownMode = ShutdownMode.OnExplicitShutdown
+                        };
 
-                TaskbarIconHelper.CreateTaskbarIcon();
-                app.Run();
+                        TaskbarIconHelper.CreateTaskbarIcon();
+                        app.Run();
+                    }
+                }
             }
             catch (Exception e)
             {
