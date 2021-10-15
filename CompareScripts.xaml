@@ -218,7 +218,16 @@
                         <DataGridTemplateColumn Header="Отменить изменения в базе" Width="170">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Отменить" Click="Revert_Click"/>
+                                    <Button x:Name="btn" Content="Отменить" Click="Revert_Click"/>
+                                    <DataTemplate.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=ObjectType}" Value="Таблица"/>
+                                                <Condition Binding="{Binding Path=ChangeState}" Value="Изменённый"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter TargetName="btn" Property="IsEnabled"  Value="False" />
+                                        </MultiDataTrigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
