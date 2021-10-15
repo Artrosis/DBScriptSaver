@@ -5,6 +5,9 @@ namespace DBScriptSaver.Core
     public class PGScript : BaseScript
     {
         public IPGObject PGObject;
+        public PGScript()
+        {
+        }
         public PGScript(IPGObject obj)
         {
             PGObject = obj;

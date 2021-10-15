@@ -6,9 +6,9 @@ namespace DBScriptSaver.Core
 {
     public class MSSQLScript : BaseScript
     {
-        public Urn urn;      
+        public Urn urn;
 
-        public new IScript Copy()
+        public override IScript Copy()
         {
             MSSQLScript result = new MSSQLScript()
             {

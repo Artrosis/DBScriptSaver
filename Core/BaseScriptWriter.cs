@@ -158,20 +158,22 @@ namespace DBScriptSaver.Core
                     {
                         ChangeType ChangeType = (TextFromFile == null) ? ChangeType.Новый : ChangeType.Изменённый;
 
-                        result.Add(
-                            new BaseScript()
-                            {
-                                FileName = FileName,
-                                FullPath = SourceFolder + FileName,
-                                ScriptText = TextFromDB,
-                                ObjectType = objectType,
-                                ChangeState = ChangeType
-                            });
+                        var script = CreateSourceScript();
+
+                        script.FileName = FileName;
+                        script.FullPath = SourceFolder + FileName;
+                        script.ScriptText = TextFromDB;
+                        script.ObjectType = objectType;
+                        script.ChangeState = ChangeType;
+
+                        result.Add(script);
                     }
                 }
             }
             return result;
         }
+
+        protected abstract BaseScript CreateSourceScript();
 
         public abstract string GetSourceDefinitionQuery();
         public abstract string GetScriptFromReader(DbDataReader reader);

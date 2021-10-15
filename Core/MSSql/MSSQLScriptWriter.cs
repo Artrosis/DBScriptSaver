@@ -338,5 +338,10 @@ ORDER BY
 
             return result;
         }
+
+        protected override BaseScript CreateSourceScript()
+        {
+            return new MSSQLScript();
+        }
     }
 }

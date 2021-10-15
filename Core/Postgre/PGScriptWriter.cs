@@ -507,5 +507,10 @@ COMMIT;";
 
             cmd.ExecuteNonQuery();
         }
+
+        protected override BaseScript CreateSourceScript()
+        {
+            return new PGScript();
+        }
     }
 }
