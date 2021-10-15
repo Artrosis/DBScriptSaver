@@ -59,8 +59,7 @@ namespace DBScriptSaver.Core
                             + @"       JOIN sys.objects  AS o" + Environment.NewLine
                             + @"            ON  o.[object_id] = sm.[object_id]" + Environment.NewLine
                             + @"       JOIN sys.schemas  AS s" + Environment.NewLine
-                            + @"            ON  o.[schema_id] = s.[schema_id]" + Environment.NewLine
-                            + $"WHERE" + Environment.NewLine;
+                            + @"            ON  o.[schema_id] = s.[schema_id]" + Environment.NewLine;
 
             string condition = "";
 
@@ -89,7 +88,10 @@ namespace DBScriptSaver.Core
                 condition += $"sm.object_id NOT IN ({ИгнорируемыеОбъекты.Select(s => s + ".sql").ToList().GetObjectIdString()})";
             }
 
-            result += condition;
+            if (condition.Length > 0)
+            {
+                result += $@"WHERE {condition}" ;
+            }
 
             return result;
         }
