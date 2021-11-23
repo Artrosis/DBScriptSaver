@@ -203,7 +203,7 @@ namespace DBScriptSaver.Core
                 }
 
                 r.NextResult();
-                //Столбы индексов
+                //Столбцы индексов
                 while (r.Read())
                 {
                     int tableId = (int)r["id"];

@@ -13,39 +13,21 @@ namespace DBScriptSaver.Parse
         public static List<Migration> GetChanges(string DBScript, string sourceScript)
         {
             var DBColumns = DBScript.ParseColumns();
-            var sourceColumns = sourceScript.ParseColumns();
+            var sourceColumns = sourceScript.ParseColumns().Select(c => c.column).ToList();
 
             var НовыеСтолбцы = DBColumns
-                                .Where(db => !sourceColumns.Any(c => c.Name.Sql == db.Name.Sql))
+                                .Where(db => !sourceColumns.Any(c => c.Name.Sql == db.column.Name.Sql))
                                 .ToList();
 
             var Result = new List<Migration>();
 
-            foreach (var column in НовыеСтолбцы)
+            foreach (var col in НовыеСтолбцы)
             {
-                string tableName = column.GetTableName();
-                var script = $@"
-IF NOT EXISTS (
-       SELECT NULL
-       FROM   sys.[columns] AS c
-       WHERE  c.[object_id] = OBJECT_ID(N'{tableName}')
-              AND c.name = N'{column.Name.Sql}'
-   )
-BEGIN
-    ALTER TABLE {tableName} ADD {column.Sql}
-END";
+                var defaultStatement = DBScript.SearchDefaultStatement(col.column.Name.Sql);
 
-                var defaultStatement = DBScript.SearchDefaultStatement(column.Name.Sql);
+                string script = col.column.MakeCreateColumnScript(defaultStatement, col.description);
 
-                if (defaultStatement != null)
-                {
-                    script += Environment.NewLine;
-                    script += "GO";
-                    script += Environment.NewLine;
-                    script += defaultStatement.Sql;
-                }
-
-                var fileName = $@"Add_{column.Name}";
+                var fileName = $@"Add_{col.column.Name}";
 
                 Result.Add(
                     new Migration()
@@ -58,15 +40,52 @@ END";
             return Result;
         }
 
-        private static List<SqlColumnDefinition> ParseColumns(this string dBScript)
+        private static string MakeCreateColumnScript(this SqlColumnDefinition column, SqlCodeObject defaultStatement, string description)
         {
-            var createTable = Microsoft.SqlServer.Management.SqlParser.Parser.Parser.Parse(dBScript).Script.GetCreateTable();
+            string tableName = column.GetTableName();
+            var script = $@"
+IF NOT EXISTS (
+       SELECT NULL
+       FROM   sys.[columns] AS c
+       WHERE  c.[object_id] = OBJECT_ID(N'{tableName}')
+              AND c.name = N'{column.Name.Sql}'
+   )
+BEGIN
+    ALTER TABLE {tableName} ADD {column.Sql}";
 
-            return createTable.Children
+            if ((description?.Length ?? 0) > 0)
+            {
+                script += Environment.NewLine + description;
+            }
+
+            script += Environment.NewLine + "END";
+
+            if (defaultStatement != null)
+            {
+                script += Environment.NewLine;
+                script += "GO";
+                script += Environment.NewLine;
+                script += defaultStatement.Sql;
+            }
+
+            return script;
+        }
+
+        private static List<(SqlColumnDefinition column, string description)> ParseColumns(this string dBScript)
+        {
+            var createTableScript = Microsoft.SqlServer.Management.SqlParser.Parser.Parser.Parse(dBScript).Script;
+
+            var createTable = createTableScript.GetCreateTable();
+
+            var ColumnDefinitions = createTable.Children
                             .Single(c => c is SqlTableDefinition).Children
                             .Where(c => c is SqlColumnDefinition)
                             .Cast<SqlColumnDefinition>()
                             .ToList();
+
+            var descriptions = createTableScript.GetColumnDescriptions();
+
+            return ColumnDefinitions.Select(c => (c, descriptions.ContainsKey(c.Name.Value) ? descriptions[c.Name.Value] : null)).ToList();
         }
 
         private static SqlCodeObject SearchDefaultStatement(this string dBScript, string columnName)
@@ -125,6 +144,32 @@ END";
             }
 
             return null;
+        }
+
+        private static Dictionary<string, string> GetColumnDescriptions(this SqlCodeObject sqlObject)
+        {
+            List<SqlExecuteModuleStatement> execs = sqlObject.GetExecuteStatements();
+
+            return execs
+                .Where(e => e.Module.Sql == "sys.sp_addextendedproperty" && e.Arguments.Any(a => a.Sql == @"@level2type=N'COLUMN'"))
+                .ToDictionary(e => ((SqlLiteralExpression)e.Arguments.Single(a => a.Parameter.VariableName == @"@level2name").Children.Single(c => c is SqlLiteralExpression)).Value, e => e.Sql);
+        }
+        private static List<SqlExecuteModuleStatement> GetExecuteStatements(this SqlCodeObject sqlObject)
+        {
+            List<SqlExecuteModuleStatement> result = new List<SqlExecuteModuleStatement>();
+
+            if (sqlObject is SqlExecuteModuleStatement s)
+            {
+                result.Add(s);
+                return result;
+            }            
+
+            foreach (var sql in sqlObject.Children)
+            {
+                result.AddRange(GetExecuteStatements(sql));
+            }
+
+            return result;
         }
         private static string GetTableName(this SqlColumnDefinition column)
         {
