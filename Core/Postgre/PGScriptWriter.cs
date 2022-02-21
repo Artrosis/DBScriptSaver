@@ -342,7 +342,7 @@ FROM   tbls                      AS t
 SELECT '""' || a.attname || '"" ' || pg_catalog.format_type (a.atttypid, a.atttypmod)
         || CASE WHEN n.nspname IS NOT NULL THEN ' COLLATE ' || '""' || n.nspname || '"".""' || c.collname || '""'  ELSE '' END
         || CASE WHEN a.attnotnull = TRUE THEN ' NOT NULL' ELSE '' END
-        || CASE WHEN a.atthasdef = TRUE THEN ' DEFAULT ' || d.adsrc ELSE '' END AS coldef, 
+        || CASE WHEN a.atthasdef = TRUE THEN ' DEFAULT ' || pg_get_expr(d.adbin, d.adrelid) ELSE '' END AS coldef, 
         a.attname AS colname,
 		t.id
 FROM   tbls AS t
