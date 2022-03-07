@@ -63,7 +63,8 @@ namespace DBScriptSaver.Core
             var cmd = connection.CreateCommand();
             cmd.CommandText = @"SELECT t.oid,
                                        t.typname,
-                                       t.typnamespace
+                                       t.typnamespace,
+                                       t.typtype
                                FROM   pg_type AS t";
 
             using (DbDataReader r = cmd.ExecuteReader())
@@ -71,7 +72,7 @@ namespace DBScriptSaver.Core
                 while (r.Read())
                 {
                     string typeName = (string)r["typname"];
-                    typesDescriptions.Add((uint)r["oid"], ($@"""{typeName}""", (uint)r["typnamespace"]));
+                    typesDescriptions.Add((uint)r["oid"], ($@"""{typeName}""", (uint)r["typnamespace"], ((char)r["typtype"]).ToString()));
                 }
             }
         }
@@ -93,20 +94,63 @@ namespace DBScriptSaver.Core
             int argsCount = (short)reader["pronargs"];
             string[] args = ((string[])reader["proargnames"]).Take(argsCount).ToArray();
 
-            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs(args, (uint[])reader["proargtypes"])}){Environment.NewLine}";
+            uint[] argtypes;
+
+            if (reader["proallargtypes"] == DBNull.Value)
+            {
+                argtypes = (uint[])reader["proargtypes"];
+            }
+            else
+            {
+                argtypes = (uint[])reader["proallargtypes"];
+            }
+
+            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs(args, argtypes)}){Environment.NewLine}";
             result += $@"RETURNS ";
 
             bool proretset = (bool)reader["proretset"];
 
+            uint typeId = (uint)reader["prorettype"];
+            string typeDesc = typesDescriptions[typeId].name;
+
             if (proretset)
             {
-                result += $@"SETOF ";
+                if (typesDescriptions[typeId].typtype == "p")
+                {
+                    result += $@"TABLE(";
+
+                    string[] tableArgs = ((string[])reader["proargnames"]).ToArray();
+
+                    string argString = string.Empty;
+
+                    for (int i = argsCount; i < tableArgs.Length; i++)
+                    {
+                        if (argString.Length > 0)
+                        {
+                            argString += ", ";
+                        }
+                        argString += $@"""{tableArgs[i]}"" {typesDescriptions[argtypes[i]].name}";
+                    }
+
+                    result += argString + ")";
+                }
+                else
+                {
+                    result += $@"SETOF ";
+
+                    uint nsId = typesDescriptions[typeId].nsId;
+
+                    result += $@"""{nameSpaces[nsId]}"".{typeDesc}";
+                }
+            }
+            else
+            {
+                uint nsId = typesDescriptions[typeId].nsId;
+
+                result += $@"""{nameSpaces[nsId]}"".{typeDesc}";
             }
 
-            uint typeId = (uint)reader["prorettype"];
-            uint nsId = typesDescriptions[typeId].nsId;
-
-            result += $@"""{nameSpaces[nsId]}"".{typesDescriptions[typeId].name} {Environment.NewLine}";
+            result += Environment.NewLine;
 
 
             result += $@"AS{Environment.NewLine}";
@@ -127,7 +171,7 @@ namespace DBScriptSaver.Core
             return result;
         }
 
-        private static readonly Dictionary<uint, (string name, uint nsId)> typesDescriptions = new Dictionary<uint, (string name, uint nsId)>();
+        private static readonly Dictionary<uint, (string name, uint nsId, string typtype)> typesDescriptions = new Dictionary<uint, (string name, uint nsId, string typtype)>();
 
         private string MakeArgs(string[] names, uint[] types)
         {
@@ -139,7 +183,7 @@ namespace DBScriptSaver.Core
                 {
                     result += ", ";
                 }
-                result += $@"{names[paramIndex]} {typesDescriptions[types[paramIndex]].name}";
+                result += $@"""{names[paramIndex]}"" {typesDescriptions[types[paramIndex]].name}";
             }
 
             return result;
@@ -147,7 +191,7 @@ namespace DBScriptSaver.Core
 
         public override string GetSourceDefinitionQuery()
         {
-            string result = @"SELECT n.nspname || '.' || p.proname as ""fileName"", n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile, p.pronargs
+            string result = @"SELECT n.nspname || '.' || p.proname as ""fileName"", n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proallargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile, p.pronargs
                                 FROM   pg_catalog.pg_proc p
                                        JOIN pg_catalog.pg_namespace AS n
                                             ON  n.oid = p.pronamespace
