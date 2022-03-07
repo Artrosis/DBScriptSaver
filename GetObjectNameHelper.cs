@@ -15,7 +15,7 @@ namespace DBScriptSaver
             var ss = s.Substring(s.IndexOf(@".") + 1);
             if (ss.IndexOf(@".") < 0)
             {
-                throw new Exception($@"Не корректное имя файла объекта: {s}");
+                return ss;
             }
             return ss.Substring(0, ss.IndexOf(@"."));
         }

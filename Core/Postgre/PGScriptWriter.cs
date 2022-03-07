@@ -89,7 +89,10 @@ namespace DBScriptSaver.Core
         {
             string result = "CREATE OR REPLACE FUNCTION ";
 
-            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs((string[])reader["proargnames"], (uint[])reader["proargtypes"])}){Environment.NewLine}";
+            int argsCount = (short)reader["pronargs"];
+            string[] args = ((string[])reader["proargnames"]).Take(argsCount).ToArray();
+
+            result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs(args, (uint[])reader["proargtypes"])}){Environment.NewLine}";
             result += $@"RETURNS ";
 
             if ((bool)reader["proretset"])
@@ -135,7 +138,7 @@ namespace DBScriptSaver.Core
 
         public override string GetSourceDefinitionQuery()
         {
-            string result = @"SELECT n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile
+            string result = @"SELECT n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile, p.pronargs
                                 FROM   pg_catalog.pg_proc p
                                        JOIN pg_catalog.pg_namespace AS n
                                             ON  n.oid = p.pronamespace
@@ -421,10 +424,30 @@ FROM   tbls AS t
             ON  t.id = d.objoid AND d.objsubid = 0
 ORDER BY 2;
 
+SELECT 'CREATE SEQUENCE ""' || n.nspname || '"".""' || c.relname || '"";' AS create,
+       'ALTER SEQUENCE ""' || n.nspname || '"".""' || c.relname || '"" OWNED BY ""' || n.nspname || '"".""' || tbl.relname ||
+       '"".""' || a.attname || '"";'    AS alter,
+       tbl.oid AS ""TableId""
+FROM tbls                          AS t
+       JOIN pg_catalog.pg_class AS tbl
+       ON  tbl.oid = t.id
+       JOIN pg_catalog.pg_depend AS d
+        ON  d.refobjid = tbl.oid
+            AND d.refobjsubid > 0
+       JOIN pg_catalog.pg_class AS c
+       ON  d.objid = c.relfilenode
+       JOIN pg_catalog.pg_sequence AS s
+          ON  s.seqrelid = c.oid
+       JOIN pg_catalog.pg_attribute AS a
+            ON(a.attnum = d.refobjsubid AND a.attrelid = d.refobjid)
+       JOIN pg_catalog.pg_namespace n
+            ON n.oid = c.relnamespace;
+
 COMMIT;";
 
             return result;
         }
+
         protected override void LoadChanges()
         {
             if (ОтслеживаемыеТаблицы.Count == 0 && ОтслеживаемыеСхемы.Count == 0) return;
@@ -495,6 +518,16 @@ COMMIT;";
                     {
                         Script = (string)r["Comment"]
                     });
+                }
+
+                r.NextResult();
+                //Последовательности
+                while (r.Read())
+                {
+                    int tableId = (int)(uint)r["TableId"];
+
+                    ((PGTableData)tables[(int)(uint)r["tableId"]]).последовательности.Add(((string)r["create"], (string)r["alter"]));
+
                 }
             }
         }

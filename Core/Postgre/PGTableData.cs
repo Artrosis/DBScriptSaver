@@ -21,6 +21,7 @@ namespace DBScriptSaver.Core
         public List<PGColumnData> Columns = new List<PGColumnData>();
         public List<PGConstrainsData> Constrains = new List<PGConstrainsData>();
         public List<PGCommentData> Comments = new List<PGCommentData>();
+        public List<(string createScript, string AlterScript)> последовательности = new List<(string createScript, string AlterScript)>();
 
         public IScript GetScript()
         {
@@ -59,6 +60,11 @@ namespace DBScriptSaver.Core
         {
             string script = string.Empty;
 
+            foreach (var seq in последовательности)
+            {
+                script += seq.createScript + Environment.NewLine;
+            }
+
             script += $@"CREATE TABLE {FullName}(" + Environment.NewLine;
 
             string columnsDef = "";
@@ -83,7 +89,12 @@ namespace DBScriptSaver.Core
 
             script += columnsDef + Environment.NewLine;
 
-            script += @");";
+            script += @");" + Environment.NewLine;
+
+            foreach (var seq in последовательности)
+            {
+                script += seq.AlterScript + Environment.NewLine;
+            }
 
             return script;
         }
