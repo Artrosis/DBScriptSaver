@@ -70,7 +70,8 @@ namespace DBScriptSaver.Core
             {
                 while (r.Read())
                 {
-                    typesDescriptions.Add((uint)r["oid"], ((string)r["typname"], (uint)r["typnamespace"]));
+                    string typeName = (string)r["typname"];
+                    typesDescriptions.Add((uint)r["oid"], ($@"""{typeName}""", (uint)r["typnamespace"]));
                 }
             }
         }
@@ -105,7 +106,7 @@ namespace DBScriptSaver.Core
             uint typeId = (uint)reader["prorettype"];
             uint nsId = typesDescriptions[typeId].nsId;
 
-            result += $@"""{nameSpaces[nsId]}"".""{typesDescriptions[typeId].name}"" {Environment.NewLine}";
+            result += $@"""{nameSpaces[nsId]}"".{typesDescriptions[typeId].name} {Environment.NewLine}";
 
 
             result += $@"AS{Environment.NewLine}";
