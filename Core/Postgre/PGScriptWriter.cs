@@ -95,7 +95,9 @@ namespace DBScriptSaver.Core
             result += $@"""{reader["nspname"]}"".""{reader["proname"]}""({MakeArgs(args, (uint[])reader["proargtypes"])}){Environment.NewLine}";
             result += $@"RETURNS ";
 
-            if ((bool)reader["proretset"])
+            bool proretset = (bool)reader["proretset"];
+
+            if (proretset)
             {
                 result += $@"SETOF ";
             }
@@ -109,12 +111,18 @@ namespace DBScriptSaver.Core
             result += $@"AS{Environment.NewLine}";
             result += $@"$BODY${Environment.NewLine}";
 
-            result += (string)reader["prosrc"] + ";" + Environment.NewLine;
+            result += (string)reader["prosrc"];
 
             result += $@"$BODY${Environment.NewLine}";
             result += $@"LANGUAGE {pgLanguages[(uint)reader["prolang"]]} {volatiles[(char)reader["provolatile"]]} {Environment.NewLine}";
             result += $@"COST {(float)reader["procost"]}{Environment.NewLine}";
-            result += $@"ROWS {(uint)reader["prolang"]}";
+            if (proretset)
+            {
+                result += $@"ROWS {(uint)reader["prolang"]}";
+            }
+
+            result += $@";";
+
             return result;
         }
 
