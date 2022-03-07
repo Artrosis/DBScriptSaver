@@ -77,7 +77,7 @@ namespace DBScriptSaver.Core
 
         public override string FileNameForObject(DbDataReader reader)
         {
-            return (string)reader["proname"];
+            return (string)reader["fileName"];
         }
 
         private static readonly Dictionary<char, string> volatiles = new Dictionary<char, string>
@@ -138,7 +138,7 @@ namespace DBScriptSaver.Core
 
         public override string GetSourceDefinitionQuery()
         {
-            string result = @"SELECT n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile, p.pronargs
+            string result = @"SELECT n.nspname || '.' || p.proname as ""fileName"", n.nspname, p.proname, p.prosrc, p.proargnames, p.proargtypes, p.proretset, p.prorettype, p.procost, p.prolang, p.provolatile, p.pronargs
                                 FROM   pg_catalog.pg_proc p
                                        JOIN pg_catalog.pg_namespace AS n
                                             ON  n.oid = p.pronamespace
