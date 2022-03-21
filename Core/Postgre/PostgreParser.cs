@@ -16,7 +16,7 @@ namespace DBScriptSaver.Core
 
             PGTableData result = new PGTableData();
 
-            string head = tablescripts[0];
+            string head = tablescripts.First(s => !s.StartsWith("CREATE SEQUENCE"));
 
             if (head == null)
             {
@@ -34,8 +34,6 @@ namespace DBScriptSaver.Core
 
             result.Schema = matches[0].Groups[1].Value;
             result.Name = matches[0].Groups[2].Value;
-
-            tablescripts.RemoveAt(0);
 
             foreach (var item in tablescripts)
             {
@@ -61,7 +59,7 @@ namespace DBScriptSaver.Core
 
         private static object ParseItem(string item)
         {
-            Regex regexColumn = new Regex(@"^""\w*"" \w* NOT? NULL? (DEFAULT? .*)?,?$");
+            Regex regexColumn = new Regex(@"^""\w*"" \w*(( NOT NULL)?( DEFAULT? .*)?)?,?$");
 
             MatchCollection matches = regexColumn.Matches(item);
             if (matches.Count == 1)
