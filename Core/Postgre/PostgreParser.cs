@@ -59,7 +59,7 @@ namespace DBScriptSaver.Core
 
         private static object ParseItem(string item)
         {
-            Regex regexColumn = new Regex(@"^""\w*"" \w*(( NOT NULL)?( DEFAULT? .*)?)?,?$");
+            Regex regexColumn = new Regex(@"^""\w+""( \w+( \w+\(\d{1,4}\))?)(( COLLATE ""\w*"".""\w*"")?( NOT NULL)?( DEFAULT? .*)?)?,?$");
 
             MatchCollection matches = regexColumn.Matches(item);
             if (matches.Count == 1)
