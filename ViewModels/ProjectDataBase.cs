@@ -419,7 +419,20 @@ namespace DBScriptSaver.ViewModels
                 Directory.CreateDirectory(ChangesFolder);
             }
 
-            File.WriteAllText(ChangesFolder + NewFileName, migration.Script, new UTF8Encoding(true));
+            string totalFileName = migration.Name;
+
+            int postIndex = 0;
+            string postFix = "";
+
+            while (File.Exists(ChangesFolder + totalFileName + postFix + ".sql"))
+            {
+                postIndex++;
+                postFix = $@"({postIndex})";
+            }
+
+            totalFileName += postFix;
+
+            File.WriteAllText(ChangesFolder + totalFileName + ".sql", migration.Script, new UTF8Encoding(true));
 
             CreateChangesXML();
 
@@ -427,7 +440,7 @@ namespace DBScriptSaver.ViewModels
 
             var LastVer = xdoc.Element("project").Elements("ver").Last();
 
-            var NewElement = new XElement("file", NewFileName);
+            var NewElement = new XElement("file", totalFileName);
             NewElement.Add(new XAttribute("autor", Environment.MachineName));
             NewElement.Add(new XAttribute("date", DateTime.Now.ToShortDateString()));
 

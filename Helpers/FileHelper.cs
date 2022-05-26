@@ -6,24 +6,13 @@ namespace DBScriptSaver.Helpers
     {
         public static string CreateMigrationName(this string baseName)
         {
-            string MigrationName = $@"Create_{baseName}";
-
-            int postIndex = 0;
-            string postFix = "";
-
-            while (File.Exists(MigrationName + postFix))
-            {
-                postIndex++;
-                postFix = $@"({postIndex})";
-            }
-
-            MigrationName += postFix;
+            string totalFileName = $@"Create_{baseName}";
 
             foreach (char invalidChar in Path.GetInvalidFileNameChars())
             {
-                MigrationName = MigrationName.Replace(invalidChar, '_');
+                totalFileName = totalFileName.Replace(invalidChar, '_');
             }
-            return MigrationName;
+            return totalFileName;
         }
     }
 }
