@@ -412,8 +412,6 @@ namespace DBScriptSaver.ViewModels
 
         public void AddMigration(Migration migration)
         {
-            string NewFileName = migration.Name + ".sql";
-
             if (!Directory.Exists(ChangesFolder))
             {
                 Directory.CreateDirectory(ChangesFolder);
@@ -430,9 +428,9 @@ namespace DBScriptSaver.ViewModels
                 postFix = $@"({postIndex})";
             }
 
-            totalFileName += postFix;
+            totalFileName += postFix + ".sql";
 
-            File.WriteAllText(ChangesFolder + totalFileName + ".sql", migration.Script, new UTF8Encoding(true));
+            File.WriteAllText(ChangesFolder + totalFileName, migration.Script, new UTF8Encoding(true));
 
             CreateChangesXML();
 
