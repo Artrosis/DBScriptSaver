@@ -96,6 +96,13 @@ namespace DBScriptSaver.Core
                 script += seq.AlterScript + Environment.NewLine;
             }
 
+            script += Environment.NewLine;
+
+            foreach (var c in Comments)
+            {
+                script += c.Script + Environment.NewLine;
+            }
+
             return script;
         }
 
