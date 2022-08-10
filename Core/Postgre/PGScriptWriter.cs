@@ -336,14 +336,14 @@ FROM   pg_catalog.pg_class  AS c
 
             if (ИгнорируемыеТаблицы.Count > 0)
             {
-                foreach (var obj in ИгнорируемыеОбъекты)
+                foreach (var t in ИгнорируемыеТаблицы)
                 {
                     if (hideTblsCondition != "")
                     {
                         hideTblsCondition += Environment.NewLine;
                         hideTblsCondition += " AND ";
                     }
-                    hideTblsCondition += $@" NOT (n.nspname = '{obj.GetSchema()}' AND c.relname = '{obj.GetName()}')";
+                    hideTblsCondition += $@" NOT (n.nspname = '{t.GetSchema()}' AND c.relname = '{t.GetName()}')";
                 }
 
                 hideTblsCondition = $@"({hideTblsCondition})";
@@ -360,19 +360,19 @@ FROM   pg_catalog.pg_class  AS c
             {
                 if (condition.Length > 0)
                 {
-                    condition += $@"({condition} OR {tblCondition})";
+                    condition = $@"({condition} OR {tblCondition})";
                 }
                 else
                 {
                     condition = tblCondition;
-                }                
+                }
             }
 
             if (hideTblsCondition.Length > 0)
             {
                 if (condition.Length > 0)
                 {
-                    condition += $@"({condition} AND {hideTblsCondition})";
+                    condition = $@"({condition} AND {hideTblsCondition})";
                 }
                 else
                 {
