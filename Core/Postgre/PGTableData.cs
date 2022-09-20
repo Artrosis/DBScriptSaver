@@ -121,10 +121,9 @@ namespace DBScriptSaver.Core
             {
                 if (!oldTable.Columns.Any(c => c.Script == col.Script))
                 {
-                    var fileName = $@"Add_{Schema}_{Name}_{col.Name}";
                     result.Add(new Migration()
                     {
-                        Name = FileHelper.CreateMigrationName(col.Name),
+                        Name = FileHelper.CreateMigrationName($@"{Schema}_{Name}_{col.Name}"),
                         Script = $@"ALTER TABLE ""{Schema}"".""{Name}"" ADD COLUMN IF NOT EXISTS {col.Script};"
                     });
                 }

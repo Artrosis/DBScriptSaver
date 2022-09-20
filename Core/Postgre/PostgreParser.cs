@@ -37,6 +37,23 @@ namespace DBScriptSaver.Core
 
             foreach (var item in tablescripts)
             {
+                if (item.StartsWith("CREATE SEQUENCE"))
+                {
+                    result.последовательности.Add((item, ""));
+                    continue;
+                }
+
+                if (item.StartsWith("ALTER SEQUENCE"))
+                {
+                    var последовательность = result.последовательности.FirstOrDefault();
+
+                    if (result.последовательности.Count == 1)
+                    {
+                        result.последовательности[0] = (result.последовательности[0].createScript, item);
+                    }
+                    continue;
+                }
+
                 object obj = ParseItem(item);
 
                 if (obj == null)
@@ -59,7 +76,18 @@ namespace DBScriptSaver.Core
 
         private static object ParseItem(string item)
         {
-            Regex regexColumn = new Regex(@"^""\w+""( \w+( \w+\(\d{1,4}\))?)(( COLLATE ""\w*"".""\w*"")?( NOT NULL)?( DEFAULT? .*)?)?,?$");
+            string regexpName = @"""\w+""";
+            //new Regex(@"""\w+""");
+            //string regexpType = @"( \w+( ?\w+\(\d{1,4}\))?)( without time zone)?";
+            string regexpType = @"( ((\w+( \w+\(\d{1,4}\))?)|character varying|(timestamp(\(\d\))? with(out)? time zone)))";
+            //new Regex(@"( ((\w+( \w+\(\d{1,4}\))?)|character varying|(timestamp(\(\d\))? with(out)? time zone)))");
+            string regexpCollation = @"( COLLATE ""\w*"".""\w*"")?";
+            //new Regex(@"( COLLATE ""\w*"".""\w*"")?");
+            string regexpNotNull = @"( NOT NULL)?";
+            //new Regex(@"( NOT NULL)?");
+            string regexpDefault = @"( DEFAULT? .*)?";
+            //new Regex(@"( DEFAULT? .*)?");
+            Regex regexColumn = new Regex($"^{regexpName}{regexpType}({regexpCollation}{regexpNotNull}{regexpDefault})?,?$");
 
             MatchCollection matches = regexColumn.Matches(item);
             if (matches.Count == 1)
