@@ -92,7 +92,13 @@ namespace DBScriptSaver.Core
             string result = "CREATE OR REPLACE FUNCTION ";
 
             int argsCount = (short)reader["pronargs"];
-            string[] args = ((string[])reader["proargnames"]).Take(argsCount).ToArray();
+
+            string[] args = { };
+
+            if (reader["proargnames"] != DBNull.Value)
+            {
+                args = ((string[])reader["proargnames"]).Take(argsCount).ToArray();
+            }
 
             uint[] argtypes;
 
